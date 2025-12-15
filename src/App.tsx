@@ -11,6 +11,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import { globalStyles } from './config/theme/styles/global.styles';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -27,7 +28,7 @@ function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View style={globalStyles.container}>
       <NewAppScreen
         templateFileName="App.tsx"
         safeAreaInsets={safeAreaInsets}
@@ -35,11 +36,5 @@ function AppContent() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default App;
