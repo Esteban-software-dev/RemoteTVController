@@ -1,9 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, PanResponder, Pressable, Dimensions } from 'react-native';
+import { View, StyleSheet, PanResponder, Pressable, Dimensions, Text } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withSpring,
+    withTiming,
+    interpolate,
+    Extrapolation
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radius, spacing } from '@src/config/theme/tokens';
@@ -33,6 +36,7 @@ export function AppBar() {
     const dragY = useSharedValue(0);
     const width = useSharedValue(EXPANDED_WIDTH);
     const height = useSharedValue(EXPANDED_HEIGHT);
+    const collapsedAnim = useSharedValue(0);
 
     const collapseTimeout = useRef<any | null>(null);
     const isPressed = useRef(false);
@@ -43,6 +47,7 @@ export function AppBar() {
             if (!isPressed.current) {
                 width.value = withSpring(COLLAPSED_WIDTH);
                 height.value = withSpring(COLLAPSED_HEIGHT);
+                collapsedAnim.value = withTiming(1, { duration: 300 });
             }
         }, AUTO_COLLAPSE_DELAY);
     };
@@ -64,6 +69,7 @@ export function AppBar() {
                 isPressed.current = true;
                 width.value = withSpring(EXPANDED_WIDTH);
                 height.value = withSpring(EXPANDED_HEIGHT);
+                collapsedAnim.value = withTiming(0, { duration: 200 });
                 if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
             },
 
@@ -95,6 +101,20 @@ export function AppBar() {
         height: height.value,
     }));
 
+    const expandedStyle = useAnimatedStyle(() => ({
+        opacity: withTiming(interpolate(collapsedAnim.value, [0, 1], [1, 0], Extrapolation.CLAMP), { duration: 200 }),
+        transform: [
+            { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [0, -10], Extrapolation .CLAMP), { duration: 200 }) }
+        ],
+    }));
+
+    const collapsedStyle = useAnimatedStyle(() => ({
+        opacity: withTiming(interpolate(collapsedAnim.value, [0, 1], [0, 1], Extrapolation .CLAMP), { duration: 200 }),
+        transform: [
+            { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [10, 0], Extrapolation .CLAMP), { duration: 200 }) }
+        ],
+    }));
+
     return (
         <View style={[styles.container, {
             paddingTop: insets.top === 0 ? spacing.sm : insets.top,
@@ -105,6 +125,7 @@ export function AppBar() {
                 isPressed.current = true;
                 width.value = withSpring(EXPANDED_WIDTH);
                 height.value = withSpring(EXPANDED_HEIGHT);
+                collapsedAnim.value = withTiming(0, { duration: 200 });
                 if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
             }}
             onPressOut={() => {
@@ -112,10 +133,31 @@ export function AppBar() {
                 startCollapseTimer();
             }}>
                 <Animated.View
-                    {...panResponder.panHandlers}
-                    style={[styles.bar, animatedStyle]}>
-                    <View style={styles.icon} />
-                    <View style={styles.icon} />
+                {...panResponder.panHandlers}
+                style={[styles.bar, animatedStyle]}>
+                    {/* Expanded content */}
+                    <Animated.View style={[styles.content, expandedStyle]}>
+                        <View style={styles.row}>
+                            <View style={styles.icon} />
+                            <View style={{ marginLeft: spacing.sm }}>
+                                <Text>
+                                    Contenido Expandido
+                                </Text>
+                            </View>
+                        </View>
+                    </Animated.View>
+
+                    {/* Collapsed content */}
+                    <Animated.View style={[styles.content, collapsedStyle]}>
+                        <View style={styles.row}>
+                            <View style={styles.icon} />
+                            <View style={{ marginLeft: spacing.sm }}>
+                                <Text>
+                                    Modo compacto
+                                </Text>
+                            </View>
+                        </View>
+                    </Animated.View>
                 </Animated.View>
             </Pressable>
         </View>
@@ -130,20 +172,17 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     bar: {
-        marginHorizontal: 10,
         backgroundColor: '#fff',
         borderRadius: radius.lg,
         borderWidth: 1,
         borderColor: withOpacityHex('#1D1D1D', .2),
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
         shadowColor: '#000',
         shadowOpacity: 0.08,
         shadowRadius: 12,
         shadowOffset: { width: 0, height: 6 },
         elevation: 8,
+        overflow: 'hidden',
+        position: 'relative',
     },
     icon: {
         width: 36,
@@ -151,4 +190,18 @@ const styles = StyleSheet.create({
         borderRadius: radius.sm,
         backgroundColor: '#E5E5E5',
     },
+    content: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        paddingHorizontal: spacing.md,
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    
 });
