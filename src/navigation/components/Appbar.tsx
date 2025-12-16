@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, PanResponder, Pressable, Dimensions, Text } from 'react-native';
+import React, { useContext, useEffect, useRef } from 'react';
+import { View, StyleSheet, PanResponder, Pressable, Text } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -11,16 +11,9 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
-const MAX_DRAG = 12;
-
-const EXPANDED_WIDTH = SCREEN_WIDTH - 20;
-const EXPANDED_HEIGHT = 70;
-const COLLAPSED_HEIGHT = 50;
-const COLLAPSED_WIDTH = 200;
-const AUTO_COLLAPSE_DELAY = 5000;
+import { AUTO_COLLAPSE_DELAY, COLLAPSED_HEIGHT, COLLAPSED_WIDTH, EXPANDED_HEIGHT, EXPANDED_WIDTH, MAX_DRAG } from '../constants/appbarDimensions.constant';
+import { AppBarLayoutContext } from '../context/AppbarLayoutContext';
+import  { scheduleOnRN } from 'react-native-worklets'
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -30,6 +23,8 @@ const applyResistance = (value: number) => {
 };
 
 export function AppBar() {
+    const { setHeight } = useContext(AppBarLayoutContext);
+    
     const insets = useSafeAreaInsets();
 
     const dragX = useSharedValue(0);
@@ -48,6 +43,7 @@ export function AppBar() {
                 width.value = withSpring(COLLAPSED_WIDTH);
                 height.value = withSpring(COLLAPSED_HEIGHT);
                 collapsedAnim.value = withTiming(1, { duration: 300 });
+                scheduleOnRN(setHeight, COLLAPSED_HEIGHT);
             }
         }, AUTO_COLLAPSE_DELAY);
     };
@@ -61,6 +57,7 @@ export function AppBar() {
 
     const panResponder = useRef(
         PanResponder.create({
+            onMoveShouldSetPanResponderCapture: (_, g) => Math.abs(g.dy) > Math.abs(g.dx) && Math.abs(g.dy) > 2,
             onStartShouldSetPanResponder: () => true,
             onMoveShouldSetPanResponder: (_, g) =>
                 Math.abs(g.dx) > 1 || Math.abs(g.dy) > 1,
@@ -70,6 +67,7 @@ export function AppBar() {
                 width.value = withSpring(EXPANDED_WIDTH);
                 height.value = withSpring(EXPANDED_HEIGHT);
                 collapsedAnim.value = withTiming(0, { duration: 200 });
+                scheduleOnRN(setHeight, EXPANDED_HEIGHT);
                 if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
             },
 
@@ -126,6 +124,7 @@ export function AppBar() {
                 width.value = withSpring(EXPANDED_WIDTH);
                 height.value = withSpring(EXPANDED_HEIGHT);
                 collapsedAnim.value = withTiming(0, { duration: 200 });
+                scheduleOnRN(setHeight, EXPANDED_HEIGHT);
                 if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
             }}
             onPressOut={() => {
@@ -169,7 +168,11 @@ const styles = StyleSheet.create({
         zIndex: 10,
         width: '100%',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
     },
     bar: {
         backgroundColor: '#fff',
@@ -182,7 +185,6 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 6 },
         elevation: 8,
         overflow: 'hidden',
-        position: 'relative',
     },
     icon: {
         width: 36,
@@ -203,5 +205,4 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    
 });
