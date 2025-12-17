@@ -1,23 +1,21 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, PanResponder, Pressable, Dimensions } from 'react-native';
+import { AUTO_COLLAPSE_DELAY, COLLAPSED_HEIGHT, COLLAPSED_WIDTH, EXPANDED_HEIGHT, EXPANDED_WIDTH, MAX_DRAG } from '../constants/appbarDimensions.constant';
+import { View, StyleSheet, PanResponder, Pressable, Text } from 'react-native';
+import React, { useContext, useEffect, useRef } from 'react';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withSpring,
+    withTiming,
+    interpolate,
+    Extrapolation,
+    useDerivedValue
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { radius, spacing } from '@src/config/theme/tokens';
-import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
-const MAX_DRAG = 12;
-
-const EXPANDED_WIDTH = SCREEN_WIDTH - 20;
-const EXPANDED_HEIGHT = 70;
-const COLLAPSED_HEIGHT = 50;
-const COLLAPSED_WIDTH = 200;
-const AUTO_COLLAPSE_DELAY = 5000;
+import { radius, shadows, spacing } from '@src/config/theme/tokens';
+import { AppBarLayoutContext } from '../context/AppbarLayoutContext';
+import LinearGradient from 'react-native-linear-gradient';
+import { colors } from '@src/config/theme/colors/colors';
+import  { scheduleOnRN } from 'react-native-worklets'
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -27,12 +25,17 @@ const applyResistance = (value: number) => {
 };
 
 export function AppBar() {
+    const { setHeight } = useContext(AppBarLayoutContext);
+    
     const insets = useSafeAreaInsets();
 
     const dragX = useSharedValue(0);
     const dragY = useSharedValue(0);
     const width = useSharedValue(EXPANDED_WIDTH);
     const height = useSharedValue(EXPANDED_HEIGHT);
+    const collapsedAnim = useSharedValue(0);
+    const gradientRotation = useSharedValue(0);
+    const gradientColors = [colors.gradient[1], colors.gradient[2], colors.gradient[3]];
 
     const collapseTimeout = useRef<any | null>(null);
     const isPressed = useRef(false);
@@ -43,6 +46,8 @@ export function AppBar() {
             if (!isPressed.current) {
                 width.value = withSpring(COLLAPSED_WIDTH);
                 height.value = withSpring(COLLAPSED_HEIGHT);
+                collapsedAnim.value = withTiming(1, { duration: 300 });
+                scheduleOnRN(setHeight, COLLAPSED_HEIGHT);
             }
         }, AUTO_COLLAPSE_DELAY);
     };
@@ -54,8 +59,20 @@ export function AppBar() {
         };
     }, []);
 
+    useDerivedValue(() => {
+        if (collapsedAnim.value) {
+            gradientRotation.value = withTiming(360, {
+                duration: 2000,
+            });
+        } else {
+            gradientRotation.value = withTiming(180, {duration: 200});
+        }
+    });
+    
+
     const panResponder = useRef(
         PanResponder.create({
+            onMoveShouldSetPanResponderCapture: (_, g) => Math.abs(g.dy) > Math.abs(g.dx) && Math.abs(g.dy) > 2,
             onStartShouldSetPanResponder: () => true,
             onMoveShouldSetPanResponder: (_, g) =>
                 Math.abs(g.dx) > 1 || Math.abs(g.dy) > 1,
@@ -64,6 +81,8 @@ export function AppBar() {
                 isPressed.current = true;
                 width.value = withSpring(EXPANDED_WIDTH);
                 height.value = withSpring(EXPANDED_HEIGHT);
+                collapsedAnim.value = withTiming(0, { duration: 200 });
+                scheduleOnRN(setHeight, EXPANDED_HEIGHT);
                 if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
             },
 
@@ -95,6 +114,34 @@ export function AppBar() {
         height: height.value,
     }));
 
+    const expandedStyle = useAnimatedStyle(() => ({
+        opacity: withTiming(interpolate(collapsedAnim.value, [0, 1], [1, 0], Extrapolation.CLAMP), { duration: 200 }),
+        transform: [
+            { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [0, -10], Extrapolation .CLAMP), { duration: 200 }) }
+        ],
+    }));
+
+    const collapsedStyle = useAnimatedStyle(() => ({
+        opacity: withTiming(interpolate(collapsedAnim.value, [0, 1], [0, 1], Extrapolation .CLAMP), { duration: 200 }),
+        transform: [
+            { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [10, 0], Extrapolation .CLAMP), { duration: 200 }) }
+        ],
+    }));
+
+    const gradientStyle = useAnimatedStyle(() => {
+        return {
+            opacity: interpolate(
+                collapsedAnim.value,
+                [0, 1],
+                [0, 1],
+                Extrapolation.CLAMP
+            ),
+            transform: [
+                { rotate: `${gradientRotation.value}deg` },
+            ],
+        };
+    });
+
     return (
         <View style={[styles.container, {
             paddingTop: insets.top === 0 ? spacing.sm : insets.top,
@@ -105,6 +152,8 @@ export function AppBar() {
                 isPressed.current = true;
                 width.value = withSpring(EXPANDED_WIDTH);
                 height.value = withSpring(EXPANDED_HEIGHT);
+                collapsedAnim.value = withTiming(0, { duration: 200 });
+                scheduleOnRN(setHeight, EXPANDED_HEIGHT);
                 if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
             }}
             onPressOut={() => {
@@ -112,10 +161,47 @@ export function AppBar() {
                 startCollapseTimer();
             }}>
                 <Animated.View
-                    {...panResponder.panHandlers}
-                    style={[styles.bar, animatedStyle]}>
-                    <View style={styles.icon} />
-                    <View style={styles.icon} />
+                {...panResponder.panHandlers}
+                style={[styles.bar, animatedStyle]}>
+                    {/* Gradient border */}
+                    <Animated.View
+                    style={[
+                        styles.gradientBorder,
+                        gradientStyle,
+                    ]}
+                    pointerEvents="none">
+                        <LinearGradient
+                            colors={gradientColors}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={StyleSheet.absoluteFill}
+                        />
+                    </Animated.View>
+                    <View style={styles.barInner}>
+                        {/* Expanded content */}
+                        <Animated.View style={[styles.content, expandedStyle]}>
+                            <View style={styles.row}>
+                                <View style={styles.icon} />
+                                <View style={{ marginLeft: spacing.sm }}>
+                                    <Text>
+                                        Contenido Expandido
+                                    </Text>
+                                </View>
+                            </View>
+                        </Animated.View>
+
+                        {/* Collapsed content */}
+                        <Animated.View style={[styles.content, collapsedStyle]}>
+                            <View style={styles.row}>
+                                <View style={styles.icon} />
+                                <View style={{ marginLeft: spacing.sm }}>
+                                    <Text>
+                                        Modo compacto
+                                    </Text>
+                                </View>
+                            </View>
+                        </Animated.View>
+                    </View>
                 </Animated.View>
             </Pressable>
         </View>
@@ -127,28 +213,54 @@ const styles = StyleSheet.create({
         zIndex: 10,
         width: '100%',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
     },
     bar: {
-        marginHorizontal: 10,
-        backgroundColor: '#fff',
+        backgroundColor: colors.white.base,
         borderRadius: radius.lg,
-        borderWidth: 1,
-        borderColor: withOpacityHex('#1D1D1D', .2),
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        shadowColor: '#000',
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
+        shadowColor: shadows.soft.shadowColor,
+        shadowOpacity: shadows.soft.shadowOpacity,
+        shadowRadius: shadows.soft.shadowRadius,
         shadowOffset: { width: 0, height: 6 },
-        elevation: 8,
+        elevation: shadows.soft.elevation,
+        overflow: 'hidden',
     },
     icon: {
         width: 36,
         height: 36,
         borderRadius: radius.sm,
         backgroundColor: '#E5E5E5',
+    },
+    content: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        paddingHorizontal: spacing.md,
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    gradientBorder: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: radius.lg,
+    },
+    barInner: {
+        backgroundColor: colors.white.base,
+        borderRadius: radius.lg,
+        margin: 1,
+        flex: 1,
+        overflow: 'hidden',
     },
 });
