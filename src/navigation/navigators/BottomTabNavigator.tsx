@@ -12,8 +12,13 @@ export function BottomTabsNavigator() {
             headerShown: false,
             animation: 'fade'
         }}>
-            <Tab.Screen name="Home" component={StackNavigator} />
-            <Tab.Screen name="Theme" children={() => {
+            <Tab.Screen
+                name="Home"
+                component={StackNavigator}
+            />
+            <Tab.Screen
+            name="Theme"
+            children={() => {
                 return (
                     <ScreenLayout>
                         <ThemeConfiguration />

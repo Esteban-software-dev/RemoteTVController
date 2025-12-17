@@ -11,7 +11,7 @@ export function StackNavigator() {
         screenOptions={{
             headerShown: false,
             cardStyle: {
-                backgroundColor: colors.white.base
+                backgroundColor: colors.bone.base
             }
         }}>
             <Stack.Screen

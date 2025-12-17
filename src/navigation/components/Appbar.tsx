@@ -1,18 +1,20 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import { AUTO_COLLAPSE_DELAY, COLLAPSED_HEIGHT, COLLAPSED_WIDTH, EXPANDED_HEIGHT, EXPANDED_WIDTH, MAX_DRAG } from '../constants/appbarDimensions.constant';
 import { View, StyleSheet, PanResponder, Pressable, Text } from 'react-native';
+import React, { useContext, useEffect, useRef } from 'react';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withSpring,
     withTiming,
     interpolate,
-    Extrapolation
+    Extrapolation,
+    useDerivedValue
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { radius, spacing } from '@src/config/theme/tokens';
-import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
-import { AUTO_COLLAPSE_DELAY, COLLAPSED_HEIGHT, COLLAPSED_WIDTH, EXPANDED_HEIGHT, EXPANDED_WIDTH, MAX_DRAG } from '../constants/appbarDimensions.constant';
+import { radius, shadows, spacing } from '@src/config/theme/tokens';
 import { AppBarLayoutContext } from '../context/AppbarLayoutContext';
+import LinearGradient from 'react-native-linear-gradient';
+import { colors } from '@src/config/theme/colors/colors';
 import  { scheduleOnRN } from 'react-native-worklets'
 
 const applyResistance = (value: number) => {
@@ -32,6 +34,8 @@ export function AppBar() {
     const width = useSharedValue(EXPANDED_WIDTH);
     const height = useSharedValue(EXPANDED_HEIGHT);
     const collapsedAnim = useSharedValue(0);
+    const gradientRotation = useSharedValue(0);
+    const gradientColors = [colors.gradient[1], colors.gradient[2], colors.gradient[3]];
 
     const collapseTimeout = useRef<any | null>(null);
     const isPressed = useRef(false);
@@ -54,6 +58,17 @@ export function AppBar() {
             if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
         };
     }, []);
+
+    useDerivedValue(() => {
+        if (collapsedAnim.value) {
+            gradientRotation.value = withTiming(360, {
+                duration: 2000,
+            });
+        } else {
+            gradientRotation.value = withTiming(180, {duration: 200});
+        }
+    });
+    
 
     const panResponder = useRef(
         PanResponder.create({
@@ -113,6 +128,20 @@ export function AppBar() {
         ],
     }));
 
+    const gradientStyle = useAnimatedStyle(() => {
+        return {
+            opacity: interpolate(
+                collapsedAnim.value,
+                [0, 1],
+                [0, 1],
+                Extrapolation.CLAMP
+            ),
+            transform: [
+                { rotate: `${gradientRotation.value}deg` },
+            ],
+        };
+    });
+
     return (
         <View style={[styles.container, {
             paddingTop: insets.top === 0 ? spacing.sm : insets.top,
@@ -134,29 +163,45 @@ export function AppBar() {
                 <Animated.View
                 {...panResponder.panHandlers}
                 style={[styles.bar, animatedStyle]}>
-                    {/* Expanded content */}
-                    <Animated.View style={[styles.content, expandedStyle]}>
-                        <View style={styles.row}>
-                            <View style={styles.icon} />
-                            <View style={{ marginLeft: spacing.sm }}>
-                                <Text>
-                                    Contenido Expandido
-                                </Text>
-                            </View>
-                        </View>
+                    {/* Gradient border */}
+                    <Animated.View
+                    style={[
+                        styles.gradientBorder,
+                        gradientStyle,
+                    ]}
+                    pointerEvents="none">
+                        <LinearGradient
+                            colors={gradientColors}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={StyleSheet.absoluteFill}
+                        />
                     </Animated.View>
+                    <View style={styles.barInner}>
+                        {/* Expanded content */}
+                        <Animated.View style={[styles.content, expandedStyle]}>
+                            <View style={styles.row}>
+                                <View style={styles.icon} />
+                                <View style={{ marginLeft: spacing.sm }}>
+                                    <Text>
+                                        Contenido Expandido
+                                    </Text>
+                                </View>
+                            </View>
+                        </Animated.View>
 
-                    {/* Collapsed content */}
-                    <Animated.View style={[styles.content, collapsedStyle]}>
-                        <View style={styles.row}>
-                            <View style={styles.icon} />
-                            <View style={{ marginLeft: spacing.sm }}>
-                                <Text>
-                                    Modo compacto
-                                </Text>
+                        {/* Collapsed content */}
+                        <Animated.View style={[styles.content, collapsedStyle]}>
+                            <View style={styles.row}>
+                                <View style={styles.icon} />
+                                <View style={{ marginLeft: spacing.sm }}>
+                                    <Text>
+                                        Modo compacto
+                                    </Text>
+                                </View>
                             </View>
-                        </View>
-                    </Animated.View>
+                        </Animated.View>
+                    </View>
                 </Animated.View>
             </Pressable>
         </View>
@@ -175,15 +220,13 @@ const styles = StyleSheet.create({
         right: 0,
     },
     bar: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.white.base,
         borderRadius: radius.lg,
-        borderWidth: 1,
-        borderColor: withOpacityHex('#1D1D1D', .2),
-        shadowColor: '#000',
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
+        shadowColor: shadows.soft.shadowColor,
+        shadowOpacity: shadows.soft.shadowOpacity,
+        shadowRadius: shadows.soft.shadowRadius,
         shadowOffset: { width: 0, height: 6 },
-        elevation: 8,
+        elevation: shadows.soft.elevation,
         overflow: 'hidden',
     },
     icon: {
@@ -204,5 +247,20 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    gradientBorder: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: radius.lg,
+    },
+    barInner: {
+        backgroundColor: colors.white.base,
+        borderRadius: radius.lg,
+        margin: 1,
+        flex: 1,
+        overflow: 'hidden',
     },
 });
