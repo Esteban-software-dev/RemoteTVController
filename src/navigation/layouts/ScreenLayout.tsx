@@ -1,6 +1,8 @@
 import React from 'react';
 import Animated from 'react-native-reanimated';
 import { useAppBarPadding } from '../hooks/useAppbarPadding';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { spacing } from '@src/config/theme/tokens';
 
 type Props = {
     children: React.ReactNode;
@@ -9,6 +11,7 @@ type Props = {
 
 export function ScreenLayout({ children, scroll = true }: Props) {
     const {paddingTop: height} = useAppBarPadding();
+    const tabBarHeight =  useBottomTabBarHeight();
 
     if (!scroll) {
         return (
@@ -22,6 +25,7 @@ export function ScreenLayout({ children, scroll = true }: Props) {
         <Animated.ScrollView
         contentContainerStyle={{
             paddingTop: height,
+            paddingBottom: tabBarHeight + spacing.sm
         }}
         scrollIndicatorInsets={{ top: height }}>
             {children}
