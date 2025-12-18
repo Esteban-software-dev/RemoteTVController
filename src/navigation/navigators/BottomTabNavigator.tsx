@@ -1,16 +1,19 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StackNavigator } from './StackNavigator';
 import ThemeConfiguration from '@src/features/theme/screens/ThemeConfiguration';
 import { ScreenLayout } from '../layouts/ScreenLayout';
+import { BottomTabBar } from '../components/BottomTabBar';
 
 const Tab = createBottomTabNavigator();
 
 export function BottomTabsNavigator() {
 
     return (
-        <Tab.Navigator screenOptions={{
+        <Tab.Navigator
+        tabBar={(props: BottomTabBarProps) => <BottomTabBar {... props} />}
+        screenOptions={{
             headerShown: false,
-            animation: 'fade'
+            animation: 'fade',
         }}>
             <Tab.Screen
                 name="Home"
@@ -18,7 +21,16 @@ export function BottomTabsNavigator() {
             />
             <Tab.Screen
             name="Theme"
-            children={() => {
+            component={() => {
+                return (
+                    <ScreenLayout>
+                        <ThemeConfiguration />
+                    </ScreenLayout>
+                )
+            }} />
+            <Tab.Screen
+            name="Profile"
+            component={() => {
                 return (
                     <ScreenLayout>
                         <ThemeConfiguration />
