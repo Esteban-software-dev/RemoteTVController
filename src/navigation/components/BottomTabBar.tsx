@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import { spacing, radius, shadows } from '@src/config/theme/tokens';
-import { colors } from '@src/config/theme/colors/colors';
+import { colors, component_colors } from '@src/config/theme/colors/colors';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { useEffect } from 'react';
 
@@ -74,13 +74,10 @@ function TabItem({ label, active, onPress }: TabItemProps) {
                 ),
             },
         ],
+        marginTop: interpolate(progress.value, [0, 1], [0, 4])
     }));
 
     const labelStyle = useAnimatedStyle(() => ({
-        opacity: withTiming(
-            interpolate(progress.value, [0, 1], [0.75, 1]),
-            { duration: 120 }
-        ),
         transform: [
             {
                 translateY: interpolate(
@@ -160,7 +157,7 @@ const styles = StyleSheet.create({
         height: 64,
         flexDirection: 'row',
         backgroundColor: colors.white.base,
-        borderRadius: radius.xl,
+        borderRadius: radius.lg,
         shadowColor: shadows.soft.shadowColor,
         shadowOpacity: shadows.soft.shadowOpacity,
         shadowRadius: shadows.soft.shadowRadius,
@@ -188,6 +185,11 @@ const styles = StyleSheet.create({
         borderRadius: 999,
         padding: 1,
         overflow: 'hidden',
+        shadowColor: shadows.soft.shadowColor,
+        shadowOpacity: shadows.soft.shadowOpacity,
+        shadowRadius: shadows.soft.shadowRadius,
+        shadowOffset: { width: 0, height: 6 },
+        elevation: shadows.soft.elevation,
     },
     icon: {
         width: 24,
@@ -197,7 +199,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 6,
         zIndex: 2,
-        shadowColor: '#000',
+        shadowColor: component_colors.shadow,
         shadowOpacity: 0.15,
         shadowRadius: 6,
         shadowOffset: { width: 0, height: 4 },
