@@ -196,26 +196,17 @@ export function AppBar() {
                                 ]}>
                                     <IonIcon name='menu' size={20} />
                                 </Pressable>
-                                <View style={{ marginLeft: spacing.sm, zIndex: 1000 }}>
+                                <View style={{ marginLeft: spacing.sm, flex: 1 }}>
                                         <Text style={{ fontWeight: '600', fontSize: 14 }}>
                                             Hola, Juan
                                         </Text>
-                                        <View style={{ flexDirection: 'row', marginTop: spacing.xs, zIndex: 100 }}>
-                                            <Pressable
-                                            style={{... styles.icon, width: 35, height: 35, zIndex: 200}}
-                                            onPress={() => console.log("Hola")}>
-                                                <IonIcon name="search" size={15} color={withOpacityHex(colors.dark.base, .9)} />
-                                            </Pressable>
-                                            <Pressable
-                                            style={[{... styles.icon, width: 35, height: 35}, { marginLeft: spacing.sm }]}
-                                            onPress={() => console.log("Hola")}>
-                                                <IonIcon name="qr-code" size={15} color={withOpacityHex(colors.dark.base, .9)} />
-                                            </Pressable>
-                                            <Pressable
-                                            style={[{... styles.icon, width: 35, height: 35}, { marginLeft: spacing.sm }]}
-                                            onPress={() => console.log("Hola")}>
-                                                <IonIcon name="settings" size={15} color={withOpacityHex(colors.dark.base, .9)} />
-                                            </Pressable>
+                                        <View style={{ flexDirection: 'row', marginTop: spacing.xs }}>
+                                            {renderMiniAction('search')}
+                                            <View style={{ width: spacing.sm }} />
+                                            {renderMiniAction('qr-code')}
+                                            <View style={{ marginLeft: 'auto' }}>
+                                                {renderMiniAction('settings')}
+                                            </View>
                                         </View>
                                     </View>
                             </View>
@@ -247,6 +238,24 @@ export function AppBar() {
         </View>
     );
 }
+
+const renderMiniAction = (icon: string) => (
+    <Pressable
+        onPress={() => console.log(icon)}
+        style={({ pressed }) => [
+            styles.miniAction,
+            {
+                transform: [{ scale: pressed ? 0.92 : 1 }],
+            },
+        ]}>
+            <IonIcon
+                name={icon as any}
+                size={14}
+                color={withOpacityHex(colors.dark.base, 0.85)}
+            />
+    </Pressable>
+);
+
 
 const styles = StyleSheet.create({
     container: {
@@ -304,5 +313,16 @@ const styles = StyleSheet.create({
         margin: 1,
         flex: 1,
         overflow: 'hidden',
+    },
+    miniAction: {
+        width: 34,
+        height: 34,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    
+        backgroundColor: withOpacityHex('#E5E5E5', .5),
+        borderWidth: 1,
+        borderColor: withOpacityHex(colors.dark.base, 0.06),
     },
 });
