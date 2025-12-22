@@ -28,13 +28,7 @@ export function BottomTabsNavigator() {
                         )
                     }
                 }}
-                component={() => {
-                    return (
-                        <ScreenLayout>
-                            <ThemeConfiguration />
-                        </ScreenLayout>
-                    )
-                }}
+                component={HomeScreen}
             />
 
             <Tab.Screen
@@ -63,14 +57,24 @@ export function BottomTabsNavigator() {
                     )
                 }
             }}
-            component={() => {
-                return (
-                    <ScreenLayout>
-                        <ThemeConfiguration />
-                    </ScreenLayout>
-                )
-            }} />
+            component={ProfileScreen} />
         </Tab.Navigator>
     );
 }
 
+
+function HomeScreen() {
+    return (
+        <ScreenLayout>
+            <ThemeConfiguration />
+        </ScreenLayout>
+    );
+}
+    
+function ProfileScreen() {
+    return (
+        <ScreenLayout>
+            <ThemeConfiguration />
+        </ScreenLayout>
+    );
+}

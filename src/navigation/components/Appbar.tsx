@@ -198,7 +198,7 @@ export function AppBar() {
                                 </Pressable>
                                 <View style={{ marginLeft: spacing.sm, flex: 1 }}>
                                         <Text style={{ fontWeight: '600', fontSize: 14 }}>
-                                            Hola, Juan
+                                            Hola, Esteban
                                         </Text>
                                         <View style={{ flexDirection: 'row', marginTop: spacing.xs }}>
                                             {renderMiniAction('search')}
