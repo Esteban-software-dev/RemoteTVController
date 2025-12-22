@@ -16,6 +16,9 @@ import { AppBarLayoutContext } from '../context/AppbarLayoutContext';
 import LinearGradient from 'react-native-linear-gradient';
 import { colors } from '@src/config/theme/colors/colors';
 import  { scheduleOnRN } from 'react-native-worklets'
+import { IonIcon } from '@src/shared/components/IonIcon';
+import { useNavigation } from '@react-navigation/native';
+import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -26,7 +29,8 @@ const applyResistance = (value: number) => {
 
 export function AppBar() {
     const { setHeight } = useContext(AppBarLayoutContext);
-    
+    const { navigate } = useNavigation();
+
     const insets = useSafeAreaInsets();
 
     const dragX = useSharedValue(0);
@@ -68,7 +72,6 @@ export function AppBar() {
             gradientRotation.value = withTiming(180, {duration: 200});
         }
     });
-    
 
     const panResponder = useRef(
         PanResponder.create({
@@ -119,6 +122,7 @@ export function AppBar() {
         transform: [
             { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [0, -10], Extrapolation .CLAMP), { duration: 200 }) }
         ],
+        pointerEvents: collapsedAnim.value === 0 ? 'auto' : 'none',
     }));
 
     const collapsedStyle = useAnimatedStyle(() => ({
@@ -126,6 +130,7 @@ export function AppBar() {
         transform: [
             { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [10, 0], Extrapolation .CLAMP), { duration: 200 }) }
         ],
+        pointerEvents: collapsedAnim.value === 1 ? 'auto' : 'none',
     }));
 
     const gradientStyle = useAnimatedStyle(() => {
@@ -181,19 +186,45 @@ export function AppBar() {
                         {/* Expanded content */}
                         <Animated.View style={[styles.content, expandedStyle]}>
                             <View style={styles.row}>
-                                <View style={styles.icon} />
-                                <View style={{ marginLeft: spacing.sm }}>
-                                    <Text>
-                                        Contenido Expandido
-                                    </Text>
-                                </View>
+                                <Pressable
+                                onPress={() => navigate('Profile' as never)}
+                                style={({ pressed }) => [
+                                    styles.icon,
+                                    pressed && {
+                                        transform: [{ scale: 0.95 }],
+                                    }
+                                ]}>
+                                    <IonIcon name='menu' size={20} />
+                                </Pressable>
+                                <View style={{ marginLeft: spacing.sm, flex: 1 }}>
+                                        <Text style={{ fontWeight: '600', fontSize: 14 }}>
+                                            Hola, Juan
+                                        </Text>
+                                        <View style={{ flexDirection: 'row', marginTop: spacing.xs }}>
+                                            {renderMiniAction('search')}
+                                            <View style={{ width: spacing.sm }} />
+                                            {renderMiniAction('qr-code')}
+                                            <View style={{ marginLeft: 'auto' }}>
+                                                {renderMiniAction('settings')}
+                                            </View>
+                                        </View>
+                                    </View>
                             </View>
                         </Animated.View>
 
                         {/* Collapsed content */}
                         <Animated.View style={[styles.content, collapsedStyle]}>
                             <View style={styles.row}>
-                                <View style={styles.icon} />
+                                <Pressable
+                                    onPress={() => navigate('Profile' as never)}
+                                    style={({ pressed }) => [
+                                        styles.icon,
+                                        pressed && {
+                                            transform: [{ scale: 0.95 }],
+                                        }
+                                    ]}>
+                                        <IonIcon name='tv' size={20} />
+                                </Pressable>
                                 <View style={{ marginLeft: spacing.sm }}>
                                     <Text>
                                         Modo compacto
@@ -207,6 +238,24 @@ export function AppBar() {
         </View>
     );
 }
+
+const renderMiniAction = (icon: string) => (
+    <Pressable
+        onPress={() => console.log(icon)}
+        style={({ pressed }) => [
+            styles.miniAction,
+            {
+                transform: [{ scale: pressed ? 0.92 : 1 }],
+            },
+        ]}>
+            <IonIcon
+                name={icon as any}
+                size={14}
+                color={withOpacityHex(colors.dark.base, 0.85)}
+            />
+    </Pressable>
+);
+
 
 const styles = StyleSheet.create({
     container: {
@@ -233,7 +282,9 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: radius.sm,
-        backgroundColor: '#E5E5E5',
+        backgroundColor: withOpacityHex('#E5E5E5', .5),
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     content: {
         position: 'absolute',
@@ -262,5 +313,16 @@ const styles = StyleSheet.create({
         margin: 1,
         flex: 1,
         overflow: 'hidden',
+    },
+    miniAction: {
+        width: 34,
+        height: 34,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    
+        backgroundColor: withOpacityHex('#E5E5E5', .5),
+        borderWidth: 1,
+        borderColor: withOpacityHex(colors.dark.base, 0.06),
     },
 });

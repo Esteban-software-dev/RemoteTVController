@@ -3,6 +3,7 @@ import { StackNavigator } from './StackNavigator';
 import ThemeConfiguration from '@src/features/theme/screens/ThemeConfiguration';
 import { ScreenLayout } from '../layouts/ScreenLayout';
 import { BottomTabBar } from '../components/BottomTabBar';
+import { IonIcon } from '@src/shared/components/IonIcon';
 
 const Tab = createBottomTabNavigator();
 
@@ -10,26 +11,58 @@ export function BottomTabsNavigator() {
 
     return (
         <Tab.Navigator
-        tabBar={(props: BottomTabBarProps) => <BottomTabBar {... props} />}
+        tabBar={BottomTabBar}
         screenOptions={{
             headerShown: false,
             animation: 'fade',
         }}>
             <Tab.Screen
                 name="Home"
-                component={StackNavigator}
+                options={{
+                    tabBarIcon: ({ focused, size }) => {
+                        return (
+                            <IonIcon
+                                name={focused ? 'home' : 'home-outline'}
+                                size={size}
+                            />
+                        )
+                    }
+                }}
+                component={() => {
+                    return (
+                        <ScreenLayout>
+                            <ThemeConfiguration />
+                        </ScreenLayout>
+                    )
+                }}
             />
+
             <Tab.Screen
-            name="Theme"
-            component={() => {
-                return (
-                    <ScreenLayout>
-                        <ThemeConfiguration />
-                    </ScreenLayout>
-                )
-            }} />
+            name="Tv scanner"
+            options={{
+                tabBarIcon: ({ focused, size }) => {
+                    return (
+                        <IonIcon
+                            name={focused ? 'tv' : 'tv-outline'}
+                            size={size}
+                        />
+                    )
+                }
+            }}
+            component={StackNavigator} />
+
             <Tab.Screen
             name="Profile"
+            options={{
+                tabBarIcon: ({ focused, size }) => {
+                    return (
+                        <IonIcon
+                            name={focused ? 'people' : 'people-outline'}
+                            size={size}
+                        />
+                    )
+                }
+            }}
             component={() => {
                 return (
                     <ScreenLayout>
@@ -40,3 +73,4 @@ export function BottomTabsNavigator() {
         </Tab.Navigator>
     );
 }
+

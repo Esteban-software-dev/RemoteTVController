@@ -1,4 +1,4 @@
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { BottomTabBarProps, BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import { View, Pressable, StyleSheet, GestureResponderEvent } from 'react-native';
 import Animated, {
     useSharedValue,
@@ -7,28 +7,32 @@ import Animated, {
     withTiming,
     interpolate,
     Extrapolation,
+    interpolateColor,
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import { spacing, radius, shadows } from '@src/config/theme/tokens';
-import { colors, component_colors } from '@src/config/theme/colors/colors';
+import { colors } from '@src/config/theme/colors/colors';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { useEffect } from 'react';
 
-export function BottomTabBar({ state, navigation }: BottomTabBarProps) {
+export function BottomTabBar({ state, navigation, descriptors }: BottomTabBarProps) {
+
     return (
         <View style={styles.wrapper}>
             {state.routes.map((route, index) => {
                 const isFocused = state.index === index;
+                const { tabBarIcon } = descriptors[route.key].options;
 
                 return (
-                <TabItem
-                    key={route.key}
-                    label={route.name}
-                    active={isFocused}
-                    onPress={() => {
-                    if (!isFocused) navigation.navigate(route.name);
-                    }}
-                />
+                    <TabItem
+                        key={route.key}
+                        label={route.name}
+                        active={isFocused}
+                        icon={tabBarIcon}
+                        onPress={() => {
+                            if (!isFocused) navigation.navigate(route.name);
+                        }}
+                    />
                 );
             })}
         </View>
@@ -40,17 +44,17 @@ interface TabItemProps {
     label: string;
     active: boolean;
     onPress: (event: GestureResponderEvent) => void;
+    icon?: BottomTabNavigationOptions['tabBarIcon'];
 }
 
-function TabItem({ label, active, onPress }: TabItemProps) {
+function TabItem({
+    label,
+    active,
+    onPress,
+    icon
+}: TabItemProps) {
     const progress = useSharedValue(active ? 1 : 0);
     const gradientRotation = useSharedValue(0);
-
-    progress.value = withSpring(active ? 1 : 0, {
-        damping: 22,
-        stiffness: 260,
-        mass: 0.6,
-    });
 
     const containerStyle = useAnimatedStyle(() => ({
         transform: [
@@ -64,17 +68,18 @@ function TabItem({ label, active, onPress }: TabItemProps) {
 
     const iconStyle = useAnimatedStyle(() => ({
         transform: [
-            { scale: interpolate(progress.value, [0, 1], [1, 1.15]) },
+            { scale: interpolate(progress.value, [0, 1], [1, 1.1]) },
             {
                 translateY: interpolate(
                     progress.value,
                     [0, 1],
-                    [-8, -14],
+                    [0, -1],
                     Extrapolation.CLAMP
                 ),
             },
         ],
-        marginTop: interpolate(progress.value, [0, 1], [0, 4])
+        borderWidth: interpolate(progress.value, [0, 1], [0, 1]),
+        backgroundColor: interpolateColor(progress.value, [0, 1], [colors.bone.base, colors.bone.base]),
     }));
 
     const labelStyle = useAnimatedStyle(() => ({
@@ -83,7 +88,7 @@ function TabItem({ label, active, onPress }: TabItemProps) {
                 translateY: interpolate(
                     progress.value,
                     [0, 1],
-                    [6, 0],
+                    [2, 0],
                     Extrapolation.CLAMP
                 ),
             },
@@ -98,6 +103,14 @@ function TabItem({ label, active, onPress }: TabItemProps) {
         } else {
             gradientRotation.value = withTiming(180, {duration: 200});
         }
+    }, [active]);
+
+    useEffect(() => {
+        progress.value = withSpring(active ? 1 : 0, {
+            damping: 22,
+            stiffness: 260,
+            mass: 0.6,
+        });
     }, [active]);
 
     const gradientStyle = useAnimatedStyle(() => ({
@@ -137,7 +150,13 @@ function TabItem({ label, active, onPress }: TabItemProps) {
                     }} />
                 </Animated.View>
 
-                <Animated.View style={[styles.icon, iconStyle]} />
+                <Animated.View style={[styles.icon, iconStyle]}>
+                    {icon?.({
+                        focused: active,
+                        color: colors.dark.base,
+                        size: active ? 19 : 18,
+                    })}
+                </Animated.View>
 
                 <Animated.Text style={[ styles.label, labelStyle, { fontWeight: active ? '700' : '500' } ]}
                 numberOfLines={1}>
@@ -173,7 +192,7 @@ const styles = StyleSheet.create({
     tabContainer: {
         width: 100,
         height: 44,
-        borderRadius: 999,
+        borderRadius: radius.xl,
         backgroundColor: colors.white.base,
         alignItems: 'center',
         justifyContent: 'flex-end',
@@ -182,7 +201,7 @@ const styles = StyleSheet.create({
 
     activeBorder: {
         ...StyleSheet.absoluteFill,
-        borderRadius: 999,
+        borderRadius: radius.xl,
         padding: 1,
         overflow: 'hidden',
         shadowColor: shadows.soft.shadowColor,
@@ -192,18 +211,12 @@ const styles = StyleSheet.create({
         elevation: shadows.soft.elevation,
     },
     icon: {
-        width: 24,
-        height: 24,
+        width: 26,
+        height: 26,
         borderRadius: radius.sm,
-        backgroundColor: '#E6E6E6',
-        position: 'absolute',
-        top: 6,
-        zIndex: 2,
-        shadowColor: component_colors.shadow,
-        shadowOpacity: 0.15,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 4 },
-        elevation: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderColor: withOpacityHex(colors.dark.base, .1),
     },
 
     label: {
