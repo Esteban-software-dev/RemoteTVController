@@ -1,16 +1,18 @@
-import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
 import { colors } from '@src/config/theme/colors/colors';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { useRokuScanner } from '../hooks/useRokuScanner';
-import { GradientCard } from '@src/shared/components/GradientCard';
 import { useEffect } from 'react';
+import { SmallButton } from '@src/shared/components/SmallButton';
+import { TVDeviceItem } from '../components/RokuTVItem';
+import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 
 export function TVScanner() {
     const { devices, scanning, scan } = useRokuScanner();
+    const setRokuDevice = useRokuSessionStore(s => s.selectDevice);
 
     useEffect(() => {
         scan();
@@ -32,22 +34,7 @@ export function TVScanner() {
                 <View style={{
                     justifyContent: 'center',
                 }}>
-                    <Pressable
-                    disabled={scanning}
-                    onPress={scan}
-                    style={({pressed}) => ({
-                        backgroundColor: colors.white.base,
-                        borderRadius: radius.sm,
-                        height: 30,
-                        width: 30,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        borderWidth: 1,
-                        borderColor: withOpacityHex(colors.dark.base, .8),
-                        transform: [{scale: pressed ? .95 : 1}]
-                    })}>
-                        <IonIcon color={colors.dark.base} size={15} name={'refresh'} />
-                    </Pressable>
+                    <SmallButton color={colors.accent.purple.base} label='Refrescar' iconName='refresh' variant='filled' onPress={scan} disabled={scanning} />
                 </View>
             </View>
 
@@ -63,33 +50,12 @@ export function TVScanner() {
 
             {/* List */}
             {devices.map((device, index) => (
-                <Animated.View
-                key={device.ip}
-                entering={FadeInUp.delay(index * 40)}
-                style={styles.cardWrapper}>
-                    <GradientCard>
-                        <Pressable
-                        style={({ pressed }) => [
-                            styles.card,
-                            pressed && { transform: [{ scale: 0.98 }] },
-                        ]}>
-                            <View style={styles.icon}>
-                                <IonIcon name="tv" size={18} />
-                            </View>
-
-                            <View style={styles.info}>
-                                <Text style={styles.name}>{device.friendlyDeviceName}</Text>
-                                <Text style={styles.ip}>{device.ip}</Text>
-                            </View>
-
-                            <IonIcon
-                                name="chevron-forward"
-                                size={18}
-                                color={withOpacityHex(colors.dark.base, .4)}
-                            />
-                        </Pressable>
-                    </GradientCard>
-                </Animated.View>
+                <TVDeviceItem
+                    key={device.ip}
+                    index={index}
+                    {...device}
+                    onPress={(d) => setRokuDevice(d)}
+                />
             ))}
         </ScrollView>
     );

@@ -8,7 +8,8 @@ import Animated, {
     withTiming,
     interpolate,
     Extrapolation,
-    useDerivedValue
+    useDerivedValue,
+    interpolateColor
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radius, shadows, spacing } from '@src/config/theme/tokens';
@@ -19,6 +20,7 @@ import  { scheduleOnRN } from 'react-native-worklets'
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { useNavigation } from '@react-navigation/native';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
+import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -27,7 +29,22 @@ const applyResistance = (value: number) => {
     return sign * (MAX_DRAG + (abs - MAX_DRAG) * 0.15);
 };
 
+const COLLAPSED_COLORS = {
+    active: {
+        bg: colors.accent.purple.soft,
+        border: colors.accent.purple.base,
+        icon: colors.accent.purple.strong,
+        text: colors.accent.purple.dark,
+    },
+    inactive: {
+        bg: colors.accent.gray.soft,
+        border: colors.accent.gray.base,
+        icon: colors.accent.gray.icon,
+        text: colors.accent.gray.text,
+    },
+};
 export function AppBar() {
+    const { selectedDevice, isOnline, isLoading } = useRokuSessionStore();
     const { setHeight } = useContext(AppBarLayoutContext);
     const { navigate } = useNavigation();
 
@@ -39,6 +56,7 @@ export function AppBar() {
     const height = useSharedValue(EXPANDED_HEIGHT);
     const collapsedAnim = useSharedValue(0);
     const gradientRotation = useSharedValue(0);
+    const deviceActiveAnim = useSharedValue(0);
     const gradientColors = [colors.gradient[1], colors.gradient[2], colors.gradient[3]];
 
     const collapseTimeout = useRef<any | null>(null);
@@ -62,6 +80,13 @@ export function AppBar() {
             if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
         };
     }, []);
+
+    useEffect(() => {
+        deviceActiveAnim.value = withTiming(
+            selectedDevice && isOnline && !isLoading ? 1 : 0,
+            { duration: 300 }
+        );
+    }, [selectedDevice, isOnline, isLoading]);
 
     useDerivedValue(() => {
         if (collapsedAnim.value) {
@@ -147,6 +172,49 @@ export function AppBar() {
         };
     });
 
+    const collapsedIconStyle = useAnimatedStyle(() => {
+        return {
+            backgroundColor: interpolateColor(
+                deviceActiveAnim.value,
+                [0, 1],
+                [
+                    COLLAPSED_COLORS.inactive.bg,
+                    COLLAPSED_COLORS.active.bg,
+                ]
+            ),
+            borderColor: interpolateColor(
+                deviceActiveAnim.value,
+                [0, 1],
+                [
+                    COLLAPSED_COLORS.inactive.border,
+                    COLLAPSED_COLORS.active.border,
+                ]
+            ),
+        };
+    });
+    const collapsedIconAnimatedStyle = useAnimatedStyle(() => ({
+        color: interpolateColor(
+            deviceActiveAnim.value,
+            [0, 1],
+            [
+                COLLAPSED_COLORS.inactive.icon,
+                COLLAPSED_COLORS.active.icon,
+            ]
+        ),
+    }));
+    
+    const collapsedTextStyle = useAnimatedStyle(() => ({
+        color: interpolateColor(
+            deviceActiveAnim.value,
+            [0, 1],
+            [
+                COLLAPSED_COLORS.inactive.text,
+                COLLAPSED_COLORS.active.text,
+            ]
+        ),
+    }));
+    
+    
     return (
         <View style={[styles.container, {
             paddingTop: insets.top === 0 ? spacing.sm : insets.top,
@@ -215,20 +283,37 @@ export function AppBar() {
                         {/* Collapsed content */}
                         <Animated.View style={[styles.content, collapsedStyle]}>
                             <View style={styles.row}>
-                                <Pressable
-                                    onPress={() => navigate('Profile' as never)}
-                                    style={({ pressed }) => [
+                                <Pressable onPress={() => navigate('Tv scanner' as never)}>
+                                    <Animated.View
+                                    style={[
                                         styles.icon,
-                                        pressed && {
-                                            transform: [{ scale: 0.95 }],
-                                        }
+                                        { borderWidth: 1.2 },
+                                        collapsedIconStyle,
                                     ]}>
-                                        <IonIcon name='tv' size={20} />
+                                        <Animated.Text style={collapsedIconAnimatedStyle}>
+                                            <IonIcon name="tv" size={20} iconStyles={{color: collapsedIconAnimatedStyle.color}} />
+                                        </Animated.Text>
+                                    </Animated.View>
                                 </Pressable>
+
                                 <View style={{ marginLeft: spacing.sm }}>
-                                    <Text>
-                                        Modo compacto
-                                    </Text>
+                                    {selectedDevice ? (
+                                        <Animated.View style={[styles.collapsedContent]}>
+                                            <View style={styles.textBlock}>
+                                                <Text style={styles.title} numberOfLines={1}>
+                                                    {selectedDevice.friendlyDeviceName}
+                                                </Text>
+
+                                                <Text style={styles.subtitle} numberOfLines={1}>
+                                                    {isOnline ? 'Reproduciendo Spotify' : ''}
+                                                </Text>
+                                            </View>
+                                        </Animated.View>
+                                    ) : (
+                                        <Animated.Text style={[{ fontSize: 13, fontWeight: '500' }, collapsedTextStyle]}>
+                                            Ningún dispositivo conectado...
+                                        </Animated.Text>
+                                    )}
                                 </View>
                             </View>
                         </Animated.View>
@@ -324,5 +409,30 @@ const styles = StyleSheet.create({
         backgroundColor: withOpacityHex('#E5E5E5', .5),
         borderWidth: 1,
         borderColor: withOpacityHex(colors.dark.base, 0.06),
+    },
+    collapsedContent: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    textBlock: {
+        marginBottom: spacing.xs,
+    },
+    title: {
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    subtitle: {
+        fontSize: 11,
+    },
+    collapsedButton: {
+        alignSelf: 'flex-start',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+        borderWidth: 1,
+    },
+    collapsedButtonText: {
+        fontSize: 11,
+        fontWeight: '500',
     },
 });
