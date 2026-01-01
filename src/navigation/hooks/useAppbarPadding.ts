@@ -8,6 +8,6 @@ export function useAppBarPadding() {
     const insets = useSafeAreaInsets();
 
     return {
-        paddingTop: height + (insets.top === 0 ? spacing.md : insets.top),
+        appBarHeight: height + (insets.top === 0 ? spacing.md : insets.top),
     };
 }
