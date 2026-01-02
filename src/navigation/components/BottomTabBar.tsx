@@ -14,11 +14,13 @@ import { spacing, radius, shadows } from '@src/config/theme/tokens';
 import { colors } from '@src/config/theme/colors/colors';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { useEffect } from 'react';
+import { BlurBackground } from '@src/shared/components/BlurBackground';
 
 export function BottomTabBar({ state, navigation, descriptors }: BottomTabBarProps) {
 
     return (
         <View style={styles.wrapper}>
+            <BlurBackground tintColor={withOpacityHex(colors.white.base, .02)} />
             {state.routes.map((route, index) => {
                 const isFocused = state.index === index;
                 const { tabBarIcon } = descriptors[route.key].options;
@@ -60,6 +62,11 @@ function TabItem({
         transform: [
             { scale: interpolate(progress.value, [0, 1], [1, 1.02]) },
         ],
+    }));
+    const inactiveBorderStyle = useAnimatedStyle(() => ({
+        borderWidth: active ? 0 : 1,
+        borderColor: 'rgba(206, 206, 206, 0.59)',
+        borderRadius: radius.xl,
     }));
 
     const borderStyle = useAnimatedStyle(() => ({
@@ -117,11 +124,13 @@ function TabItem({
         transform: [
             { rotate: `${gradientRotation.value}deg` },
         ],
+        opacity: progress.value,
     }));
 
     return (
         <Pressable style={styles.tabWrapper} onPress={onPress}>
             <Animated.View style={[styles.tabContainer, containerStyle]}>
+                {!active && <Animated.View style={[StyleSheet.absoluteFill, inactiveBorderStyle]} />}
                 <Animated.View style={[styles.activeBorder, borderStyle]}>
                     <Animated.View
                     style={[StyleSheet.absoluteFill, gradientStyle]}
@@ -175,13 +184,15 @@ const styles = StyleSheet.create({
         right: spacing.sm,
         height: 64,
         flexDirection: 'row',
-        backgroundColor: colors.white.base,
         borderRadius: radius.lg,
+        borderWidth: 1,
+        borderColor: withOpacityHex(colors.dark.base, .02),
         shadowColor: shadows.soft.shadowColor,
         shadowOpacity: shadows.soft.shadowOpacity,
         shadowRadius: shadows.soft.shadowRadius,
         shadowOffset: { width: 0, height: 6 },
         elevation: shadows.soft.elevation,
+        overflow: 'hidden'
     },
     tabWrapper: {
         flex: 1,
