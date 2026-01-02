@@ -15,7 +15,7 @@ import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { SmallButton } from '@src/shared/components/SmallButton';
 
-import { TVDeviceItem } from '../components/RokuTVItem';
+import { RokuTVItem } from '../components/RokuTVItem';
 import { useRokuScanner } from '../hooks/useRokuScanner';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types';
@@ -62,7 +62,7 @@ export function TVScanner() {
                         />
                     </View>
 
-                    <TVDeviceItem
+                    <RokuTVItem
                         {...selectedDevice}
                         selected
                         showChevron={false}
@@ -108,7 +108,7 @@ export function TVScanner() {
                 keyExtractor={(item: RokuDeviceInfo) => item.ip}
                 renderItem={({ item }) => (
                     <View style={{ marginVertical: spacing.xs }}>
-                        <TVDeviceItem
+                        <RokuTVItem
                             {...item}
                             selected={selectedDevice?.ip === item.ip}
                             disabled={scanning}

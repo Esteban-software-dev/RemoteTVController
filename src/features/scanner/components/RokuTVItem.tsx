@@ -36,7 +36,7 @@ interface TVDeviceItemProps extends RokuDeviceInfo {
     containerStyle?: ViewStyle;
 }
 
-export function TVDeviceItem({
+export function RokuTVItem({
     index = 0,
     onPress,
     containerStyle,
