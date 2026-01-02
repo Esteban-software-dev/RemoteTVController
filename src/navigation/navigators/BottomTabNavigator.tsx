@@ -11,6 +11,7 @@ export function BottomTabsNavigator() {
     return (
         <Tab.Navigator
         tabBar={BottomTabBar}
+        initialRouteName='Tv scanner'
         screenOptions={{
             headerShown: false,
             animation: 'fade',

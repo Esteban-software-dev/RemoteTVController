@@ -1,7 +1,7 @@
-import { StyleSheet, View } from "react-native";
-import { Gradient } from "./Gradient";
-import { radius, shadows } from "@src/config/theme/tokens";
-import { colors } from "@src/config/theme/colors/colors";
+import { StyleSheet, View } from 'react-native';
+import { Gradient } from './Gradient';
+import { radius, shadows } from '@src/config/theme/tokens';
+import { colors } from '@src/config/theme/colors/colors';
 
 export function GradientCard({ children }: { children: React.ReactNode }) {
     return (

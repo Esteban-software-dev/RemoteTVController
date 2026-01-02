@@ -4,7 +4,6 @@ import {
     Text,
     View,
     ActivityIndicator,
-    Animated,
 } from 'react-native';
 import { useEffect } from 'react';
 
@@ -22,6 +21,7 @@ import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types';
 import { fetchSelectedRokuApps } from '../services/roku-device-info.service';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
+import Animated from 'react-native-reanimated';
 
 export function TVScanner() {
     const { bottom, top } = useSafeBarsArea();
@@ -32,7 +32,7 @@ export function TVScanner() {
     const selectedDevice = useRokuSessionStore(s => s.selectedDevice);
 
     useEffect(() => {
-        if (!devices.length) scan();
+        scan();
     }, []);
 
     const setSelectedRoku = async (rokuDevice: RokuDeviceInfo) => {

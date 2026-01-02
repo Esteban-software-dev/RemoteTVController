@@ -57,6 +57,7 @@ export function AppBar() {
     const collapsedAnim = useSharedValue(0);
     const gradientRotation = useSharedValue(0);
     const deviceActiveAnim = useSharedValue(0);
+    const scale = useSharedValue(1);
     const gradientColors = [colors.gradient[1], colors.gradient[2], colors.gradient[3]];
 
     const collapseTimeout = useRef<any | null>(null);
@@ -213,8 +214,10 @@ export function AppBar() {
             ]
         ),
     }));
-    
-    
+
+    const scaleAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
     return (
         <View style={[styles.container, {
             paddingTop: insets.top === 0 ? spacing.sm : insets.top,
@@ -283,12 +286,20 @@ export function AppBar() {
                         {/* Collapsed content */}
                         <Animated.View style={[styles.content, collapsedStyle]}>
                             <View style={styles.row}>
-                                <Pressable onPress={() => navigate('Tv scanner' as never)}>
+                                <Pressable
+                                onPressIn={() => {
+                                    scale.value = withTiming(0.92, { duration: 120 });
+                                }}
+                                onPressOut={() => {
+                                    scale.value = withTiming(1, { duration: 120 });
+                                }}
+                                onPress={() => navigate('Tv scanner' as never)}>
                                     <Animated.View
                                     style={[
                                         styles.icon,
                                         { borderWidth: 1.2 },
                                         collapsedIconStyle,
+                                        scaleAnimatedStyle
                                     ]}>
                                         <Animated.Text style={collapsedIconAnimatedStyle}>
                                             <IonIcon name="tv" size={20} iconStyles={{color: collapsedIconAnimatedStyle.color}} />

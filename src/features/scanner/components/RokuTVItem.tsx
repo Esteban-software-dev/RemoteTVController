@@ -80,15 +80,20 @@ export function TVDeviceItem({
             [0, 1],
             [colors.white.base, GREEN_18]
         ),
+        borderColor: interpolateColor(
+            selectedAnim.value,
+            [0, 1],
+            [colors.dark.base, GREEN_BASE]
+        )
     }));
 
     return (
-        <Animated.View
-            entering={FadeInUp.delay(index * 40)}
-            style={[containerStyle, animatedCardStyle, { borderRadius: radius.lg }]}>
-            <GradientCard>
-                <Animated.View>
-                    <Pressable
+        <Animated.View entering={FadeInUp.delay(index * 40)}>
+            <Animated.View
+                style={[containerStyle, animatedCardStyle, { borderRadius: radius.lg }]}>
+                <GradientCard>
+                    <Animated.View>
+                        <Pressable
                         disabled={disabled}
                         onPress={() =>
                             onPress?.({
@@ -106,42 +111,42 @@ export function TVDeviceItem({
                         onPressOut={() => {
                             scale.value = withTiming(1, { duration: 120 })
                         }}
-                        style={styles.card}
-                    >
-                        <Animated.View style={[styles.icon, iconAnimatedStyle]}>
-                            <IonIcon
-                                name="tv"
-                                size={18}
-                                color={selected ? GREEN_BASE : colors.dark.base}
-                            />
-                        </Animated.View>
+                        style={styles.card}>
+                            <Animated.View style={[styles.icon, iconAnimatedStyle]}>
+                                <IonIcon
+                                    name="tv"
+                                    size={18}
+                                    color={selected ? GREEN_BASE : colors.dark.base}
+                                />
+                            </Animated.View>
 
-                        <View style={styles.info}>
-                            <Text
-                                style={[
-                                    styles.name,
-                                    selected && { color: '#2F4F2F' },
-                                ]}
-                                numberOfLines={1}
-                            >
-                                {friendlyDeviceName}
-                            </Text>
+                            <View style={styles.info}>
+                                <Text
+                                    style={[
+                                        styles.name,
+                                        selected && { color: '#2F4F2F' },
+                                    ]}
+                                    numberOfLines={1}
+                                >
+                                    {friendlyDeviceName}
+                                </Text>
 
-                            <Text style={styles.subtitle} numberOfLines={1}>
-                                {ip}
-                            </Text>
-                        </View>
+                                <Text style={styles.subtitle} numberOfLines={1}>
+                                    {ip}
+                                </Text>
+                            </View>
 
-                        {showChevron && !disabled && (
-                            <IonIcon
-                                name="chevron-forward"
-                                size={18}
-                                color={DARK_35}
-                            />
-                        )}
-                    </Pressable>
-                </Animated.View>
-            </GradientCard>
+                            {showChevron && !disabled && (
+                                <IonIcon
+                                    name="chevron-forward"
+                                    size={18}
+                                    color={DARK_35}
+                                />
+                            )}
+                        </Pressable>
+                    </Animated.View>
+                </GradientCard>
+            </Animated.View>
         </Animated.View>
     )
 }
@@ -159,6 +164,7 @@ const styles = StyleSheet.create({
         borderRadius: radius.sm,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: .6
     },
     info: {
         flex: 1,
