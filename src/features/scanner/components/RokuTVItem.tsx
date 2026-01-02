@@ -1,29 +1,48 @@
-import React from 'react'
-import { View, Text, Pressable, ViewStyle, StyleSheet } from 'react-native'
+import React, { useEffect } from 'react';
+import {
+    View,
+    Text,
+    Pressable,
+    ViewStyle,
+    StyleSheet,
+} from 'react-native';
 import Animated, {
     FadeInUp,
     useSharedValue,
     useAnimatedStyle,
     withTiming,
-} from 'react-native-reanimated'
-import { colors } from '@src/config/theme/colors/colors'
-import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor'
-import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types'
-import { GradientCard } from '@src/shared/components/GradientCard'
-import { IonIcon } from '@src/shared/components/IonIcon'
-import { radius, spacing } from '@src/config/theme/tokens'
+    interpolateColor,
+} from 'react-native-reanimated';
+
+import { colors } from '@src/config/theme/colors/colors';
+import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types';
+import { GradientCard } from '@src/shared/components/GradientCard';
+import { IonIcon } from '@src/shared/components/IonIcon';
+import { radius, spacing } from '@src/config/theme/tokens';
+
+const GREEN_BASE = '#4D6D4F';
+const GREEN_18 = 'rgba(77, 109, 79, 0.18)';
+const DARK_35 = 'rgba(0, 0, 0, 0.35)';
+const DARK_60 = 'rgba(0, 0, 0, 0.6)';
 
 interface TVDeviceItemProps extends RokuDeviceInfo {
-    index?: number
-    onPress?: (device: RokuDeviceInfo) => void
-    containerStyle?: ViewStyle
-    showChevron?: boolean
+    index?: number;
+    onPress?: (device: RokuDeviceInfo) => void;
+
+    selected?: boolean;
+    disabled?: boolean;
+    showChevron?: boolean;
+
+    containerStyle?: ViewStyle;
 }
 
 export function TVDeviceItem({
     index = 0,
     onPress,
     containerStyle,
+
+    selected = false,
+    disabled = false,
     showChevron = true,
 
     ip,
@@ -32,38 +51,79 @@ export function TVDeviceItem({
     softwareVersion,
 }: TVDeviceItemProps) {
     const scale = useSharedValue(1);
-    const animatedStyle = useAnimatedStyle(() => ({
+    const selectedAnim = useSharedValue(selected ? 1 : 0);
+
+    useEffect(() => {
+        selectedAnim.value = withTiming(selected ? 1 : 0, {
+            duration: 220,
+        })
+    }, [selected]);
+
+    const animatedCardStyle = useAnimatedStyle(() => ({
         transform: [{ scale: scale.value }],
+        backgroundColor: interpolateColor(
+            selectedAnim.value,
+            [0, 1],
+            [colors.white.base, 'rgba(77, 109, 79, 0.08)']
+        ),
+        borderColor: interpolateColor(
+            selectedAnim.value,
+            [0, 1],
+            ['transparent', GREEN_BASE]
+        ),
+        opacity: disabled ? 0.45 : 1,
+    }));
+
+    const iconAnimatedStyle = useAnimatedStyle(() => ({
+        backgroundColor: interpolateColor(
+            selectedAnim.value,
+            [0, 1],
+            [colors.white.base, GREEN_18]
+        ),
     }));
 
     return (
         <Animated.View
-        entering={FadeInUp.delay(index * 40)}
-        style={[containerStyle, animatedStyle]}>
+            entering={FadeInUp.delay(index * 40)}
+            style={[containerStyle, animatedCardStyle, { borderRadius: radius.lg }]}>
             <GradientCard>
                 <Animated.View>
                     <Pressable
-                    onPress={() =>
-                        onPress?.({
-                            ip,
-                            friendlyDeviceName,
-                            modelName,
-                            softwareVersion,
-                        } as RokuDeviceInfo)
-                    }
-                    onPressIn={() => {
-                        scale.value = withTiming(0.98, { duration: 90 })
-                    }}
-                    onPressOut={() => {
-                        scale.value = withTiming(1, { duration: 120 })
-                    }}
-                    style={styles.card}>
-                        <View style={styles.icon}>
-                            <IonIcon name="tv" size={18} />
-                        </View>
+                        disabled={disabled}
+                        onPress={() =>
+                            onPress?.({
+                                ip,
+                                friendlyDeviceName,
+                                modelName,
+                                softwareVersion,
+                            } as RokuDeviceInfo)
+                        }
+                        onPressIn={() => {
+                            if (!disabled) {
+                                scale.value = withTiming(0.97, { duration: 90 })
+                            }
+                        }}
+                        onPressOut={() => {
+                            scale.value = withTiming(1, { duration: 120 })
+                        }}
+                        style={styles.card}
+                    >
+                        <Animated.View style={[styles.icon, iconAnimatedStyle]}>
+                            <IonIcon
+                                name="tv"
+                                size={18}
+                                color={selected ? GREEN_BASE : colors.dark.base}
+                            />
+                        </Animated.View>
 
                         <View style={styles.info}>
-                            <Text style={styles.name} numberOfLines={1}>
+                            <Text
+                                style={[
+                                    styles.name,
+                                    selected && { color: '#2F4F2F' },
+                                ]}
+                                numberOfLines={1}
+                            >
                                 {friendlyDeviceName}
                             </Text>
 
@@ -72,11 +132,11 @@ export function TVDeviceItem({
                             </Text>
                         </View>
 
-                        {showChevron && (
+                        {showChevron && !disabled && (
                             <IonIcon
                                 name="chevron-forward"
                                 size={18}
-                                color={withOpacityHex(colors.dark.base, 0.4)}
+                                color={DARK_35}
                             />
                         )}
                     </Pressable>
@@ -86,7 +146,7 @@ export function TVDeviceItem({
     )
 }
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
     card: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -97,7 +157,6 @@ export const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: radius.sm,
-        backgroundColor: colors.white.base,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -108,10 +167,10 @@ export const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: colors.dark.base,
-        },
-        subtitle: {
+    },
+    subtitle: {
         fontSize: 12,
         marginTop: 2,
-        color: withOpacityHex(colors.dark.base, 0.6),
+        color: DARK_60,
     },
-});
+})

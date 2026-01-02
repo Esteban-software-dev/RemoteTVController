@@ -1,0 +1,33 @@
+export const ROKU_API = {
+    PORT: 8060,
+    BASE_URL: (ip: string) => `http://${ip}:8060`,
+    QUERY: {
+        DEVICE_INFO: '/query/device-info',
+        APPS: '/query/apps',
+        ACTIVE_APP: '/query/active-app',
+        ICON: (appId: string) => `/query/icon/${appId}`,
+    },
+    KEY_PRESS: {
+        HOME: '/keypress/Home',
+        BACK: '/keypress/Back',
+        UP: '/keypress/Up',
+        DOWN: '/keypress/Down',
+        LEFT: '/keypress/Left',
+        RIGHT: '/keypress/Right',
+        SELECT: '/keypress/Select',
+        PLAY: '/keypress/Play',
+        PAUSE: '/keypress/Pause',
+        PLAY_PAUSE: '/keypress/PlayPause',
+        REWIND: '/keypress/Rev',
+        FAST_FORWARD: '/keypress/Fwd',
+        INSTANT_REPLAY: '/keypress/InstantReplay',
+        INFO: '/keypress/Info',
+        POWER: '/keypress/Power',
+        VOLUME_UP: '/keypress/VolumeUp',
+        VOLUME_DOWN: '/keypress/VolumeDown',
+        VOLUME_MUTE: '/keypress/VolumeMute',
+    },
+    LAUNCH: {
+        APP: (appId: string) => `/launch/${appId}`,
+    },
+} as const;

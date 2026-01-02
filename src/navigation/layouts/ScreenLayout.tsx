@@ -17,7 +17,9 @@ export function ScreenLayout({ children, scroll = true }: Props) {
     if (!scroll) {
         return (
             <Animated.View style={{ flex: 1, }}>
+                <View style={{height: appBarHeight}} />
                 {children}
+                <View style={{height: tabBarHeight + spacing.lg}} />
             </Animated.View>
         );
     }
