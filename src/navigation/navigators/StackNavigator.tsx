@@ -1,7 +1,6 @@
 import { TVScanner } from '@src/features/scanner/screens/TVScanner';
 import { createStackNavigator } from '@react-navigation/stack';
 import { colors } from '@src/config/theme/colors/colors';
-import { ScreenLayout } from '../layouts/ScreenLayout';
 
 const Stack = createStackNavigator();
 
@@ -16,11 +15,7 @@ export function StackNavigator() {
         }}>
             <Stack.Screen
                 name="TVScanner"
-                children={() => (
-                    <ScreenLayout>
-                        <TVScanner />
-                    </ScreenLayout>
-                )}
+                component={TVScanner}
             />
         </Stack.Navigator>
     );

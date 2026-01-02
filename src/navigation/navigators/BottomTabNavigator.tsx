@@ -1,7 +1,6 @@
-import { BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StackNavigator } from './StackNavigator';
 import ThemeConfiguration from '@src/features/theme/screens/ThemeConfiguration';
-import { ScreenLayout } from '../layouts/ScreenLayout';
 import { BottomTabBar } from '../components/BottomTabBar';
 import { IonIcon } from '@src/shared/components/IonIcon';
 
@@ -28,7 +27,7 @@ export function BottomTabsNavigator() {
                         )
                     }
                 }}
-                component={HomeScreen}
+                component={ThemeConfiguration}
             />
 
             <Tab.Screen
@@ -57,24 +56,7 @@ export function BottomTabsNavigator() {
                     )
                 }
             }}
-            component={ProfileScreen} />
+            component={ThemeConfiguration} />
         </Tab.Navigator>
-    );
-}
-
-
-function HomeScreen() {
-    return (
-        <ScreenLayout>
-            <ThemeConfiguration />
-        </ScreenLayout>
-    );
-}
-    
-function ProfileScreen() {
-    return (
-        <ScreenLayout>
-            <ThemeConfiguration />
-        </ScreenLayout>
     );
 }

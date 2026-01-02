@@ -4,6 +4,7 @@ import {
     Text,
     View,
     ActivityIndicator,
+    Animated,
 } from 'react-native';
 import { useEffect } from 'react';
 
@@ -20,8 +21,10 @@ import { useRokuScanner } from '../hooks/useRokuScanner';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types';
 import { fetchSelectedRokuApps } from '../services/roku-device-info.service';
+import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 
 export function TVScanner() {
+    const { bottom, top } = useSafeBarsArea();
     const { devices, scanning, scan } = useRokuScanner();
 
     const setRokuDevice = useRokuSessionStore(s => s.selectDevice);
@@ -29,7 +32,7 @@ export function TVScanner() {
     const selectedDevice = useRokuSessionStore(s => s.selectedDevice);
 
     useEffect(() => {
-        scan();
+        if (!devices.length) scan();
     }, []);
 
     const setSelectedRoku = async (rokuDevice: RokuDeviceInfo) => {
@@ -40,7 +43,9 @@ export function TVScanner() {
     }
 
     return (
-        <View style={[globalStyles.container, { padding: spacing.sm }]}>
+        <Animated.View style={[globalStyles.container, globalStyles.horizontalAppPadding, {
+            paddingTop: top,
+        }]}>
             {selectedDevice && (
                 <View style={styles.connectedCard}>
                     <View style={styles.header}>
@@ -96,6 +101,9 @@ export function TVScanner() {
             </View>
 
             <FlatList
+                contentContainerStyle={{
+                    paddingBottom: bottom
+                }}
                 data={devices}
                 keyExtractor={(item: RokuDeviceInfo) => item.ip}
                 renderItem={({ item }) => (
@@ -132,14 +140,8 @@ export function TVScanner() {
                         </View>
                     ) : null
                 }
-                contentContainerStyle={{
-                    padding: spacing.sm,
-                    flexGrow: 1,
-                }}
-                scrollEnabled={false}
-                nestedScrollEnabled
             />
-        </View>
+        </Animated.View>
     );
 }
 
