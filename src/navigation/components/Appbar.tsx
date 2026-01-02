@@ -21,6 +21,7 @@ import { IonIcon } from '@src/shared/components/IonIcon';
 import { useNavigation } from '@react-navigation/native';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
+import { BlurView } from '@react-native-community/blur';
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -157,6 +158,7 @@ export function AppBar() {
             { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [10, 0], Extrapolation .CLAMP), { duration: 200 }) }
         ],
         pointerEvents: collapsedAnim.value === 1 ? 'auto' : 'none',
+        backgroundColor: 'rgba(255,255,255,0.55)'
     }));
 
     const gradientStyle = useAnimatedStyle(() => {
@@ -173,26 +175,25 @@ export function AppBar() {
         };
     });
 
-    const collapsedIconStyle = useAnimatedStyle(() => {
-        return {
-            backgroundColor: interpolateColor(
-                deviceActiveAnim.value,
-                [0, 1],
-                [
-                    COLLAPSED_COLORS.inactive.bg,
-                    COLLAPSED_COLORS.active.bg,
-                ]
-            ),
-            borderColor: interpolateColor(
-                deviceActiveAnim.value,
-                [0, 1],
-                [
-                    COLLAPSED_COLORS.inactive.border,
-                    COLLAPSED_COLORS.active.border,
-                ]
-            ),
-        };
-    });
+    const collapsedIconStyle = useAnimatedStyle(() => ({
+        backgroundColor: interpolateColor(
+            deviceActiveAnim.value,
+            [0, 1],
+            [
+                'rgba(255,255,255,0.78)',
+                COLLAPSED_COLORS.active.bg,
+            ]
+        ),
+        borderColor: interpolateColor(
+            deviceActiveAnim.value,
+            [0, 1],
+            [
+                'rgba(0,0,0,0.22)',
+                COLLAPSED_COLORS.active.border,
+            ]
+        ),
+    }));
+
     const collapsedIconAnimatedStyle = useAnimatedStyle(() => ({
         color: interpolateColor(
             deviceActiveAnim.value,
@@ -218,6 +219,18 @@ export function AppBar() {
     const scaleAnimatedStyle = useAnimatedStyle(() => ({
         transform: [{ scale: scale.value }],
     }));
+
+    const glassTintStyle = useAnimatedStyle(() => ({
+        backgroundColor: interpolateColor(
+            collapsedAnim.value,
+            [0, 1],
+            [
+                'rgba(255, 255, 255, 0.09)',
+                'rgba(255, 255, 255, 0.24)',
+            ]
+        ),
+    }));
+
     return (
         <View style={[styles.container, {
             paddingTop: insets.top === 0 ? spacing.sm : insets.top,
@@ -253,7 +266,20 @@ export function AppBar() {
                             style={StyleSheet.absoluteFill}
                         />
                     </Animated.View>
+
                     <View style={styles.barInner}>
+                        <BlurView
+                            blurType="light"
+                            blurAmount={5}
+                            reducedTransparencyFallbackColor={colors.white.base}
+                            style={StyleSheet.absoluteFill}
+                        />
+
+                        <Animated.View
+                            pointerEvents="none"
+                            style={[StyleSheet.absoluteFill, glassTintStyle]}
+                        />
+
                         {/* Expanded content */}
                         <Animated.View style={[styles.content, expandedStyle]}>
                             <View style={styles.row}>
@@ -365,7 +391,6 @@ const styles = StyleSheet.create({
         right: 0,
     },
     bar: {
-        backgroundColor: colors.white.base,
         borderRadius: radius.lg,
         shadowColor: shadows.soft.shadowColor,
         shadowOpacity: shadows.soft.shadowOpacity,
@@ -404,7 +429,6 @@ const styles = StyleSheet.create({
         borderRadius: radius.lg,
     },
     barInner: {
-        backgroundColor: colors.white.base,
         borderRadius: radius.lg,
         margin: 1,
         flex: 1,

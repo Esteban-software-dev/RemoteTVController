@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-community/blur": "^4.4.1",
     "@react-native-masked-view/masked-view": "^0.3.2",
     "@react-native-vector-icons/ionicons": "^12.3.0",
     "@react-native/new-app-screen": "0.83.0",
@@ -20,6 +21,7 @@
     "buffer": "^6.0.3",
     "react": "19.2.0",
     "react-native": "0.83.0",
+    "react-native-device-info": "^15.0.1",
     "react-native-gesture-handler": "^2.29.1",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-reanimated": "^4.2.0",

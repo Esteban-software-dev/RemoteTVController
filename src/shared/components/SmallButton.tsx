@@ -10,6 +10,7 @@ import { radius } from '@src/config/theme/tokens'
 import { IonIcon } from './IonIcon'
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons'
 import { getContrastColor } from '@src/config/theme/utils/contrast-color'
+import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor'
 
 type Variant = 'filled' | 'outline'
 type Size = 'sm' | 'md'
@@ -53,6 +54,7 @@ export function SmallButton({
         variant === 'filled'
             ? getContrastColor(color)
             : color;
+    const outlineBg = withOpacityHex(color, .05);
 
     useEffect(() => {
         opacity.value = withTiming(disabled ? 0.6 : 1, { duration: 180 });
@@ -91,7 +93,7 @@ export function SmallButton({
                 backgroundColor: color,
             }
             : {
-                backgroundColor: colors.white.base,
+                backgroundColor: outlineBg,
                 borderWidth: 1,
                 borderColor: color,
             };

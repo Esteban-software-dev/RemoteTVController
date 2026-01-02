@@ -97,7 +97,6 @@ export function TVScanner() {
                     onPress={scan}
                     disabled={scanning}
                 />
-
             </View>
 
             <FlatList
