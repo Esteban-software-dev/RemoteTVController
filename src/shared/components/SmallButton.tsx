@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Pressable, PressableProps, Text, ViewStyle, TextStyle } from 'react-native'
+import { Pressable, PressableProps, Text, ViewStyle, TextStyle, StyleProp } from 'react-native'
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -12,20 +12,21 @@ import { IoniconsIconName } from '@react-native-vector-icons/ionicons'
 import { getContrastColor } from '@src/config/theme/utils/contrast-color'
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor'
 
-type Variant = 'filled' | 'outline'
-type Size = 'sm' | 'md'
+type Variant = 'filled' | 'outline' | 'ghost';
+type Size = 'sm' | 'md';
 
 interface SmallButtonProps extends PressableProps {
-    label?: string
-    iconName?: IoniconsIconName
-    iconSize?: number
-    iconColor?: string
+    label?: string;
+    iconName?: IoniconsIconName;
+    iconSize?: number;
+    iconColor?: string;
     color?: string;
-    variant?: Variant
-    size?: Size
+    variant?: Variant;
+    size?: Size;
 
-    containerStyle?: ViewStyle
-    textStyle?: TextStyle
+    containerStyle?: StyleProp<ViewStyle>;
+    textStyle?: TextStyle;
+    stopPropagation?: boolean;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -42,6 +43,7 @@ export function SmallButton({
     disabled,
     containerStyle,
     textStyle,
+    stopPropagation = false,
 
     ...pressableProps
 }: SmallButtonProps) {
@@ -88,20 +90,26 @@ export function SmallButton({
     };
 
     const variantStyle: ViewStyle =
-        variant === 'filled'
-            ? {
-                backgroundColor: color,
-            }
-            : {
-                backgroundColor: outlineBg,
-                borderWidth: 1,
-                borderColor: color,
-            };
+    variant === 'filled'
+        ? {
+            backgroundColor: color,
+        }
+        : variant === 'outline'
+        ? {
+            backgroundColor: outlineBg,
+            borderWidth: 1,
+            borderColor: color,
+        }
+        : {
+            backgroundColor: outlineBg,
+            borderWidth: 0,
+        };
 
     return (
         <AnimatedPressable
             disabled={disabled}
-            onPressIn={() => {
+            onPressIn={(e) => {
+                stopPropagation && e.stopPropagation();
                 scale.value = withTiming(0.96, { duration: 90 });
             }}
             onPressOut={() => {

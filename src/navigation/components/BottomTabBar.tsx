@@ -1,5 +1,5 @@
 import { BottomTabBarProps, BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
-import { View, Pressable, StyleSheet, GestureResponderEvent } from 'react-native';
+import { View, Pressable, StyleSheet, GestureResponderEvent, Platform } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -17,10 +17,27 @@ import { useEffect } from 'react';
 import { BlurBackground } from '@src/shared/components/BlurBackground';
 
 export function BottomTabBar({ state, navigation, descriptors }: BottomTabBarProps) {
+    const isAndroid = Platform.OS === 'android';
 
     return (
         <View style={styles.wrapper}>
-            <BlurBackground tintColor={withOpacityHex(colors.white.base, .02)} />
+            {/* <BlurBackground style={{borderRadius: radius.lg}} blurAmount={isAndroid ? 3 : 8} /> */}
+            {/* {!isAndroid && (
+                <BlurBackground blurAmount={6} />
+            )}
+
+            {isAndroid && (
+                <View
+                    style={[
+                    StyleSheet.absoluteFill,
+                    {
+                        backgroundColor: 'rgba(255,255,255,0.85)',
+                        borderRadius: radius.lg,
+                    },
+                    ]}
+                />
+            )} */}
+
             {state.routes.map((route, index) => {
                 const isFocused = state.index === index;
                 const { tabBarIcon } = descriptors[route.key].options;
@@ -40,7 +57,6 @@ export function BottomTabBar({ state, navigation, descriptors }: BottomTabBarPro
         </View>
     );
 }
-
 
 interface TabItemProps {
     label: string;
@@ -192,7 +208,7 @@ const styles = StyleSheet.create({
         shadowRadius: shadows.soft.shadowRadius,
         shadowOffset: { width: 0, height: 6 },
         elevation: shadows.soft.elevation,
-        overflow: 'hidden'
+        backgroundColor: colors.white.base
     },
     tabWrapper: {
         flex: 1,

@@ -150,6 +150,7 @@ export function AppBar() {
             { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [0, -10], Extrapolation .CLAMP), { duration: 200 }) }
         ],
         pointerEvents: collapsedAnim.value === 0 ? 'auto' : 'none',
+        backgroundColor: colors.white.base
     }));
 
     const collapsedStyle = useAnimatedStyle(() => ({
@@ -158,7 +159,7 @@ export function AppBar() {
             { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [10, 0], Extrapolation .CLAMP), { duration: 200 }) }
         ],
         pointerEvents: collapsedAnim.value === 1 ? 'auto' : 'none',
-        backgroundColor: 'rgba(255,255,255,0.55)'
+        backgroundColor: colors.white.base
     }));
 
     const gradientStyle = useAnimatedStyle(() => {
@@ -268,7 +269,7 @@ export function AppBar() {
                     </Animated.View>
 
                     <View style={styles.barInner}>
-                        <BlurView
+                        {/* <BlurView
                             blurType="light"
                             blurAmount={5}
                             reducedTransparencyFallbackColor={colors.white.base}
@@ -278,7 +279,7 @@ export function AppBar() {
                         <Animated.View
                             pointerEvents="none"
                             style={[StyleSheet.absoluteFill, glassTintStyle]}
-                        />
+                        /> */}
 
                         {/* Expanded content */}
                         <Animated.View style={[styles.content, expandedStyle]}>

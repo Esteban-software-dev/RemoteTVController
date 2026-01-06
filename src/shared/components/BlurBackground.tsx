@@ -18,7 +18,7 @@ export function BlurBackground({
     style,
 }: BlurBackgroundProps) {
     return (
-        <View style={[StyleSheet.absoluteFill, style]}>
+        <View style={[StyleSheet.absoluteFill, style, {overflow: 'hidden'}]}>
             <BlurView
                 blurType={blurType}
                 blurAmount={blurAmount}

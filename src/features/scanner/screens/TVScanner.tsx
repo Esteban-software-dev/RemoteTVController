@@ -22,17 +22,23 @@ import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types';
 import { fetchSelectedRokuApps } from '../services/roku-device-info.service';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import Animated from 'react-native-reanimated';
+import { fakeApps } from '@src/data.fake';
 
 export function TVScanner() {
     const { bottom, top } = useSafeBarsArea();
     const { devices, scanning, scan } = useRokuScanner();
 
     const setRokuDevice = useRokuSessionStore(s => s.selectDevice);
+    const setApps = useRokuSessionStore(s => s.setApps);
     const clearSession = useRokuSessionStore(s => s.clearSession);
     const selectedDevice = useRokuSessionStore(s => s.selectedDevice);
 
     useEffect(() => {
         scan();
+        /**
+         * * Temporal set
+         */
+        setApps(fakeApps);
     }, []);
 
     const setSelectedRoku = async (rokuDevice: RokuDeviceInfo) => {
@@ -40,6 +46,7 @@ export function TVScanner() {
         const rokuApps = await fetchSelectedRokuApps(rokuDevice.ip);
         console.log({rokuApps});
         setRokuDevice(rokuDevice);
+        setApps(rokuApps && rokuApps.length ? rokuApps : fakeApps);
     }
 
     return (

@@ -3,6 +3,7 @@ import { StackNavigator } from './StackNavigator';
 import ThemeConfiguration from '@src/features/theme/screens/ThemeConfiguration';
 import { BottomTabBar } from '../components/BottomTabBar';
 import { IonIcon } from '@src/shared/components/IonIcon';
+import { SmartHub } from '@src/features/scanner/screens/SmartHub';
 
 const Tab = createBottomTabNavigator();
 
@@ -17,7 +18,7 @@ export function BottomTabsNavigator() {
             animation: 'fade',
         }}>
             <Tab.Screen
-                name="Home"
+                name="Smarthub"
                 options={{
                     tabBarIcon: ({ focused, size }) => {
                         return (
@@ -28,7 +29,7 @@ export function BottomTabsNavigator() {
                         )
                     }
                 }}
-                component={ThemeConfiguration}
+                component={SmartHub}
             />
 
             <Tab.Screen
