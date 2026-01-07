@@ -1,43 +1,37 @@
-import { FlatList, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import React, { useEffect } from 'react';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
-import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
-import { RokuApp } from '../interfaces/roku-app.interface';
-import { AppItem } from '../components/AppItem';
-import { spacing } from '@src/config/theme/tokens';
+import { SmartHubSectionType } from '../interfaces/section.types';
+import { SmartHubSectionList } from '../components/SmartHubSectionList';
 
 export function SmartHub() {
-    const { bottom, top } = useSafeBarsArea();
     const { apps } = useRokuSessionStore();
+    const sections: SmartHubSectionType[] = [
+        {
+            type: 'favorites',
+            data: apps && apps.length ? [apps[4], apps[2], apps[6]] : [],
+            title: 'Tus favoritos',
+            subtitle: 'Apps marcadas como favoritas',
+            iconName: 'heart',
+            scrollType: 'horizontal'
+        },
+        {
+            type: 'apps',
+            data: apps ?? [],
+            title: 'Aplicaciones',
+            subtitle: 'Todas las apps disponibles en este dispositivo',
+            iconName: 'apps',
+        }
+    ];
 
     useEffect(() => {
         console.log({apps})
     }, [apps]);
 
     return (
-        <FlatList
-            style={[globalStyles.container, globalStyles.horizontalAppPadding]}
-            data={apps}
-            numColumns={2}
-            keyExtractor={(app: RokuApp) => app.id}
-            renderItem={({ item, index }) => (
-                <AppItem
-                    onPress={console.log}
-                    appId={item.id}
-                    name={item.name}
-                    index={index} />
-            )}
-            contentContainerStyle={[{ paddingTop: top, paddingBottom: bottom, gap: spacing.sm }]}
-            columnWrapperStyle={styles.row}
-            showsVerticalScrollIndicator={false}
-        />
+        <View style={[globalStyles.container, globalStyles.horizontalAppPadding]}>
+            <SmartHubSectionList sections={sections} />
+        </View>
     )
 }
-
-const styles = StyleSheet.create({
-    row: {
-        justifyContent: 'space-between',
-        gap: spacing.sm
-    },
-})

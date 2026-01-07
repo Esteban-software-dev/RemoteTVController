@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native'
-import React, { useEffect } from 'react'
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { Gradient } from '@src/shared/components/Gradient';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { colors } from '@src/config/theme/colors/colors';
@@ -33,6 +33,7 @@ export function AppItem({
   const opacity = useSharedValue(1);
   const gradientConfig = getAppGradient(appId);
 
+  const [hasError, setHasError] = useState(false);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     opacity: opacity.value,
@@ -68,10 +69,17 @@ export function AppItem({
         variant='ghost'
         hitSlop={8}
         onPress={() => console.log("options")} />
-
-      <View style={styles.iconZone}>
-        <FallbackIcon name={name} />
-      </View>
+        <View style={styles.iconZone}>
+          {!iconUrl || hasError ? (
+            <FallbackIcon name={name} />
+          ) : (
+            <Image
+              style={styles.appIcon}
+              source={{ uri: iconUrl }}
+              onError={() => setHasError(true)}
+            />
+          )}
+        </View>
 
       <View style={styles.textZone}>
         <Text style={styles.name} numberOfLines={1}>
@@ -105,7 +113,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: radius.xl,
-    borderColor: withOpacityHex(colors.dark.base, .10)
+    borderColor: withOpacityHex(colors.dark.base, .10),
+    overflow: 'hidden'
   },
   textZone: {
     flex: .5,
@@ -121,6 +130,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.white.base,
     opacity: 0.7,
+  },
+  appIcon: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
