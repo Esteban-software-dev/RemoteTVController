@@ -8,7 +8,8 @@ import Animated, {
     withTiming,
     interpolate,
     Extrapolation,
-    useDerivedValue
+    useDerivedValue,
+    interpolateColor
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radius, shadows, spacing } from '@src/config/theme/tokens';
@@ -19,6 +20,8 @@ import  { scheduleOnRN } from 'react-native-worklets'
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { useNavigation } from '@react-navigation/native';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
+import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
+import { BlurView } from '@react-native-community/blur';
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -27,7 +30,22 @@ const applyResistance = (value: number) => {
     return sign * (MAX_DRAG + (abs - MAX_DRAG) * 0.15);
 };
 
+const COLLAPSED_COLORS = {
+    active: {
+        bg: colors.accent.purple.soft,
+        border: colors.accent.purple.base,
+        icon: colors.accent.purple.strong,
+        text: colors.accent.purple.dark,
+    },
+    inactive: {
+        bg: colors.accent.gray.soft,
+        border: colors.accent.gray.base,
+        icon: colors.accent.gray.icon,
+        text: colors.accent.gray.text,
+    },
+};
 export function AppBar() {
+    const { selectedDevice, isOnline, isLoading } = useRokuSessionStore();
     const { setHeight } = useContext(AppBarLayoutContext);
     const { navigate } = useNavigation();
 
@@ -39,6 +57,8 @@ export function AppBar() {
     const height = useSharedValue(EXPANDED_HEIGHT);
     const collapsedAnim = useSharedValue(0);
     const gradientRotation = useSharedValue(0);
+    const deviceActiveAnim = useSharedValue(0);
+    const scale = useSharedValue(1);
     const gradientColors = [colors.gradient[1], colors.gradient[2], colors.gradient[3]];
 
     const collapseTimeout = useRef<any | null>(null);
@@ -62,6 +82,13 @@ export function AppBar() {
             if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
         };
     }, []);
+
+    useEffect(() => {
+        deviceActiveAnim.value = withTiming(
+            selectedDevice && isOnline && !isLoading ? 1 : 0,
+            { duration: 300 }
+        );
+    }, [selectedDevice, isOnline, isLoading]);
 
     useDerivedValue(() => {
         if (collapsedAnim.value) {
@@ -123,6 +150,7 @@ export function AppBar() {
             { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [0, -10], Extrapolation .CLAMP), { duration: 200 }) }
         ],
         pointerEvents: collapsedAnim.value === 0 ? 'auto' : 'none',
+        backgroundColor: colors.white.base
     }));
 
     const collapsedStyle = useAnimatedStyle(() => ({
@@ -131,6 +159,7 @@ export function AppBar() {
             { translateY: withTiming(interpolate(collapsedAnim.value, [0, 1], [10, 0], Extrapolation .CLAMP), { duration: 200 }) }
         ],
         pointerEvents: collapsedAnim.value === 1 ? 'auto' : 'none',
+        backgroundColor: colors.white.base
     }));
 
     const gradientStyle = useAnimatedStyle(() => {
@@ -146,6 +175,62 @@ export function AppBar() {
             ],
         };
     });
+
+    const collapsedIconStyle = useAnimatedStyle(() => ({
+        backgroundColor: interpolateColor(
+            deviceActiveAnim.value,
+            [0, 1],
+            [
+                'rgba(255,255,255,0.78)',
+                COLLAPSED_COLORS.active.bg,
+            ]
+        ),
+        borderColor: interpolateColor(
+            deviceActiveAnim.value,
+            [0, 1],
+            [
+                'rgba(0,0,0,0.22)',
+                COLLAPSED_COLORS.active.border,
+            ]
+        ),
+    }));
+
+    const collapsedIconAnimatedStyle = useAnimatedStyle(() => ({
+        color: interpolateColor(
+            deviceActiveAnim.value,
+            [0, 1],
+            [
+                COLLAPSED_COLORS.inactive.icon,
+                COLLAPSED_COLORS.active.icon,
+            ]
+        ),
+    }));
+    
+    const collapsedTextStyle = useAnimatedStyle(() => ({
+        color: interpolateColor(
+            deviceActiveAnim.value,
+            [0, 1],
+            [
+                COLLAPSED_COLORS.inactive.text,
+                COLLAPSED_COLORS.active.text,
+            ]
+        ),
+    }));
+
+    const scaleAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
+
+    const glassTintStyle = useAnimatedStyle(() => ({
+        backgroundColor: interpolateColor(
+            collapsedAnim.value,
+            [0, 1],
+            [
+                'rgba(255, 255, 255, 0.09)',
+                'rgba(255, 255, 255, 0.24)',
+            ]
+        ),
+    }));
 
     return (
         <View style={[styles.container, {
@@ -182,7 +267,20 @@ export function AppBar() {
                             style={StyleSheet.absoluteFill}
                         />
                     </Animated.View>
+
                     <View style={styles.barInner}>
+                        {/* <BlurView
+                            blurType="light"
+                            blurAmount={5}
+                            reducedTransparencyFallbackColor={colors.white.base}
+                            style={StyleSheet.absoluteFill}
+                        />
+
+                        <Animated.View
+                            pointerEvents="none"
+                            style={[StyleSheet.absoluteFill, glassTintStyle]}
+                        /> */}
+
                         {/* Expanded content */}
                         <Animated.View style={[styles.content, expandedStyle]}>
                             <View style={styles.row}>
@@ -198,7 +296,7 @@ export function AppBar() {
                                 </Pressable>
                                 <View style={{ marginLeft: spacing.sm, flex: 1 }}>
                                         <Text style={{ fontWeight: '600', fontSize: 14 }}>
-                                            Hola, Juan
+                                            Hola, Esteban
                                         </Text>
                                         <View style={{ flexDirection: 'row', marginTop: spacing.xs }}>
                                             {renderMiniAction('search')}
@@ -216,19 +314,44 @@ export function AppBar() {
                         <Animated.View style={[styles.content, collapsedStyle]}>
                             <View style={styles.row}>
                                 <Pressable
-                                    onPress={() => navigate('Profile' as never)}
-                                    style={({ pressed }) => [
+                                onPressIn={() => {
+                                    scale.value = withTiming(0.92, { duration: 120 });
+                                }}
+                                onPressOut={() => {
+                                    scale.value = withTiming(1, { duration: 120 });
+                                }}
+                                onPress={() => navigate('Tv scanner' as never)}>
+                                    <Animated.View
+                                    style={[
                                         styles.icon,
-                                        pressed && {
-                                            transform: [{ scale: 0.95 }],
-                                        }
+                                        { borderWidth: 1.2 },
+                                        collapsedIconStyle,
+                                        scaleAnimatedStyle
                                     ]}>
-                                        <IonIcon name='tv' size={20} />
+                                        <Animated.Text style={collapsedIconAnimatedStyle}>
+                                            <IonIcon name="tv" size={20} iconStyles={{color: collapsedIconAnimatedStyle.color}} />
+                                        </Animated.Text>
+                                    </Animated.View>
                                 </Pressable>
+
                                 <View style={{ marginLeft: spacing.sm }}>
-                                    <Text>
-                                        Modo compacto
-                                    </Text>
+                                    {selectedDevice ? (
+                                        <Animated.View style={[styles.collapsedContent]}>
+                                            <View style={styles.textBlock}>
+                                                <Text style={styles.title} numberOfLines={1}>
+                                                    {selectedDevice.friendlyDeviceName}
+                                                </Text>
+
+                                                <Text style={styles.subtitle} numberOfLines={1}>
+                                                    {isOnline ? 'Reproduciendo Spotify' : ''}
+                                                </Text>
+                                            </View>
+                                        </Animated.View>
+                                    ) : (
+                                        <Animated.Text style={[{ fontSize: 13, fontWeight: '500' }, collapsedTextStyle]}>
+                                            Ningún dispositivo conectado...
+                                        </Animated.Text>
+                                    )}
                                 </View>
                             </View>
                         </Animated.View>
@@ -269,7 +392,6 @@ const styles = StyleSheet.create({
         right: 0,
     },
     bar: {
-        backgroundColor: colors.white.base,
         borderRadius: radius.lg,
         shadowColor: shadows.soft.shadowColor,
         shadowOpacity: shadows.soft.shadowOpacity,
@@ -308,7 +430,6 @@ const styles = StyleSheet.create({
         borderRadius: radius.lg,
     },
     barInner: {
-        backgroundColor: colors.white.base,
         borderRadius: radius.lg,
         margin: 1,
         flex: 1,
@@ -324,5 +445,30 @@ const styles = StyleSheet.create({
         backgroundColor: withOpacityHex('#E5E5E5', .5),
         borderWidth: 1,
         borderColor: withOpacityHex(colors.dark.base, 0.06),
+    },
+    collapsedContent: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    textBlock: {
+        marginBottom: spacing.xs,
+    },
+    title: {
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    subtitle: {
+        fontSize: 11,
+    },
+    collapsedButton: {
+        alignSelf: 'flex-start',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+        borderWidth: 1,
+    },
+    collapsedButtonText: {
+        fontSize: 11,
+        fontWeight: '500',
     },
 });
