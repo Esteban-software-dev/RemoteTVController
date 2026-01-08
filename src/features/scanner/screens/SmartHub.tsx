@@ -7,10 +7,10 @@ import { SmartHubSectionList } from '../components/SmartHubSectionList';
 import { defaultApps } from '@src/default-apps';
 import { NoRokuDevice } from '../components/NoRokuDevice';
 import { colors } from '@src/config/theme/colors/colors';
-import { useNavigation } from '@react-navigation/native';
+import { useAppNavigation } from '@src/navigation/hooks/useAppNavigation';
 
 export function SmartHub() {
-    const { navigate } = useNavigation();
+    const { navigation } = useAppNavigation();
     const { apps, setApps } = useRokuSessionStore();
     const { selectedDevice } = useRokuSessionStore();
     const sections: SmartHubSectionType[] = [
@@ -48,7 +48,7 @@ export function SmartHub() {
                     iconName: 'search',
                     variant: 'outline',
                     color: colors.gradient[2],
-                    onPress: () => navigate('Tv scanner' as never)
+                    onPress: () => navigation.navigate('Tv scanner')
                 }}
             />
         );

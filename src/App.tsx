@@ -6,8 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { EXPANDED_HEIGHT } from './navigation/constants/appbarDimensions.constant';
 import { AppBarLayoutContext } from './navigation/context/AppbarLayoutContext';
-import { AppBar } from './navigation/components/Appbar';
-import { BottomTabsNavigator } from './navigation/navigators/BottomTabNavigator';
+import { DrawerNavigator } from './navigation/navigators/DrawerNavigator';
 
 function App() {
   const [height, setHeight] = useState(EXPANDED_HEIGHT);
@@ -19,8 +18,7 @@ function App() {
       <NavigationContainer>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <AppBarLayoutContext.Provider value={{ height, setHeight }}>
-          <AppBar />
-          <BottomTabsNavigator />
+          <DrawerNavigator />
         </AppBarLayoutContext.Provider>
       </NavigationContainer>
     </SafeAreaProvider>

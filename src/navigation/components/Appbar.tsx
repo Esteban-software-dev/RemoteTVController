@@ -18,7 +18,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { colors } from '@src/config/theme/colors/colors';
 import  { scheduleOnRN } from 'react-native-worklets'
 import { IonIcon } from '@src/shared/components/IonIcon';
-import { useNavigation } from '@react-navigation/native';
+import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { BlurView } from '@react-native-community/blur';
@@ -45,9 +45,10 @@ const COLLAPSED_COLORS = {
     },
 };
 export function AppBar() {
+    const navigation = useNavigation();
+
     const { selectedDevice, isOnline, isLoading } = useRokuSessionStore();
     const { setHeight } = useContext(AppBarLayoutContext);
-    const { navigate } = useNavigation();
 
     const insets = useSafeAreaInsets();
 
@@ -75,6 +76,16 @@ export function AppBar() {
             }
         }, AUTO_COLLAPSE_DELAY);
     };
+
+    const collapseAppbar = () => {
+        if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
+        if (!isPressed.current) {
+            width.value = withSpring(COLLAPSED_WIDTH);
+            height.value = withSpring(COLLAPSED_HEIGHT);
+            collapsedAnim.value = withTiming(1, { duration: 300 });
+            scheduleOnRN(setHeight, COLLAPSED_HEIGHT);
+        }
+    }
 
     useEffect(() => {
         startCollapseTimer();
@@ -285,7 +296,10 @@ export function AppBar() {
                         <Animated.View style={[styles.content, expandedStyle]}>
                             <View style={styles.row}>
                                 <Pressable
-                                onPress={() => navigate('Profile' as never)}
+                                onPress={() => {
+                                    collapseAppbar();
+                                    navigation.dispatch(DrawerActions.openDrawer());
+                                }}
                                 style={({ pressed }) => [
                                     styles.icon,
                                     pressed && {
@@ -320,7 +334,7 @@ export function AppBar() {
                                 onPressOut={() => {
                                     scale.value = withTiming(1, { duration: 120 });
                                 }}
-                                onPress={() => navigate('Tv scanner' as never)}>
+                                onPress={() => navigation.navigate('Tv scanner' as never)}>
                                     <Animated.View
                                     style={[
                                         styles.icon,
