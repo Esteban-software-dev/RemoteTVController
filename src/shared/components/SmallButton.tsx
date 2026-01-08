@@ -15,7 +15,7 @@ import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor'
 type Variant = 'filled' | 'outline' | 'ghost';
 type Size = 'sm' | 'md';
 
-interface SmallButtonProps extends PressableProps {
+export interface SmallButtonProps extends PressableProps {
     label?: string;
     iconName?: IoniconsIconName;
     iconSize?: number;
