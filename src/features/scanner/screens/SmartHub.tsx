@@ -7,10 +7,10 @@ import { SmartHubSectionList } from '../components/SmartHubSectionList';
 import { defaultApps } from '@src/default-apps';
 import { NoRokuDevice } from '../components/NoRokuDevice';
 import { colors } from '@src/config/theme/colors/colors';
-import { useAppNavigation } from '@src/navigation/hooks/useAppNavigation';
+import { useBottomtabNavigation } from '@src/navigation/hooks/useBottomtabNavigation';
 
 export function SmartHub() {
-    const { navigation } = useAppNavigation();
+    const { navigation } = useBottomtabNavigation();
     const { apps, setApps } = useRokuSessionStore();
     const { selectedDevice } = useRokuSessionStore();
     const sections: SmartHubSectionType[] = [
