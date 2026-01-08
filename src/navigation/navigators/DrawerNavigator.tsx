@@ -10,8 +10,7 @@ export function DrawerNavigator() {
     return (
         <Drawer.Navigator
         screenOptions={{
-            headerShown: true,
-            header: AppBar,
+            headerShown: false,
             drawerType: 'back',
         }}>
             <Drawer.Screen

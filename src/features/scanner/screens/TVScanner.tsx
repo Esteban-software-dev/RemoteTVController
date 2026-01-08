@@ -15,18 +15,20 @@ import { RokuTVItem } from '../components/RokuTVItem';
 import { useRokuScanner } from '../hooks/useRokuScanner';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types';
-import { fetchSelectedRokuApps } from '../services/roku-device-info.service';
+import { fetchActiveRokuApp, fetchSelectedRokuApps } from '../services/roku-device-info.service';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import Animated from 'react-native-reanimated';
 import { defaultApps } from '@src/default-apps';
 import { SectionHeader } from '@src/shared/components/SectionHeader';
 import { NoRokuDevice } from '../components/NoRokuDevice';
+import { ActiveApp } from '../interfaces/active-app.interface';
 
 export function TVScanner() {
     const { bottom, top } = useSafeBarsArea();
     const { devices, scanning, scan } = useRokuScanner();
 
     const setRokuDevice = useRokuSessionStore(s => s.selectDevice);
+    const setActiveApp = useRokuSessionStore(s => s.setActiveApp);
     const setApps = useRokuSessionStore(s => s.setApps);
     const clearSession = useRokuSessionStore(s => s.clearSession);
     const selectedDevice = useRokuSessionStore(s => s.selectedDevice);
@@ -38,8 +40,12 @@ export function TVScanner() {
     const setSelectedRoku = async (rokuDevice: RokuDeviceInfo) => {
         if (selectedDevice?.modelName === rokuDevice.modelName) return;
         setApps([]);
-        const rokuApps = await fetchSelectedRokuApps(rokuDevice.ip);
         setRokuDevice(rokuDevice);
+
+        const activeApp = await fetchActiveRokuApp(rokuDevice.ip);
+        const rokuApps = await fetchSelectedRokuApps(rokuDevice.ip);
+        
+        setActiveApp(activeApp ?? {} as ActiveApp);
         setApps(rokuApps && rokuApps.length ? rokuApps : defaultApps);
     }
 

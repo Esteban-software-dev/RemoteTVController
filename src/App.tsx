@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { EXPANDED_HEIGHT } from './navigation/constants/appbarDimensions.constant';
 import { AppBarLayoutContext } from './navigation/context/AppbarLayoutContext';
 import { DrawerNavigator } from './navigation/navigators/DrawerNavigator';
+import { AppBar } from './navigation/components/Appbar';
 
 function App() {
   const [height, setHeight] = useState(EXPANDED_HEIGHT);
@@ -18,6 +19,7 @@ function App() {
       <NavigationContainer>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <AppBarLayoutContext.Provider value={{ height, setHeight }}>
+          <AppBar />
           <DrawerNavigator />
         </AppBarLayoutContext.Provider>
       </NavigationContainer>

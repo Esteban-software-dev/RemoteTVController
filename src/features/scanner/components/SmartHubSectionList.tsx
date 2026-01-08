@@ -12,21 +12,22 @@ import { SmartHubSectionType } from '../interfaces/section.types';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import { getAppIcon, launchRokuApp } from '../services/roku-apps.service';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
+import { fetchActiveRokuApp } from '../services/roku-device-info.service';
 
 interface SmartHubSectionListProps {
     sections: SmartHubSectionType[];
 }
 export function SmartHubSectionList({ sections }: SmartHubSectionListProps) {
     const { top, bottom } = useSafeBarsArea();
-    const { selectedDevice } = useRokuSessionStore();
+    const { selectedDevice, setActiveApp } = useRokuSessionStore();
 
     const formattedSections = useMemo(() => {
         return sections.map(section => ({
             ...section,
             data: section.data.reduce<any[]>((rows, item, index) => {
             if (index % 2 === 0) rows.push([item]);
-            else rows[rows.length - 1].push(item);
-            return rows;
+                else rows[rows.length - 1].push(item);
+                return rows;
             }, []),
         }));
     }, [sections]);
@@ -53,7 +54,7 @@ export function SmartHubSectionList({ sections }: SmartHubSectionListProps) {
                     />
                 )
             }}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
                 <View style={styles.row}>
                     {item.map((app: any) => (
                         <AppItem
@@ -65,9 +66,11 @@ export function SmartHubSectionList({ sections }: SmartHubSectionListProps) {
                                 ? getAppIcon(selectedDevice.ip, app.id)
                                 : ''
                             }
-                            onPress={() => {
+                            onPress={async () => {
                                 if (!selectedDevice?.ip) return;
-                                launchRokuApp(selectedDevice.ip, app.id);
+                                await launchRokuApp(selectedDevice.ip, app.id);
+                                const activeApp = await fetchActiveRokuApp(selectedDevice.ip);
+                                if (activeApp) setActiveApp(activeApp);
                             }}
                         />
                     ))}

@@ -21,7 +21,9 @@ import { IonIcon } from '@src/shared/components/IonIcon';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
-import { BlurView } from '@react-native-community/blur';
+import { RokuDeviceActionButton } from './RokuDeviceActionButton';
+import { powerRokuDevice } from '@src/features/scanner/services/roku-apps.service';
+import { fetchActiveRokuApp } from '@src/features/scanner/services/roku-device-info.service';
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -47,7 +49,7 @@ const COLLAPSED_COLORS = {
 export function AppBar() {
     const navigation = useNavigation();
 
-    const { selectedDevice, isOnline, isLoading } = useRokuSessionStore();
+    const { selectedDevice, isOnline, isLoading, activeApp, setActiveApp } = useRokuSessionStore();
     const { setHeight } = useContext(AppBarLayoutContext);
 
     const insets = useSafeAreaInsets();
@@ -100,6 +102,20 @@ export function AppBar() {
             { duration: 300 }
         );
     }, [selectedDevice, isOnline, isLoading]);
+
+    useEffect(() => {
+        if (!selectedDevice) return;
+
+        fetchActiveRokuApp(selectedDevice.ip)
+            .then((response) => {
+                if (!response) return;
+                console.log({response});
+                setActiveApp(response);
+            })
+            .catch((error) => {
+                console.log({error})
+            })
+    }, [selectedDevice]);
 
     useDerivedValue(() => {
         if (collapsedAnim.value) {
@@ -227,6 +243,29 @@ export function AppBar() {
             ]
         ),
     }));
+    
+    const rokuDeviceActions = useAnimatedStyle(() => {
+        const visible = collapsedAnim.value === 1;
+
+        return {
+            opacity: withTiming(visible ? 1 : 0, { duration: 300 }),
+            transform: [
+                {
+                    translateY: withTiming(visible ? 0 : -8, { duration: 200 }),
+                },
+                {
+                    scale: withTiming(visible ? 1 : 0.9, { duration: 200 }),
+                },
+            ],
+            pointerEvents: visible ? 'auto' : 'none',
+            display: visible? 'flex' : 'none',
+            flexDirection: 'row',
+            marginTop: 'auto',
+            marginBottom: 'auto',
+            gap: withTiming(visible ? 3 : 0, { duration: 300 }),
+            margin: spacing.sm
+        };
+    });
 
     const scaleAnimatedStyle = useAnimatedStyle(() => ({
         transform: [{ scale: scale.value }],
@@ -246,8 +285,22 @@ export function AppBar() {
     return (
         <View style={[styles.container, {
             paddingTop: insets.top === 0 ? spacing.sm : insets.top,
-            paddingBottom: insets.top === 0 ? spacing.sm : insets.top
+            paddingBottom: insets.top === 0 ? spacing.sm : insets.top,
+            flexDirection: 'row'
         }]}>
+            <Animated.View style={[rokuDeviceActions, {
+                alignSelf: 'flex-start',
+                marginRight: 'auto',
+            }]}>
+                <RokuDeviceActionButton
+                iconName="power"
+                color={colors.gradient[3]}
+                onPress={async () => {
+                    if (!selectedDevice) return;
+                    await powerRokuDevice(selectedDevice.ip);
+                }} />
+            </Animated.View>
+
             <Pressable
             onPressIn={() => {
                 isPressed.current = true;
@@ -356,8 +409,13 @@ export function AppBar() {
                                                     {selectedDevice.friendlyDeviceName}
                                                 </Text>
 
-                                                <Text style={styles.subtitle} numberOfLines={1}>
-                                                    {isOnline ? 'Reproduciendo Spotify' : ''}
+                                                <Text
+                                                style={styles.subtitle}
+                                                ellipsizeMode="tail"
+                                                numberOfLines={1} >
+                                                    {isOnline && activeApp?.text
+                                                    ? (activeApp.text.length > 20 ? activeApp.text.slice(0, 20) + '...' : activeApp.text)
+                                                    : 'Desconocido'}
                                                 </Text>
                                             </View>
                                         </Animated.View>
@@ -372,6 +430,13 @@ export function AppBar() {
                     </View>
                 </Animated.View>
             </Pressable>
+
+            <Animated.View style={[rokuDeviceActions, {
+                alignSelf: 'flex-start',
+                marginLeft: 'auto',
+            }]}>
+                <RokuDeviceActionButton iconName="keypad" color={colors.accent.purple.strong} />
+            </Animated.View>
         </View>
     );
 }
@@ -474,15 +539,5 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 11,
     },
-    collapsedButton: {
-        alignSelf: 'flex-start',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 8,
-        borderWidth: 1,
-    },
-    collapsedButtonText: {
-        fontSize: 11,
-        fontWeight: '500',
-    },
 });
+

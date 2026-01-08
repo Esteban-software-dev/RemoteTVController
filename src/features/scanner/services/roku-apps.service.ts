@@ -1,5 +1,14 @@
 import { ROKU_API } from '@src/shared/constants/roku-endpoints.const';
 
+export async function powerRokuDevice(ip: string) {
+    try {
+        await fetch(
+            `${ROKU_API.BASE_URL(ip)}${ROKU_API.KEY_PRESS.POWER}`,
+            { method: 'POST' }
+        );
+    } catch (error) {}
+}
+
 export async function launchRokuApp(ip: string, appId: string): Promise<void> {
     if (!ip || !appId) return;
     try {
