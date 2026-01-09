@@ -258,12 +258,12 @@ export function AppBar() {
                 },
             ],
             pointerEvents: visible ? 'auto' : 'none',
-            display: visible? 'flex' : 'none',
+            display: visible ? 'flex' : 'none',
             flexDirection: 'row',
             marginTop: 'auto',
             marginBottom: 'auto',
             gap: withTiming(visible ? 3 : 0, { duration: 300 }),
-            margin: spacing.sm
+            margin: spacing.md
         };
     });
 
