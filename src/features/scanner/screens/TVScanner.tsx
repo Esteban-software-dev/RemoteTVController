@@ -6,49 +6,47 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { useEffect } from 'react';
-
 import { globalStyles } from '@src/config/theme/styles/global.styles';
 import { colors } from '@src/config/theme/colors/colors';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
-
-import { IonIcon } from '@src/shared/components/IonIcon';
 import { SmallButton } from '@src/shared/components/SmallButton';
-
 import { RokuTVItem } from '../components/RokuTVItem';
 import { useRokuScanner } from '../hooks/useRokuScanner';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types';
-import { fetchSelectedRokuApps } from '../services/roku-device-info.service';
+import { fetchActiveRokuApp, fetchSelectedRokuApps } from '../services/roku-device-info.service';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import Animated from 'react-native-reanimated';
-import { fakeApps } from '@src/data.fake';
+import { defaultApps } from '@src/default-apps';
 import { SectionHeader } from '@src/shared/components/SectionHeader';
+import { NoRokuDevice } from '../components/NoRokuDevice';
+import { ActiveApp } from '../interfaces/active-app.interface';
 
 export function TVScanner() {
     const { bottom, top } = useSafeBarsArea();
     const { devices, scanning, scan } = useRokuScanner();
 
     const setRokuDevice = useRokuSessionStore(s => s.selectDevice);
+    const setActiveApp = useRokuSessionStore(s => s.setActiveApp);
     const setApps = useRokuSessionStore(s => s.setApps);
     const clearSession = useRokuSessionStore(s => s.clearSession);
     const selectedDevice = useRokuSessionStore(s => s.selectedDevice);
 
     useEffect(() => {
         scan();
-        /**
-         * * Temporal set
-         */
-        setApps(fakeApps);
     }, []);
 
     const setSelectedRoku = async (rokuDevice: RokuDeviceInfo) => {
         if (selectedDevice?.modelName === rokuDevice.modelName) return;
         setApps([]);
-        const rokuApps = await fetchSelectedRokuApps(rokuDevice.ip);
-        console.log({rokuApps});
         setRokuDevice(rokuDevice);
-        setApps(rokuApps && rokuApps.length ? rokuApps : fakeApps);
+
+        const activeApp = await fetchActiveRokuApp(rokuDevice.ip);
+        const rokuApps = await fetchSelectedRokuApps(rokuDevice.ip);
+        
+        setActiveApp(activeApp ?? {} as ActiveApp);
+        setApps(rokuApps && rokuApps.length ? rokuApps : defaultApps);
     }
 
     return (
@@ -102,7 +100,6 @@ export function TVScanner() {
                     disabled={scanning}
                 />
             } />
-
             <FlatList
                 contentContainerStyle={{
                     paddingBottom: bottom
@@ -121,26 +118,16 @@ export function TVScanner() {
                 )}
                 ListEmptyComponent={
                     !scanning ? (
-                        <View style={styles.empty}>
-                            <IonIcon
-                                name='tv-outline'
-                                size={48}
-                                color={withOpacityHex(colors.dark.base, 0.4)}
-                            />
-                            <Text style={styles.emptyTitle}>
-                                No se encontró ningún Roku
-                            </Text>
-                            <Text style={styles.emptySubtitle}>
-                                Verifica que tu celular y tu TV estén en la misma red Wi-Fi
-                            </Text>
-
-                            <SmallButton
-                                label='Volver a buscar'
-                                iconName='refresh'
-                                variant='outline'
-                                onPress={scan}
-                            />
-                        </View>
+                        <NoRokuDevice
+                            title='No se encontró ningún Roku'
+                            subtitle='Verifica que tu celular y tu TV estén en la misma red Wi-Fi'
+                            actionButton={{
+                                label: 'Volver a buscar',
+                                iconName: 'refresh',
+                                variant: 'outline',
+                                onPress: scan
+                            }}
+                        />
                     ) : null
                 }
             />
@@ -156,20 +143,5 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: withOpacityHex(colors.accent.purple.dark, 0.5),
         marginBottom: spacing.md,
-    },
-    empty: {
-        alignItems: 'center',
-        marginTop: 96,
-        paddingHorizontal: spacing.lg,
-    },
-    emptyTitle: {
-        marginTop: spacing.sm,
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    emptySubtitle: {
-        marginVertical: spacing.sm,
-        textAlign: 'center',
-        color: withOpacityHex(colors.dark.base, 0.55),
-    },
+    }
 });

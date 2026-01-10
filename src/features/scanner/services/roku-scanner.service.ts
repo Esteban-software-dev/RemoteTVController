@@ -41,7 +41,6 @@ export async function scanAndFetchRokus() {
                 const info = await fetchRokuDeviceInfo(device.ip);
 
                 setDevice({
-                    ip: device.ip,
                     ...info,
                 });
             } catch {

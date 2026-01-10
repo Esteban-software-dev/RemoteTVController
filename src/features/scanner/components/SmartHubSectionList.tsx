@@ -3,7 +3,7 @@ import {
     StyleSheet,
     View,
 } from 'react-native';
-import React, { useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 
 import { AppItem } from '../components/AppItem';
 import { spacing } from '@src/config/theme/tokens';
@@ -12,25 +12,55 @@ import { SmartHubSectionType } from '../interfaces/section.types';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import { getAppIcon, launchRokuApp } from '../services/roku-apps.service';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
+import { fetchActiveRokuApp } from '../services/roku-device-info.service';
+import { RokuApp } from '../interfaces/roku-app.interface';
 
+export const MemoAppItem = memo(AppItem);
 interface SmartHubSectionListProps {
     sections: SmartHubSectionType[];
 }
 export function SmartHubSectionList({ sections }: SmartHubSectionListProps) {
     const { top, bottom } = useSafeBarsArea();
-    const { selectedDevice } = useRokuSessionStore();
+    const { selectedDevice, setActiveApp } = useRokuSessionStore();
 
     const formattedSections = useMemo(() => {
         return sections.map(section => ({
             ...section,
             data: section.data.reduce<any[]>((rows, item, index) => {
             if (index % 2 === 0) rows.push([item]);
-            else rows[rows.length - 1].push(item);
-            return rows;
+                else rows[rows.length - 1].push(item);
+                return rows;
             }, []),
         }));
     }, [sections]);
 
+    const launchApp = async (appId: string) => {
+        if (!selectedDevice?.ip) return;
+        await launchRokuApp(selectedDevice.ip, appId);
+        const activeApp = await fetchActiveRokuApp(selectedDevice.ip);
+        if (activeApp) setActiveApp(activeApp);
+    }
+
+    const renderItem = useCallback(
+        ({ item }: {item: RokuApp[]}) => (
+            <View style={styles.row}>
+                {item.map((app: any) => (
+                    <MemoAppItem
+                        key={app.id}
+                        appId={app.id}
+                        name={app.name}
+                        iconUrl={
+                        selectedDevice?.ip
+                            ? getAppIcon(selectedDevice.ip, app.id)
+                            : ''
+                        }
+                        onPress={() => launchApp(app.id)}
+                    />
+                ))}
+            </View>
+        ),
+        [selectedDevice?.ip]
+    );
     return (
         <SectionList
             sections={formattedSections}
@@ -38,6 +68,10 @@ export function SmartHubSectionList({ sections }: SmartHubSectionListProps) {
             contentContainerStyle={{ paddingBottom: bottom }}
             showsVerticalScrollIndicator={false}
             scrollEventThrottle={16}
+            removeClippedSubviews
+            initialNumToRender={6}
+            maxToRenderPerBatch={8}
+            windowSize={7}
             viewabilityConfig={{ itemVisiblePercentThreshold: 20 }}
             renderSectionHeader={({ section }) => {
                 const isFirst = sections[0]?.type === section.type;
@@ -53,26 +87,7 @@ export function SmartHubSectionList({ sections }: SmartHubSectionListProps) {
                     />
                 )
             }}
-            renderItem={({ item }) => (
-                <View style={styles.row}>
-                    {item.map((app: any) => (
-                        <AppItem
-                            key={app.id}
-                            appId={app.id}
-                            name={app.name}
-                            iconUrl={
-                            selectedDevice?.ip
-                                ? getAppIcon(selectedDevice.ip, app.id)
-                                : ''
-                            }
-                            onPress={() => {
-                                if (!selectedDevice?.ip) return;
-                                launchRokuApp(selectedDevice.ip, app.id);
-                            }}
-                        />
-                    ))}
-                </View>
-            )}
+            renderItem={renderItem}
         />
     );
 }
