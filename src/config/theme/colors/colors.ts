@@ -8,6 +8,10 @@ export const colors = {
     white: {
         base: '#FFFFFF'
     },
+    danger: '#ff453a',
+    green: {
+        base: '#4D6D4F'
+    },
     gradient: {
         1: '#38298B',
         2: '#9E36CE',

@@ -14,6 +14,7 @@ import { getAppIcon, launchRokuApp } from '../services/roku-apps.service';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { fetchActiveRokuApp } from '../services/roku-device-info.service';
 import { RokuApp } from '../interfaces/roku-app.interface';
+import { useContextMenu } from '@src/shared/context/ContextMenu';
 
 export const MemoAppItem = memo(AppItem);
 interface SmartHubSectionListProps {
@@ -21,6 +22,7 @@ interface SmartHubSectionListProps {
 }
 export function SmartHubSectionList({ sections }: SmartHubSectionListProps) {
     const { top, bottom } = useSafeBarsArea();
+    const { open } = useContextMenu();
     const { selectedDevice, setActiveApp } = useRokuSessionStore();
 
     const formattedSections = useMemo(() => {
@@ -41,6 +43,45 @@ export function SmartHubSectionList({ sections }: SmartHubSectionListProps) {
         if (activeApp) setActiveApp(activeApp);
     }
 
+    const openAppContextMenu = (app: RokuApp) => {
+        open({
+            payload: app,
+            renderTarget: () => (
+                <AppItem
+                    appId={app.id}
+                    name={app.name}
+                    iconUrl={
+                        selectedDevice?.ip
+                            ? getAppIcon(selectedDevice.ip, app.id)
+                            : ''
+                    }
+                    selected={true}
+                />
+            ),
+            actions: [
+                {
+                    key: 'highlight',
+                    label: 'Destacar',
+                    icon: 'star',
+                    onPress: app => console.log('highlight', app),
+                },
+                {
+                    key: 'pin',
+                    label: 'Pinnear',
+                    icon: 'pin',
+                    onPress: app => console.log('pin', app),
+                },
+                {
+                    key: 'hide',
+                    label: 'Ocultar',
+                    icon: 'eye-off',
+                    destructive: true,
+                    onPress: app => console.log('hide', app),
+                },
+            ],
+        });
+    }
+
     const renderItem = useCallback(
         ({ item }: {item: RokuApp[]}) => (
             <View style={styles.row}>
@@ -54,13 +95,17 @@ export function SmartHubSectionList({ sections }: SmartHubSectionListProps) {
                             ? getAppIcon(selectedDevice.ip, app.id)
                             : ''
                         }
-                        onPress={() => launchApp(app.id)}
+                        onPress={launchApp}
+                        onLongPress={() => {
+                            openAppContextMenu(app);
+                        }}
                     />
                 ))}
             </View>
         ),
         [selectedDevice?.ip]
     );
+
     return (
         <SectionList
             sections={formattedSections}

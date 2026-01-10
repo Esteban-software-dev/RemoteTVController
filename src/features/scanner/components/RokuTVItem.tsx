@@ -19,11 +19,7 @@ import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types';
 import { GradientCard } from '@src/shared/components/GradientCard';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { radius, spacing } from '@src/config/theme/tokens';
-
-const GREEN_BASE = '#4D6D4F';
-const GREEN_18 = 'rgba(77, 109, 79, 0.18)';
-const DARK_35 = 'rgba(0, 0, 0, 0.35)';
-const DARK_60 = 'rgba(0, 0, 0, 0.6)';
+import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 
 interface TVDeviceItemProps extends RokuDeviceInfo {
     index?: number;
@@ -52,6 +48,7 @@ export function RokuTVItem({
 }: TVDeviceItemProps) {
     const scale = useSharedValue(1);
     const selectedAnim = useSharedValue(selected ? 1 : 0);
+    const activeDeviceBG = withOpacityHex(colors.green.base, .18)
 
     useEffect(() => {
         selectedAnim.value = withTiming(selected ? 1 : 0, {
@@ -69,7 +66,7 @@ export function RokuTVItem({
         borderColor: interpolateColor(
             selectedAnim.value,
             [0, 1],
-            ['transparent', GREEN_BASE]
+            ['transparent', colors.green.base]
         ),
         opacity: disabled ? 0.45 : 1,
     }));
@@ -78,12 +75,12 @@ export function RokuTVItem({
         backgroundColor: interpolateColor(
             selectedAnim.value,
             [0, 1],
-            [colors.white.base, GREEN_18]
+            [colors.white.base, activeDeviceBG]
         ),
         borderColor: interpolateColor(
             selectedAnim.value,
             [0, 1],
-            [colors.dark.base, GREEN_BASE]
+            [colors.dark.base, colors.green.base]
         )
     }));
 
@@ -116,7 +113,7 @@ export function RokuTVItem({
                                 <IonIcon
                                     name="tv"
                                     size={18}
-                                    color={selected ? GREEN_BASE : colors.dark.base}
+                                    color={selected ? colors.green.base : colors.dark.base}
                                 />
                             </Animated.View>
 
@@ -140,7 +137,7 @@ export function RokuTVItem({
                                 <IonIcon
                                     name="chevron-forward"
                                     size={18}
-                                    color={DARK_35}
+                                    color={withOpacityHex(colors.dark.base, .35)}
                                 />
                             )}
                         </Pressable>
@@ -177,6 +174,6 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 12,
         marginTop: 2,
-        color: DARK_60,
+        color: withOpacityHex(colors.dark.base, .6),
     },
 })

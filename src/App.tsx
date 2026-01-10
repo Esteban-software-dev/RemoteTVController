@@ -8,6 +8,7 @@ import { EXPANDED_HEIGHT } from './navigation/constants/appbarDimensions.constan
 import { AppBarLayoutContext } from './navigation/context/AppbarLayoutContext';
 import { DrawerNavigator } from './navigation/navigators/DrawerNavigator';
 import { AppBar } from './navigation/components/Appbar';
+import { ContextMenuProvider } from './shared/context/ContextMenu';
 
 function App() {
   const [height, setHeight] = useState(EXPANDED_HEIGHT);
@@ -16,13 +17,15 @@ function App() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <AppBarLayoutContext.Provider value={{ height, setHeight }}>
-          <AppBar />
-          <DrawerNavigator />
-        </AppBarLayoutContext.Provider>
-      </NavigationContainer>
+      <ContextMenuProvider>
+        <NavigationContainer>
+          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+          <AppBarLayoutContext.Provider value={{ height, setHeight }}>
+            <AppBar />
+            <DrawerNavigator />
+          </AppBarLayoutContext.Provider>
+        </NavigationContainer>
+      </ContextMenuProvider>
     </SafeAreaProvider>
   );
 }

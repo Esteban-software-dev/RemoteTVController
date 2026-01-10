@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native'
+import { View, Text, StyleSheet, Pressable, Image, GestureResponderEvent } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Gradient } from '@src/shared/components/Gradient';
 import { radius, spacing } from '@src/config/theme/tokens';
@@ -8,6 +8,9 @@ import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
 import { getAppGradient } from '@src/config/theme/utils/gradient-generator';
+import { useContextMenu } from '@src/shared/context/ContextMenu';
+import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
+import { getAppIcon } from '../services/roku-apps.service';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 interface RokuAppItemProps {
@@ -18,6 +21,7 @@ interface RokuAppItemProps {
     selected?: boolean;
     disabled?: boolean;
     onPress?: (appId: string) => void;
+    onLongPress?: ({}: {e: GestureResponderEvent, appId: string}) => void;
 }
 
 export function AppItem({
@@ -27,8 +31,11 @@ export function AppItem({
     iconUrl,
     index,
     onPress,
-    selected
+    onLongPress,
+    selected,
 }: RokuAppItemProps) {
+  const { open } = useContextMenu();
+  const { selectedDevice } = useRokuSessionStore();
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
   const gradientConfig = getAppGradient(appId);
@@ -39,6 +46,48 @@ export function AppItem({
     opacity: opacity.value,
   }));
 
+  const openAppContextMenu = () => {
+    const app = {
+      id: appId,
+      name,
+      icon: selectedDevice?.ip ? getAppIcon(selectedDevice.ip, appId) : '',
+    };
+
+    open({
+      payload: app,
+      renderTarget: () => (
+        <AppItem
+          appId={app.id}
+          name={app.name}
+          iconUrl={app.icon}
+          selected
+        />
+      ),
+      actions: [
+        {
+          key: 'highlight',
+          label: 'Destacar',
+          icon: 'star',
+          onPress: app => console.log('highlight', app),
+        },
+        {
+          key: 'pin',
+          label: 'Pinnear',
+          icon: 'pin',
+          onPress: app => console.log('pin', app),
+        },
+        {
+          key: 'hide',
+          label: 'Ocultar',
+          icon: 'eye-off',
+          destructive: true,
+          onPress: app => console.log('hide', app),
+        },
+      ],
+    });
+  
+  }
+
   useEffect(() => {
     opacity.value = withTiming(disabled ? 0.6 : 1, { duration: 180 });
   }, [disabled]);
@@ -46,13 +95,24 @@ export function AppItem({
   return (
     <AnimatedPressable
     key={index}
+    pointerEvents={selected ? 'none' : 'auto'}
     onPressIn={(e) => {
+      if (selected) return;
       scale.value = withTiming(0.96, { duration: 90 });
     }}
     onPressOut={() => {
-        scale.value = withTiming(1, { duration: 120 });
+      if (selected) return;
+      scale.value = withTiming(1, { duration: 120 });
     }}
-    onPress={() => onPress?.(appId)}
+    onPress={() => {
+      if (selected) return;
+      onPress?.(appId);
+    }}
+    onLongPress={(e: GestureResponderEvent) => {
+      scale.value = withTiming(1, { duration: 120 });
+      onLongPress?.({e, appId})
+    }}
+    delayLongPress={500}
     style={[globalStyles.shadow, styles.container, animatedStyle]}>
       <Gradient
         colors={gradientConfig.colors}
@@ -61,14 +121,14 @@ export function AppItem({
       />
       
       <SmallButton
-        stopPropagation={true}
-        size='sm'
-        iconName='ellipsis-vertical'
-        containerStyle={styles.moreButton}
-        color={colors.white.base}
-        variant='ghost'
-        hitSlop={8}
-        onPress={() => console.log("options")} />
+      stopPropagation={true}
+      size='sm'
+      iconName='ellipsis-vertical'
+      containerStyle={styles.moreButton}
+      color={colors.white.base}
+      variant='ghost'
+      hitSlop={8}
+      onPress={openAppContextMenu} />
         <View style={styles.iconZone}>
           {!iconUrl || hasError ? (
             <FallbackIcon name={name} />
