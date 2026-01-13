@@ -1,6 +1,5 @@
-import { component_colors } from "../colors/colors";
+import { component_colors } from '../colors/colors';
 
-// ui/tokens/shadows.ts
 export const shadows = {
     soft: {
         shadowColor: component_colors.shadow,
