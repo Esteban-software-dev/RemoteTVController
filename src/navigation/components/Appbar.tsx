@@ -109,7 +109,6 @@ export function AppBar() {
         fetchActiveRokuApp(selectedDevice.ip)
             .then((response) => {
                 if (!response) return;
-                console.log({response});
                 setActiveApp(response);
             })
             .catch((error) => {

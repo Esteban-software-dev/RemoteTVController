@@ -182,7 +182,7 @@ export function MenuItemButton({
           <IonIcon
             name={icon}
             size={18}
-            color={destructive ? colors.danger : colors.white.base}
+            color={destructive ? colors.state.danger : colors.white.base}
           />
         )}
 
@@ -214,6 +214,6 @@ const menuItemButtonStyles = StyleSheet.create({
     color: colors.white.base,
   },
   destructiveText: {
-    color: colors.danger,
+    color: colors.state.danger,
   },
 });
