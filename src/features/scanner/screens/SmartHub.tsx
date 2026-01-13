@@ -8,34 +8,37 @@ import { defaultApps } from '@src/default-apps';
 import { NoRokuDevice } from '../components/NoRokuDevice';
 import { colors } from '@src/config/theme/colors/colors';
 import { useBottomtabNavigation } from '@src/navigation/hooks/useBottomtabNavigation';
+import { useAppCustomizationStore } from '@src/store/roku/app-customization.store';
+import { buildAppsSections } from '../helpers/build-apps-section';
+
 
 export function SmartHub() {
     const { navigation } = useBottomtabNavigation();
     const { apps, setApps } = useRokuSessionStore();
     const { selectedDevice } = useRokuSessionStore();
-    const sections: SmartHubSectionType[] = [
-        {
-            type: 'favorites',
-            data: apps && apps.length ? [apps[4], apps[2], apps[6]] : [],
-            title: 'Tus favoritos',
-            subtitle: 'Apps marcadas como favoritas',
-            iconName: 'heart',
-            scrollType: 'horizontal'
-        },
-        {
-            type: 'apps',
-            data: apps ?? [],
-            title: 'Aplicaciones',
-            subtitle: 'Todas las apps disponibles en este dispositivo',
-            iconName: 'apps',
-        }
-    ];
+    const deviceId = useRokuSessionStore(s => s.selectedDevice?.deviceId);
+    const config = useAppCustomizationStore(s => deviceId ? s.byDevice[deviceId] : null);
+
+    const sections: SmartHubSectionType[] = React.useMemo(() => {
+        return [
+            {
+                type: 'favorites',
+                data: config?.favorites ?? [],
+                title: 'Tus favoritos',
+                subtitle: 'Apps marcadas como favoritas',
+                iconName: 'heart',
+                scrollType: 'horizontal',
+            },
+            ...buildAppsSections(apps ?? []),
+        ];
+    }, [deviceId, config, apps]);
 
     useEffect(() => {
         if (!selectedDevice) return;
         if (apps && apps.length > 0) return;
+
         setApps(defaultApps);
-    }, []);
+    }, [selectedDevice]);
 
     if (!apps || !apps.length) {
         return (

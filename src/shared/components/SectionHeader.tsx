@@ -40,18 +40,16 @@ export function SectionHeader({
 }: SectionHeaderProps) {
     return (
         <View style={[styles.header, containerStyle]}>
-            <View style={{flexDirection: 'row'}}>
+            <View style={styles.left}>
                 {iconName && (
-                    <View style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        margin: spacing.sm,
-                    }}>
-                        <IonIcon name={iconName} size={18} />
+                    <View style={styles.iconWrap}>
+                        <IonIcon name={iconName} size={18} color={colors.gradient[2]} />
                     </View>
                 )}
-                <View>
+
+                <View style={styles.textBlock}>
                     <Text style={[styles.title, titleStyle]}>{title}</Text>
+
                     {subtitle && (
                         typeof subtitle === 'string' ? (
                             <Text style={[styles.subtitle, subtitleStyle]}>{subtitle}</Text>
@@ -62,16 +60,14 @@ export function SectionHeader({
                 </View>
             </View>
 
-            {actionButton ? (
-                actionButton
-            ) : (
+            {actionButton ? actionButton : (
                 buttonLabel && onButtonPress && (
-                <SmallButton
-                    label={buttonLabel}
-                    variant={buttonVariant}
-                    color={buttonColor}
-                    onPress={onButtonPress}
-                />
+                    <SmallButton
+                        label={buttonLabel}
+                        variant={buttonVariant}
+                        color={buttonColor}
+                        onPress={onButtonPress}
+                    />
                 )
             )}
         </View>
@@ -80,18 +76,40 @@ export function SectionHeader({
 
 const styles = StyleSheet.create({
     header: {
-        marginBottom: spacing.md,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        marginBottom: spacing.md,
+        paddingBottom: spacing.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: withOpacityHex(colors.dark.base, 0.08),
+    },
+    left: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
+        flex: 1,
+    },
+    iconWrap: {
+        width: 34,
+        height: 34,
+        borderRadius: 12,
+        backgroundColor: withOpacityHex(colors.gradient[2], 0.15),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    textBlock: {
+        flexShrink: 1,
     },
     title: {
         fontSize: 18,
         fontWeight: '700',
+        color: colors.dark.base,
     },
     subtitle: {
+        marginTop: 2,
         fontSize: 13,
-        color: withOpacityHex(colors.dark.base, 0.6),
+        color: withOpacityHex(colors.dark.base, 0.55),
     },
     subtitleRow: {
         flexDirection: 'row',

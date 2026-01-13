@@ -112,7 +112,7 @@ export function TVScanner() {
                             {...item}
                             selected={selectedDevice?.ip === item.ip}
                             disabled={scanning}
-                            onPress={setSelectedRoku}
+                            onPress={() => setSelectedRoku(item)}
                         />
                     </View>
                 )}
