@@ -4,6 +4,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  interpolate,
 } from 'react-native-reanimated';
 
 import { IonIcon } from '@src/shared/components/IonIcon';
@@ -21,6 +22,7 @@ export type ContextMenuAction<T = any> = {
   key: string;
   label: string;
   icon?: IoniconsIconName;
+  disabled?: boolean;
   destructive?: boolean;
   onPress: (payload: T) => void;
 };
@@ -102,6 +104,7 @@ export function ContextMenuComponent<T>({
             <MenuItemButton
               key={action.key}
               label={action.label}
+              disabled={action.disabled}
               destructive={action.destructive}
               icon={action.icon}
               onPress={() => {
@@ -148,6 +151,7 @@ interface MenuItemButtonProps {
   label: string;
   icon?: IoniconsIconName;
   destructive?: boolean;
+  disabled?: boolean;
   onPress: () => void;
 }
 
@@ -155,15 +159,35 @@ export function MenuItemButton({
   label,
   icon,
   destructive,
+  disabled,
   onPress,
 }: MenuItemButtonProps) {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
+  const disabledProgress = useSharedValue(disabled ? 1 : 0);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
+  useEffect(() => {
+    disabledProgress.value = withTiming(disabled ? 1 : 0, { duration: 180 });
+  }, [disabled]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const disabledOpacity = interpolate(
+      disabledProgress.value,
+      [0, 1],
+      [1, 0.45]
+    );
+  
+    const disabledScale = interpolate(
+      disabledProgress.value,
+      [0, 1],
+      [1, 0.97]
+    );
+
+    return {
+      transform: [{ scale: scale.value * disabledScale }],
+      opacity: opacity.value * disabledOpacity,
+    };
+  });
 
   return (
     <AnimatedPressable
@@ -176,6 +200,7 @@ export function MenuItemButton({
       scale.value = withTiming(1, { duration: 120 });
       opacity.value = withTiming(1, { duration: 120 });
     }}
+    disabled={disabled}
     style={[menuItemButtonStyles.container, animatedStyle]}>
       <View style={menuItemButtonStyles.content}>
         {icon && (

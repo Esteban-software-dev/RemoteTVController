@@ -30,7 +30,6 @@ export function useRokuAppMenu() {
                 <AppItem
                     appId={app.id}
                     name={app.name}
-                    iconUrl={selectedDevice.ip ? getAppIconCached(selectedDevice.deviceId, app.id, selectedDevice.ip) : ''}
                     selected
                 />
             ),
@@ -45,6 +44,7 @@ export function useRokuAppMenu() {
                     key: 'pin',
                     label: isPinned ? 'Desanclar app' : 'Anclar app',
                     icon: isPinned ? 'pin' : 'pin-outline',
+                    disabled: !isPinned && deviceConfig.pinned.length >= 5,
                     onPress: () => rokuPreferencesService.togglePinned(deviceId, app),
                 },
                 {

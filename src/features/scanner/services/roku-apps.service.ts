@@ -20,11 +20,6 @@ export async function launchRokuApp(ip: string, appId: string): Promise<void> {
     } catch (error) {}
 }
 
-export function getAppIcon(ip: string, appId: string): string {
-    if (!ip || !appId) return '';
-
-    return `${ROKU_API.BASE_URL(ip)}${ROKU_API.QUERY.ICON(appId)}`;
-}
 export function getAppIconCached(
     deviceId: string,
     appId: string,

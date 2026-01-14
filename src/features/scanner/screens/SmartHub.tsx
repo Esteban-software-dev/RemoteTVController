@@ -10,14 +10,24 @@ import { colors } from '@src/config/theme/colors/colors';
 import { useBottomtabNavigation } from '@src/navigation/hooks/useBottomtabNavigation';
 import { useAppCustomizationStore } from '@src/store/roku/app-customization.store';
 import { buildAppsSections } from '../helpers/build-apps-section';
+import { PinnedFabMenu } from '../components/PinnedAppsBar';
+import { launchRokuApp } from '../services/roku-apps.service';
+import { fetchActiveRokuApp } from '../services/roku-device-info.service';
+import { ActiveApp } from '../interfaces/active-app.interface';
 
 
 export function SmartHub() {
     const { navigation } = useBottomtabNavigation();
     const { apps, setApps } = useRokuSessionStore();
-    const { selectedDevice } = useRokuSessionStore();
+    const { selectedDevice, setActiveApp } = useRokuSessionStore();
     const deviceId = useRokuSessionStore(s => s.selectedDevice?.deviceId);
     const config = useAppCustomizationStore(s => deviceId ? s.byDevice[deviceId] : null);
+
+    const onAppPress = async (deviceIp: string, appId: string) => {
+        await launchRokuApp(deviceIp, appId)
+        const launchedApp = await fetchActiveRokuApp(deviceIp);
+        setActiveApp(launchedApp ?? {} as ActiveApp);
+    }
 
     const sections: SmartHubSectionType[] = React.useMemo(() => {
         return [
@@ -60,6 +70,7 @@ export function SmartHub() {
     return (
         <View style={[globalStyles.container, globalStyles.horizontalAppPadding]}>
             <SmartHubSectionList sections={sections} />
+            <PinnedFabMenu apps={config?.pinned ?? []} onPress={(app) => onAppPress(selectedDevice?.ip ?? '', app.id)} />
         </View>
     )
 }
