@@ -14,6 +14,7 @@ import { PinnedFabMenu } from '../components/PinnedAppsBar';
 import { launchRokuApp } from '../services/roku-apps.service';
 import { fetchActiveRokuApp } from '../services/roku-device-info.service';
 import { ActiveApp } from '../interfaces/active-app.interface';
+import { AppBackground } from '@src/shared/components/AppBackground';
 
 
 export function SmartHub() {
@@ -69,6 +70,7 @@ export function SmartHub() {
 
     return (
         <View style={[globalStyles.container, globalStyles.horizontalAppPadding]}>
+            <AppBackground />
             <SmartHubSectionList sections={sections} />
             <PinnedFabMenu apps={config?.pinned ?? []} onPress={(app) => onAppPress(selectedDevice?.ip ?? '', app.id)} />
         </View>
