@@ -3,10 +3,16 @@ export const colors = {
         background: '#0B0D12',
         surface: '#131621',
         surface2: '#1A1E2C',
-        border: 'rgba(255,255,255,0.06)',
-        base: '#1D1D1D', // legacy
-    },
 
+        surface3: '#141519',
+        surfaceItem: '#1C1D22',
+        surfaceInset: '#0F1013',
+
+        border: 'rgba(255,255,255,0.06)',
+        borderStrong: '#2A2A33',
+
+        base: '#1D1D1D',
+    },
     bone: {
         base: '#FAFAFA',
         soft: '#F3F4F6',
@@ -66,6 +72,11 @@ export const colors = {
         base: '#4D6D4F',
         soft: 'rgba(77,109,79,0.2)',
     },
+    effects: {
+        glowPurple: 'rgba(139,92,246,0.25)',
+        glowPurpleDark: '#2A1240',
+    }
+    
 } as const;
 
 export const component_colors = {

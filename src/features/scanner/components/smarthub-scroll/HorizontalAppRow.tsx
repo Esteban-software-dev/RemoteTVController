@@ -1,6 +1,6 @@
 import { memo, useCallback } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { getAppIconCached, launchRokuApp } from '../../services/roku-apps.service';
+import { launchRokuApp } from '../../services/roku-apps.service';
 import { RokuApp } from '../../interfaces/roku-app.interface';
 import { useRokuAppMenu } from '../../hooks/useRokuAppMenu';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
@@ -9,14 +9,22 @@ import { IonIcon } from '@src/shared/components/IonIcon';
 import { colors } from '@src/config/theme/colors/colors';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
+import { fetchActiveRokuApp } from '../../services/roku-device-info.service';
+import { ActiveApp } from '../../interfaces/active-app.interface';
 
 interface HorizontalAppsRowProps {
     apps: RokuApp[];
     deviceIp: string;
 }
 export const HorizontalAppsRow = memo(({ apps, deviceIp }: HorizontalAppsRowProps) => {
-    const selectedDevice = useRokuSessionStore(s => s.selectedDevice);
+    const { selectedDevice, setActiveApp } = useRokuSessionStore();
     const { openMenu } = useRokuAppMenu();
+
+    const onAppPress = async (deviceIp: string, appId: string) => {
+        await launchRokuApp(deviceIp, appId)
+        const launchedApp = await fetchActiveRokuApp(deviceIp);
+        setActiveApp(launchedApp ?? {} as ActiveApp);
+    }
 
     const renderItem = useCallback(
         ({ item }: { item: RokuApp }) => (
@@ -24,12 +32,7 @@ export const HorizontalAppsRow = memo(({ apps, deviceIp }: HorizontalAppsRowProp
                 <AppItem
                     name={item.name}
                     appId={item.id}
-                    iconUrl={getAppIconCached(
-                        selectedDevice?.deviceId ?? '',
-                        item.id,
-                        selectedDevice?.ip
-                    )}
-                    onPress={() => launchRokuApp(deviceIp, item.id)}
+                    onPress={() => onAppPress(deviceIp, item.id)}
                     onLongPress={() => openMenu(item)}
                     onMenuPress={() => openMenu(item)}
                 />
