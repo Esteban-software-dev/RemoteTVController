@@ -41,6 +41,7 @@ export const colors = {
             soft: 'rgba(45,212,191,0.15)',
             base: '#2DD4BF',
             strong: '#14B8A6',
+            glow: '#4DFF9A',
         },
         pink: {
             soft: 'rgba(244,114,182,0.15)',
