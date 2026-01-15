@@ -22,6 +22,7 @@ import { defaultApps } from '@src/default-apps';
 import { SectionHeader } from '@src/shared/components/SectionHeader';
 import { NoRokuDevice } from '../components/NoRokuDevice';
 import { ActiveApp } from '../interfaces/active-app.interface';
+import { AppBackground } from '@src/shared/components/AppBackground';
 
 export function TVScanner() {
     const { bottom, top } = useSafeBarsArea();
@@ -53,6 +54,7 @@ export function TVScanner() {
         <Animated.View style={[globalStyles.container, globalStyles.horizontalAppPadding, {
             paddingTop: top,
         }]}>
+            <AppBackground />
             {selectedDevice && (
                 <View style={styles.connectedCard}>
                     <SectionHeader
@@ -112,7 +114,7 @@ export function TVScanner() {
                             {...item}
                             selected={selectedDevice?.ip === item.ip}
                             disabled={scanning}
-                            onPress={setSelectedRoku}
+                            onPress={() => setSelectedRoku(item)}
                         />
                     </View>
                 )}

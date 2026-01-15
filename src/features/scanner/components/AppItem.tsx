@@ -8,19 +8,17 @@ import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
 import { getAppGradient } from '@src/config/theme/utils/gradient-generator';
-import { useContextMenu } from '@src/shared/context/ContextMenu';
-import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
-import { getAppIcon } from '../services/roku-apps.service';
+import { AppIcon } from './AppIcon';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 interface RokuAppItemProps {
     appId: string;
     name: string;
-    iconUrl?: string;
     index?: number;
     selected?: boolean;
     disabled?: boolean;
     onPress?: (appId: string) => void;
+    onMenuPress?: () => void;
     onLongPress?: ({}: {e: GestureResponderEvent, appId: string}) => void;
 }
 
@@ -28,65 +26,20 @@ export function AppItem({
     appId,
     name,
     disabled,
-    iconUrl,
     index,
     onPress,
+    onMenuPress,
     onLongPress,
     selected,
 }: RokuAppItemProps) {
-  const { open } = useContextMenu();
-  const { selectedDevice } = useRokuSessionStore();
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
   const gradientConfig = getAppGradient(appId);
 
-  const [hasError, setHasError] = useState(false);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     opacity: opacity.value,
   }));
-
-  const openAppContextMenu = () => {
-    const app = {
-      id: appId,
-      name,
-      icon: selectedDevice?.ip ? getAppIcon(selectedDevice.ip, appId) : '',
-    };
-
-    open({
-      payload: app,
-      renderTarget: () => (
-        <AppItem
-          appId={app.id}
-          name={app.name}
-          iconUrl={app.icon}
-          selected
-        />
-      ),
-      actions: [
-        {
-          key: 'highlight',
-          label: 'Destacar',
-          icon: 'star',
-          onPress: app => console.log('highlight', app),
-        },
-        {
-          key: 'pin',
-          label: 'Pinnear',
-          icon: 'pin',
-          onPress: app => console.log('pin', app),
-        },
-        {
-          key: 'hide',
-          label: 'Ocultar',
-          icon: 'eye-off',
-          destructive: true,
-          onPress: app => console.log('hide', app),
-        },
-      ],
-    });
-  
-  }
 
   useEffect(() => {
     opacity.value = withTiming(disabled ? 0.6 : 1, { duration: 180 });
@@ -128,17 +81,13 @@ export function AppItem({
       color={colors.white.base}
       variant='ghost'
       hitSlop={8}
-      onPress={openAppContextMenu} />
+      onPress={onMenuPress} />
         <View style={styles.iconZone}>
-          {!iconUrl || hasError ? (
-            <FallbackIcon name={name} />
-          ) : (
-            <Image
-              style={styles.appIcon}
-              source={{ uri: iconUrl }}
-              onError={() => setHasError(true)}
-            />
-          )}
+          <AppIcon
+            name={name}
+            appId={appId}
+            style={styles.appIcon}
+          />
         </View>
 
       <View style={styles.textZone}>
@@ -197,34 +146,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-});
-
-interface FallbackIconProps {
-  name: string;
-}
-function FallbackIcon({
-  name
-}: FallbackIconProps) {
-  return (
-    <View style={fallbackStyles.fallback}>
-      <Text style={fallbackStyles.letter}>
-        {name.charAt(0).toUpperCase()}
-      </Text>
-    </View>
-  )
-}
-
-const fallbackStyles = StyleSheet.create({
-  fallback: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  letter: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: colors.white.base,
-  },
-  
 });

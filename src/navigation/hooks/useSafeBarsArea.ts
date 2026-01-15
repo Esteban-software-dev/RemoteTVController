@@ -8,7 +8,7 @@ export function useSafeBarsArea() {
 
     return {
         top: appBarHeight,
-        bottom: tabBarHeight + spacing.xs,
+        bottom: tabBarHeight + spacing.sm,
         total: appBarHeight + tabBarHeight,
     };
 }

@@ -1,4 +1,5 @@
 import { ROKU_API } from '@src/shared/constants/roku-endpoints.const';
+const iconCache = new Map<string, string>();
 
 export async function powerRokuDevice(ip: string) {
     try {
@@ -19,8 +20,21 @@ export async function launchRokuApp(ip: string, appId: string): Promise<void> {
     } catch (error) {}
 }
 
-export function getAppIcon(ip: string, appId: string): string {
-    if (!ip || !appId) return '';
+export function getAppIconCached(
+    deviceId: string,
+    appId: string,
+    ip?: string
+) {
+    const key = `${deviceId}:${appId}`;
 
-    return `${ROKU_API.BASE_URL(ip)}${ROKU_API.QUERY.ICON(appId)}`;
+    if (iconCache.has(key)) {
+        return iconCache.get(key)!;
+    }
+
+    if (!ip) return '';
+
+    const url = `http://${ip}:8060/query/icon/${appId}`;
+
+    iconCache.set(key, url);
+    return url;
 }
