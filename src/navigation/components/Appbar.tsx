@@ -24,6 +24,7 @@ import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { RokuDeviceActionButton } from './RokuDeviceActionButton';
 import { powerRokuDevice } from '@src/features/scanner/services/roku-apps.service';
 import { fetchActiveRokuApp } from '@src/features/scanner/services/roku-device-info.service';
+import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -350,24 +351,24 @@ export function AppBar() {
                                 <Pressable
                                 onPress={() => {
                                     collapseAppbar();
-                                    navigation.dispatch(DrawerActions.openDrawer());
+                                    navigation.dispatch(DrawerActions.toggleDrawer());
                                 }}
                                 style={({ pressed }) => [
-                                    styles.icon,
+                                    styles.menuButton,
                                     pressed && {
                                         transform: [{ scale: 0.95 }],
                                     }
                                 ]}>
-                                    <IonIcon name='menu' size={20} />
+                                    <IonIcon name='menu' size={20} color={colors.accent.purple.dark} />
                                 </Pressable>
                                 <View style={{ marginLeft: spacing.sm, flex: 1 }}>
                                         <Text style={{ fontWeight: '600', fontSize: 14 }}>
                                             Hola, Esteban
                                         </Text>
                                         <View style={{ flexDirection: 'row', marginTop: spacing.xs }}>
-                                            {renderMiniAction('search')}
+                                            {renderMiniAction('mic')}
                                             <View style={{ width: spacing.sm }} />
-                                            {renderMiniAction('qr-code')}
+                                            {renderMiniAction('search')}
                                             <View style={{ marginLeft: 'auto' }}>
                                                 {renderMiniAction('settings')}
                                             </View>
@@ -440,7 +441,7 @@ export function AppBar() {
     );
 }
 
-const renderMiniAction = (icon: string) => (
+const renderMiniAction = (icon: IoniconsIconName) => (
     <Pressable
         onPress={() => console.log(icon)}
         style={({ pressed }) => [
@@ -450,9 +451,9 @@ const renderMiniAction = (icon: string) => (
             },
         ]}>
             <IonIcon
-                name={icon as any}
-                size={14}
-                color={withOpacityHex(colors.dark.base, 0.85)}
+                name={icon}
+                size={15}
+                color={colors.accent.gray.text}
             />
     </Pressable>
 );
@@ -477,6 +478,16 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 6 },
         elevation: shadows.soft.elevation,
         overflow: 'hidden',
+    },
+    menuButton: {
+        width: 36,
+        height: 36,
+        borderRadius: radius.sm,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.accent.purple.soft,
+        borderWidth: 1,
+        borderColor: withOpacityHex(colors.accent.purple.base, .8),
     },
     icon: {
         width: 36,
@@ -519,10 +530,10 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
-    
-        backgroundColor: withOpacityHex('#E5E5E5', .5),
+
+        backgroundColor: colors.accent.gray.base,
         borderWidth: 1,
-        borderColor: withOpacityHex(colors.dark.base, 0.06),
+        borderColor: withOpacityHex(colors.accent.gray.icon, .3),
     },
     collapsedContent: {
         flex: 1,
