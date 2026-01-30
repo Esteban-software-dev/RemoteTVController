@@ -81,9 +81,37 @@ This improves navigation and reduces UI friction.
 | App Customization | Favorites, pinned and hidden apps |
 | Device Control | Power and app launch actions |
 
-```text
-/screenshots
-  ├── device-discovery.png
-  ├── apps-list.png
-  ├── app-customization.png
-  └── device-control.png
+---
+
+### 🎬 Basic Animation
+*Collapsed & expanded AppBar basic animation.*
+
+https://github.com/user-attachments/assets/a616502b-128c-4250-a3ca-315194c4425f
+
+---
+
+### 🎬 AppBar State
+*Animated AppBar border with a rotating effect.*
+
+https://github.com/user-attachments/assets/012098fe-de67-40d9-a5fe-74a5f52e9947
+
+---
+
+### 🎬 Pure TabBar Animation
+*Styled TabBar animation aligned with the AppBar design.*
+
+https://github.com/user-attachments/assets/48c89d12-0815-401c-a66e-0a4499e6d8f8
+
+---
+
+### 📡 Roku Scanner
+*Wi-Fi network scanning UI that detects Roku devices and displays them in a list via the TV Scanner tab.*
+
+https://github.com/user-attachments/assets/2a985294-b7d1-4099-9da4-94002e83e8c6
+
+---
+
+### ⭐ Pin & Favorite Apps + Background Style
+*Final UI iteration showing installed apps grouped into Favorites, Entertainment, and Device Settings, including pinning and filtering.*
+
+https://github.com/user-attachments/assets/a34a3084-7841-4f1a-aed0-f26b2c73c862
