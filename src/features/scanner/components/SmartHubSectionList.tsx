@@ -8,6 +8,7 @@ import { SectionHeader } from '@src/shared/components/SectionHeader';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import { spacing } from '@src/config/theme/tokens';
 import { RokuApp } from '../interfaces/roku-app.interface';
+import { filterHiddenApps } from '../services/roku-preferences.service';
 
 interface SmartHubSectionListProps {
     sections: SmartHubSectionType[];
@@ -31,7 +32,7 @@ export const SmartHubSectionList = memo(({ sections }: SmartHubSectionListProps)
             if (section.type === 'favorites') {
                 return (
                     <HorizontalAppsRow
-                        apps={item}
+                        apps={filterHiddenApps(selectedDevice?.deviceId ?? '', item)}
                         deviceIp={selectedDevice?.ip ?? ''}
                     />
                 );
@@ -40,7 +41,7 @@ export const SmartHubSectionList = memo(({ sections }: SmartHubSectionListProps)
             if (section.type === 'apps') {
                 return (
                     <GridApps
-                        apps={item}
+                        apps={filterHiddenApps(selectedDevice?.deviceId ?? '', item)}
                         deviceIp={selectedDevice?.ip ?? ''}
                     />
                 );

@@ -15,6 +15,7 @@ import { launchRokuApp } from '../services/roku-apps.service';
 import { fetchActiveRokuApp } from '../services/roku-device-info.service';
 import { ActiveApp } from '../interfaces/active-app.interface';
 import { AppBackground } from '@src/shared/components/AppBackground';
+import { filterHiddenApps } from '../services/roku-preferences.service';
 
 
 export function SmartHub() {
@@ -34,7 +35,7 @@ export function SmartHub() {
         return [
             {
                 type: 'favorites',
-                data: config?.favorites ?? [],
+                data: filterHiddenApps(deviceId ?? '', config?.favorites ?? []),
                 title: 'Tus favoritos',
                 subtitle: 'Apps marcadas como favoritas',
                 iconName: 'heart',
@@ -72,7 +73,7 @@ export function SmartHub() {
         <View style={[globalStyles.container, globalStyles.horizontalAppPadding]}>
             <AppBackground />
             <SmartHubSectionList sections={sections} />
-            <PinnedFabMenu apps={config?.pinned ?? []} onPress={(app) => onAppPress(selectedDevice?.ip ?? '', app.id)} />
+            <PinnedFabMenu apps={filterHiddenApps(deviceId ?? '', config?.pinned ?? [])} onPress={(app) => onAppPress(selectedDevice?.ip ?? '', app.id)} />
         </View>
     )
 }

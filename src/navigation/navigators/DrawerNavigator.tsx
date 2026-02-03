@@ -1,12 +1,12 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { BottomTabsNavigator } from './BottomTabNavigator';
 import { SideMenu } from '../components/SideMenu';
-import { HidenApps } from '@src/features/scanner/screens/HidenApps';
+import { HiddenApps } from '@src/features/scanner/screens/HiddenApps';
 import { IonIcon } from '@src/shared/components/IonIcon';
 
 export type RootDrawerParamList = {
     Home: undefined;
-    "Hiden apps": undefined;
+    "Hidden apps": undefined;
 };
 const Drawer = createDrawerNavigator();
 export function DrawerNavigator() {
@@ -33,8 +33,8 @@ export function DrawerNavigator() {
                 }}
             />
             <Drawer.Screen
-                name="Hiden apps"
-                component={HidenApps}
+                name="Hidden apps"
+                component={HiddenApps}
                 options={{
                     title: 'Aplicaciones ocultas',
                     drawerIcon: ({color, size}) => <IonIcon name={'eye-off'} color={color} size={size} /> 
