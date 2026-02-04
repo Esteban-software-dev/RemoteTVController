@@ -1,7 +1,22 @@
+import { emptyListResources } from '@src/features/scanner/i18n/components.i18n';
 import { hiddenAppsResources } from '@src/features/scanner/i18n/hidden-apps.i18n';
+import { smartHubResources } from '@src/features/scanner/i18n/smarthub.i18n';
 
 export const resources = {
-    ...hiddenAppsResources,
+    es: {
+        translation: {
+            ...hiddenAppsResources.es.translation,
+            ...smartHubResources.es.translation,
+            ... emptyListResources.es.translation,
+        },
+    },
+    en: {
+        translation: {
+            ...hiddenAppsResources.en.translation,
+            ...smartHubResources.en.translation,
+            ... emptyListResources.en.translation,
+        },
+    },
 } as const;
 
 export type AppLanguages = keyof typeof resources;
