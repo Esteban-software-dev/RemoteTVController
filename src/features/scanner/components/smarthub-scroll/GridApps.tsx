@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { RokuApp } from '../../interfaces/roku-app.interface';
 import { AppItem } from '../AppItem';
 import { launchRokuApp } from '../../services/roku-apps.service';
@@ -9,6 +9,7 @@ import { colors } from '@src/config/theme/colors/colors';
 import { fetchActiveRokuApp } from '../../services/roku-device-info.service';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { ActiveApp } from '../../interfaces/active-app.interface';
+import { EmptyList } from '../EmptyList';
 
 interface GridAppsProps {
     apps: RokuApp[];
@@ -48,6 +49,14 @@ export const GridApps = memo(({ apps, deviceIp }: GridAppsProps) => {
             columnWrapperStyle={styles.row}
             style={styles.container}
 
+            ListEmptyComponent={
+                <View style={{ paddingVertical: spacing.lg }}>
+                    <EmptyList
+                        title="Sin apps disponibles"
+                        subtitle="Conecta un Roku para ver sus aplicaciones"
+                    />
+                </View>
+            }
             initialNumToRender={6}
             maxToRenderPerBatch={6}
             windowSize={5}
