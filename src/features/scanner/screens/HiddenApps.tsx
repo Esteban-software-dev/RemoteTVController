@@ -55,7 +55,7 @@ export function HiddenApps() {
                     <View style={{ marginBottom: spacing.md }}>
                         <SectionHeader
                             title='Apps ocultas'
-                            subtitle={`Estas aplicaciones no aparecen en la vista principal - ` + config?.hidden.length +  ' apps ocultas.'}
+                            subtitle={`Estas aplicaciones no aparecen en la vista principal.`}
                         />
                         <CollapsibleSearchBar value={query} onChange={setQuery} />
                     </View>
