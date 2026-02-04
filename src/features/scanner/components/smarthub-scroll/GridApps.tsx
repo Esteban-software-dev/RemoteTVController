@@ -9,7 +9,7 @@ import { colors } from '@src/config/theme/colors/colors';
 import { fetchActiveRokuApp } from '../../services/roku-device-info.service';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { ActiveApp } from '../../interfaces/active-app.interface';
-import { EmptyVerticalList } from '../EmptyList';
+import { EmptyList } from '../EmptyList';
 
 interface GridAppsProps {
     apps: RokuApp[];
@@ -51,7 +51,7 @@ export const GridApps = memo(({ apps, deviceIp }: GridAppsProps) => {
 
             ListEmptyComponent={
                 <View style={{ paddingVertical: spacing.lg }}>
-                    <EmptyVerticalList
+                    <EmptyList
                         title="Sin apps disponibles"
                         subtitle="Conecta un Roku para ver sus aplicaciones"
                     />

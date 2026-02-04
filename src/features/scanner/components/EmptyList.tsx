@@ -7,17 +7,17 @@ import { IonIcon } from '@src/shared/components/IonIcon';
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 
-interface EmptyVerticalListProps {
+interface EmptyListProps {
     title?: string;
     subtitle?: string;
     iconName?: IoniconsIconName;
 }
 
-export function EmptyVerticalList({
+export function EmptyList({
     title = 'No hay aplicaciones',
     subtitle = 'Cuando agregues apps, aparecerán aquí',
     iconName = 'apps-outline',
-}: EmptyVerticalListProps) {
+}: EmptyListProps) {
     return (
         <View style={styles.container}>
             <View style={styles.iconWrapper}>

@@ -15,6 +15,9 @@ import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { useAppCustomizationStore } from '@src/store/roku/app-customization.store';
 import { ActionItem } from '../components/HiddenAppItem';
 import { AppIcon } from '../components/AppIcon';
+import { useEffect, useMemo, useState } from 'react';
+import { CollapsibleSearchBar } from '@src/shared/components/CollapsibleSearchBar';
+import { EmptyList } from '../components/EmptyList';
 
 export function HiddenApps() {
     const { appBarHeight } = useAppBarPadding();
@@ -22,6 +25,19 @@ export function HiddenApps() {
     const deviceId = useRokuSessionStore(s => s.selectedDevice?.deviceId);
     const config = useAppCustomizationStore(s => deviceId ? s.byDevice[deviceId] : null);
     const showApp = useAppCustomizationStore(s => s.showApp);
+
+    const [query, setQuery] = useState<string>('');
+
+    useEffect(() => {
+        console.log({hidden: config?.hidden});
+    });
+
+    const filteredHidden = useMemo(() => {
+        const list = config?.hidden ?? [];
+        const q = query.trim().toLowerCase();
+        if (!q) return list;
+        return list.filter(item => item.name.toLowerCase().includes(q));
+    }, [config?.hidden, query]);
 
     return (
         <View
@@ -31,21 +47,26 @@ export function HiddenApps() {
         ]}>
             <AppBackground />
             <FlatList
-                ListHeaderComponent={
-                    <SectionHeader
-                        title='Apps ocultas'
-                        subtitle='Estas aplicaciones no aparecen en la vista principal'
-                    />
-                }
-                data={config?.hidden ?? []}
-                keyExtractor={item => item.id}
                 contentContainerStyle={{
+                    paddingTop: appBarHeight,
+                    paddingBottom: spacing.md,
                 }}
-                renderItem={({ item }) => (
+                ListHeaderComponent={
+                    <View style={{ marginBottom: spacing.md }}>
+                        <SectionHeader
+                            title='Apps ocultas'
+                            subtitle={`Estas aplicaciones no aparecen en la vista principal - ` + config?.hidden.length +  ' apps ocultas.'}
+                        />
+                        <CollapsibleSearchBar value={query} onChange={setQuery} />
+                    </View>
+                }
+                data={filteredHidden}
+                keyExtractor={item => item.id}
+                renderItem={({ item, index }) => (
                     <View style={styles.appItemWrapper}>
                         <ActionItem
                             id={item.id}
-                            title={item.name}
+                            title={`${index + 1}. ${item.name}`}
                             subtitle="Hidden app"
                             icon={
                                 <AppIcon
@@ -60,16 +81,10 @@ export function HiddenApps() {
                     </View>
                 )}
                 ListEmptyComponent={
-                    <View style={styles.emptyState}>
-                        <Text style={styles.emptyTitle}>
-                            No hidden apps
-                        </Text>
-                        <Text style={styles.emptySubtitle}>
-                            Apps you hide will appear here.
-                        </Text>
+                    <View style={globalStyles.emptyContainer}>
+                        <EmptyList />
                     </View>
                 }
-                style={{ paddingTop: appBarHeight }}
             />
         </View>
     );
@@ -78,25 +93,5 @@ export function HiddenApps() {
 const styles = StyleSheet.create({
     appItemWrapper: {
         marginVertical: spacing.xs,
-    },
-    emptyState: {
-        marginTop: spacing.xl,
-        padding: spacing.lg,
-        borderRadius: radius.md,
-        backgroundColor: withOpacityHex(colors.dark.base, 0.04),
-        borderWidth: 1,
-        borderColor: withOpacityHex(colors.dark.base, 0.08),
-        alignItems: 'center',
-    },
-    emptyTitle: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.dark.base,
-        marginBottom: 4,
-    },
-    emptySubtitle: {
-        fontSize: 13,
-        color: withOpacityHex(colors.dark.base, 0.6),
-        textAlign: 'center',
     },
 });

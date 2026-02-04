@@ -11,7 +11,8 @@ import { radius, spacing } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { fetchActiveRokuApp } from '../../services/roku-device-info.service';
 import { ActiveApp } from '../../interfaces/active-app.interface';
-import { EmptyVerticalList } from '../EmptyList';
+import { EmptyList } from '../EmptyList';
+import { globalStyles } from '@src/config/theme/styles/global.styles';
 
 interface HorizontalAppsRowProps {
     apps: RokuApp[];
@@ -44,8 +45,8 @@ export const HorizontalAppsRow = memo(({ apps, deviceIp }: HorizontalAppsRowProp
 
     if (!apps.length) {
         return (
-            <View style={styles.emptyContainer}>
-                <EmptyVerticalList />
+            <View style={globalStyles.emptyContainer}>
+                <EmptyList />
             </View>
         );
     }
@@ -86,13 +87,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.sm,
         paddingVertical: spacing.sm,
         borderRadius: radius.lg,
-    },
-    emptyContainer: {
-        borderRadius: radius.lg,
-        backgroundColor: colors.dark.surface,
-        borderWidth: 1,
-        borderColor: withOpacityHex(colors.accent.purple.base, 0.25),
-        padding: spacing.lg,
-    },
+    }
 });
 
