@@ -2,6 +2,7 @@ import { emptyListResources } from '@src/features/scanner/i18n/components.i18n';
 import { hiddenAppsResources } from '@src/features/scanner/i18n/hidden-apps.i18n';
 import { smartHubResources } from '@src/features/scanner/i18n/smarthub.i18n';
 import { tvScannerResources } from '@src/features/scanner/i18n/tv-scanner.i18n';
+import { navigatorResources } from '@src/navigation/i18n/navigator.i18n';
 
 export const resources = {
     es: {
@@ -10,6 +11,7 @@ export const resources = {
             ...smartHubResources.es.translation,
             ... emptyListResources.es.translation,
             ... tvScannerResources.es.translation,
+            ... navigatorResources.es.translation,
         },
     },
     en: {
@@ -18,6 +20,7 @@ export const resources = {
             ...smartHubResources.en.translation,
             ... emptyListResources.en.translation,
             ... tvScannerResources.en.translation,
+            ... navigatorResources.en.translation,
         },
     },
 } as const;

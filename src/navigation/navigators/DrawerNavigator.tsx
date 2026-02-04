@@ -3,17 +3,24 @@ import { BottomTabsNavigator } from './BottomTabNavigator';
 import { SideMenu } from '../components/SideMenu';
 import { HiddenApps } from '@src/features/scanner/screens/HiddenApps';
 import { IonIcon } from '@src/shared/components/IonIcon';
+import { useTranslation } from 'react-i18next';
 
 export type RootDrawerParamList = {
     Home: undefined;
-    "Hidden apps": undefined;
+    HiddenApps: undefined;
 };
+
 const Drawer = createDrawerNavigator();
+
 export function DrawerNavigator() {
+    const { t } = useTranslation();
+
     return (
         <Drawer.Navigator
         drawerContent={(props) => <SideMenu {...props} />}
         screenOptions={{
+            drawerStatusBarAnimation: 'fade',
+            
             headerShown: false,
             drawerType: 'front',
             drawerStyle: {
@@ -28,16 +35,20 @@ export function DrawerNavigator() {
                 name="Home"
                 component={BottomTabsNavigator}
                 options={{
-                    title: 'Inicio',
-                    drawerIcon: ({color, size}) => <IonIcon name={'home'} color={color} size={size} />
+                    title: t('drawer.home.title'),
+                    drawerIcon: ({ color, size }) => (
+                        <IonIcon name="home" color={color} size={size} />
+                    ),
                 }}
             />
             <Drawer.Screen
-                name="Hidden apps"
+                name="HiddenApps"
                 component={HiddenApps}
                 options={{
-                    title: 'Aplicaciones ocultas',
-                    drawerIcon: ({color, size}) => <IonIcon name={'eye-off'} color={color} size={size} /> 
+                    title: t('drawer.hiddenApps.title'),
+                    drawerIcon: ({ color, size }) => (
+                        <IonIcon name="eye-off" color={color} size={size} />
+                    ),
                 }}
             />
         </Drawer.Navigator>

@@ -18,21 +18,30 @@ import { getDisplayName, getModelInfo, getNetwork } from '../helpers/roku-inform
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { globalStyles } from '../../config/theme/styles/global.styles';
 import { RouteItem } from './RouteItem';
+import { useTranslation } from 'react-i18next';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function SideMenu({ navigation, state, descriptors }: DrawerContentComponentProps) {
+export function SideMenu({
+    navigation,
+    state,
+    descriptors,
+}: DrawerContentComponentProps) {
+    const { t } = useTranslation();
     const { selectedDevice } = useRokuSessionStore();
+
     const progress = useDrawerProgress();
     const blurOpacity = useSharedValue(0);
 
     useAnimatedReaction(
         () => progress.value,
         (value, prev) => {
-            if (value > 0 && (prev &&prev < 1)) {
-                if (value === 1)  blurOpacity.value = withTiming(1, { duration: 500 });
+            if (value > 0 && prev && prev < 1) {
+                if (value === 1) {
+                    blurOpacity.value = withTiming(1, { duration: 500 });
+                }
             }
-            if ((value < 1) && (prev && prev > 0)) {
+            if (value < 1 && prev && prev > 0) {
                 blurOpacity.value = withTiming(0, { duration: 50 });
             }
         }
@@ -43,47 +52,62 @@ export function SideMenu({ navigation, state, descriptors }: DrawerContentCompon
     }));
 
     const animatedContainer = useAnimatedStyle(() => ({
-        transform: [{
-            scale: interpolate(progress.value, [0, 1], [1.3, 1])
-        }]
+        transform: [
+            {
+                scale: interpolate(progress.value, [0, 1], [1.3, 1]),
+            },
+        ],
     }));
 
     return (
-        <View style={[StyleSheet.absoluteFill, {flex: 1, justifyContent: 'center'}]}>
+        <View style={[StyleSheet.absoluteFill, { flex: 1, justifyContent: 'center' }]}>
             <AnimatedPressable
-            style={[StyleSheet.absoluteFill, blurStyle]}
-            onPress={() => {
-                navigation.closeDrawer();
-                blurOpacity.value = withTiming(0, { duration: 50 });
-            }}>
+                style={[StyleSheet.absoluteFill, blurStyle]}
+                onPress={() => {
+                    navigation.closeDrawer();
+                    blurOpacity.value = withTiming(0, { duration: 50 });
+                }}
+            >
                 <BlurBackground blurAmount={3} blurType="light" />
             </AnimatedPressable>
 
             <Animated.View style={[styles.root, animatedContainer]}>
                 <View style={styles.panel}>
-                    {/* contenido */}
                     <View style={styles.content}>
                         {/* Device Header */}
                         <View style={styles.deviceHeader}>
-                            <View style={[styles.deviceDot, {
-                                        backgroundColor: selectedDevice ? colors.accent.teal.glow : colors.state.warning,
-                                        shadowColor: selectedDevice ? colors.accent.teal.glow : colors.state.warning,
+                            <View
+                                style={[
+                                    styles.deviceDot,
+                                    {
+                                        backgroundColor: selectedDevice
+                                            ? colors.accent.teal.glow
+                                            : colors.state.warning,
+                                        shadowColor: selectedDevice
+                                            ? colors.accent.teal.glow
+                                            : colors.state.warning,
                                         shadowOpacity: 0.8,
                                         shadowRadius: 10,
-                            }]} />
+                                    },
+                                ]}
+                            />
+
                             <View>
                                 <Text numberOfLines={1} style={styles.deviceTitle}>
                                     {getDisplayName(selectedDevice)}
                                 </Text>
 
                                 <Text style={styles.deviceStatus}>
-                                {selectedDevice ? 'Conectado' : 'No conectado'}
-                                    {getModelInfo(selectedDevice) && ` · ${getModelInfo(selectedDevice)}`}
+                                    {selectedDevice
+                                        ? t('device.status.connected')
+                                        : t('device.status.disconnected')}
+                                    {getModelInfo(selectedDevice) &&
+                                        ` · ${getModelInfo(selectedDevice)}`}
                                 </Text>
 
                                 {getNetwork(selectedDevice) && (
                                     <Text style={styles.deviceMeta}>
-                                        Wi-Fi: {getNetwork(selectedDevice)}
+                                        {t('device.network.wifi')}: {getNetwork(selectedDevice)}
                                     </Text>
                                 )}
                             </View>
@@ -91,10 +115,15 @@ export function SideMenu({ navigation, state, descriptors }: DrawerContentCompon
 
                         {/* Primary Actions */}
                         <View style={styles.primaryActions}>
-                            <Text style={{
-                                fontSize: typography.size.sm,
-                                color: colors.text.inverted
-                            }}>Navegación</Text>
+                            <Text
+                                style={{
+                                    fontSize: typography.size.sm,
+                                    color: colors.text.inverted,
+                                }}
+                            >
+                                {t('drawer.section.navigation')}
+                            </Text>
+
                             {state.routes.map((route, index) => {
                                 const focused = state.index === index;
                                 const options = descriptors[route.key].options;
@@ -116,6 +145,7 @@ export function SideMenu({ navigation, state, descriptors }: DrawerContentCompon
         </View>
     );
 }
+
 const styles = StyleSheet.create({
     root: {
         justifyContent: 'center',

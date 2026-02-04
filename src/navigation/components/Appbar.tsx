@@ -25,6 +25,7 @@ import { RokuDeviceActionButton } from './RokuDeviceActionButton';
 import { powerRokuDevice } from '@src/features/scanner/services/roku-apps.service';
 import { fetchActiveRokuApp } from '@src/features/scanner/services/roku-device-info.service';
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
+import { t } from 'i18next';
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -363,7 +364,7 @@ export function AppBar() {
                                 </Pressable>
                                 <View style={{ marginLeft: spacing.sm, flex: 1 }}>
                                         <Text style={{ fontWeight: '600', fontSize: 14 }}>
-                                            Hola, Esteban
+                                            {t('appbar.greeting', { name: 'Esteban' })}
                                         </Text>
                                         <View style={{ flexDirection: 'row', marginTop: spacing.xs }}>
                                             {renderMiniAction('mic')}
