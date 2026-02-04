@@ -23,8 +23,10 @@ import { SectionHeader } from '@src/shared/components/SectionHeader';
 import { NoRokuDevice } from '../components/NoRokuDevice';
 import { ActiveApp } from '../interfaces/active-app.interface';
 import { AppBackground } from '@src/shared/components/AppBackground';
+import { useTranslation } from 'react-i18next';
 
 export function TVScanner() {
+    const { t } = useTranslation();
     const { bottom, top } = useSafeBarsArea();
     const { devices, scanning, scan } = useRokuScanner();
 
@@ -45,29 +47,39 @@ export function TVScanner() {
 
         const activeApp = await fetchActiveRokuApp(rokuDevice.ip);
         const rokuApps = await fetchSelectedRokuApps(rokuDevice.ip);
-        
-        setActiveApp(activeApp ?? {} as ActiveApp);
+        setActiveApp(activeApp ?? ({} as ActiveApp));
         setApps(rokuApps && rokuApps.length ? rokuApps : defaultApps);
-    }
+    };
+
+    const devicesSubtitle = scanning
+        ? t('tvScanner.devices.scanning')
+        : t('tvScanner.devices.found', {
+            count: devices.length,
+        });
 
     return (
-        <Animated.View style={[globalStyles.container, globalStyles.horizontalAppPadding, {
-            paddingTop: top,
-        }]}>
+        <Animated.View
+        style={[
+            globalStyles.container,
+            globalStyles.horizontalAppPadding,
+            { paddingTop: top },
+        ]}>
             <AppBackground />
             {selectedDevice && (
                 <View style={styles.connectedCard}>
                     <SectionHeader
-                    title='Dispositivo conectado'
-                    subtitle={'Listo para usarse'}
-                    actionButton={
-                        <SmallButton
-                            color={colors.gradient[3]}
-                            label='Desconectar'
-                            variant='outline'
-                            onPress={clearSession}
-                        />
-                    } />
+                        title={t('tvScanner.connected.title')}
+                        subtitle={t('tvScanner.connected.subtitle')}
+                        actionButton={
+                            <SmallButton
+                                color={colors.gradient[3]}
+                                label={t('tvScanner.connected.disconnect')}
+                                variant="outline"
+                                onPress={clearSession}
+                            />
+                        }
+                    />
+
                     <RokuTVItem
                         {...selectedDevice}
                         selected
@@ -77,35 +89,40 @@ export function TVScanner() {
             )}
 
             <SectionHeader
-            title='Dispositivos Roku'
-            subtitle={(
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    {scanning && (
-                        <ActivityIndicator
-                            size='small'
-                            color={withOpacityHex(colors.dark.base, 0.6)}
-                            style={{ marginRight: 6 }}
-                        />
-                    )}
-                    <Text style={{ fontSize: 13, color: withOpacityHex(colors.dark.base, 0.6) }}>
-                        {scanning ? 'Buscando en tu red local…' : `${devices.length} encontrados`}
-                    </Text>
-                </View>
-            )}
-            actionButton={
-                <SmallButton
-                    color={colors.gradient[2]}
-                    label='Escanear red'
-                    iconName='wifi'
-                    variant='filled'
-                    onPress={scan}
-                    disabled={scanning}
-                />
-            } />
+                title={t('tvScanner.devices.title')}
+                subtitle={
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        {scanning && (
+                            <ActivityIndicator
+                                size="small"
+                                color={withOpacityHex(colors.dark.base, 0.6)}
+                                style={{ marginRight: 6 }}
+                            />
+                        )}
+                        <Text
+                            style={{
+                                fontSize: 13,
+                                color: withOpacityHex(colors.dark.base, 0.6),
+                            }}
+                        >
+                            {devicesSubtitle}
+                        </Text>
+                    </View>
+                }
+                actionButton={
+                    <SmallButton
+                        color={colors.gradient[2]}
+                        label={t('tvScanner.devices.scanAction')}
+                        iconName="wifi"
+                        variant="filled"
+                        onPress={scan}
+                        disabled={scanning}
+                    />
+                }
+            />
+
             <FlatList
-                contentContainerStyle={{
-                    paddingBottom: bottom
-                }}
+                contentContainerStyle={{ paddingBottom: bottom }}
                 data={devices}
                 keyExtractor={(item: RokuDeviceInfo) => item.ip}
                 renderItem={({ item }) => (
@@ -121,13 +138,13 @@ export function TVScanner() {
                 ListEmptyComponent={
                     !scanning ? (
                         <NoRokuDevice
-                            title='No se encontró ningún Roku'
-                            subtitle='Verifica que tu celular y tu TV estén en la misma red Wi-Fi'
+                            title={t('tvScanner.empty.title')}
+                            subtitle={t('tvScanner.empty.subtitle')}
                             actionButton={{
-                                label: 'Volver a buscar',
+                                label: t('tvScanner.empty.retry'),
                                 iconName: 'refresh',
                                 variant: 'outline',
-                                onPress: scan
+                                onPress: scan,
                             }}
                         />
                     ) : null
@@ -145,5 +162,5 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: withOpacityHex(colors.accent.purple.dark, 0.5),
         marginBottom: spacing.md,
-    }
+    },
 });
