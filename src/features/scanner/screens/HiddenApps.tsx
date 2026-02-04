@@ -28,10 +28,6 @@ export function HiddenApps() {
 
     const [query, setQuery] = useState<string>('');
 
-    useEffect(() => {
-        console.log({hidden: config?.hidden});
-    });
-
     const filteredHidden = useMemo(() => {
         const list = config?.hidden ?? [];
         const q = query.trim().toLowerCase();
