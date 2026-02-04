@@ -115,3 +115,12 @@ https://github.com/user-attachments/assets/2a985294-b7d1-4099-9da4-94002e83e8c6
 *Final UI iteration showing installed apps grouped into Favorites, Entertainment, and Device Settings, including pinning and filtering.*
 
 https://github.com/user-attachments/assets/a34a3084-7841-4f1a-aed0-f26b2c73c862
+
+---
+
+🕶️ Hidden Apps
+Manage hidden Roku apps: search, preview, and restore them to the main view.
+
+https://github.com/user-attachments/assets/eef8ca60-ee1e-4d1e-9b87-74024f89721c
+
+---
