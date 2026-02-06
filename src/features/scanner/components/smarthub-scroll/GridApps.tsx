@@ -10,6 +10,7 @@ import { fetchActiveRokuApp } from '../../services/roku-device-info.service';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { ActiveApp } from '../../interfaces/active-app.interface';
 import { EmptyList } from '../EmptyList';
+import { t } from 'i18next';
 
 interface GridAppsProps {
     apps: RokuApp[];
@@ -52,8 +53,8 @@ export const GridApps = memo(({ apps, deviceIp }: GridAppsProps) => {
             ListEmptyComponent={
                 <View style={{ paddingVertical: spacing.lg }}>
                     <EmptyList
-                        title="Sin apps disponibles"
-                        subtitle="Conecta un Roku para ver sus aplicaciones"
+                        title={t('smartHub.emptyGrid.title')}
+                        subtitle={t('smartHub.emptyGrid.subtitle')}
                     />
                 </View>
             }

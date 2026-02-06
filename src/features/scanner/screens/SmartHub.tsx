@@ -16,34 +16,40 @@ import { fetchActiveRokuApp } from '../services/roku-device-info.service';
 import { ActiveApp } from '../interfaces/active-app.interface';
 import { AppBackground } from '@src/shared/components/AppBackground';
 import { filterHiddenApps } from '../services/roku-preferences.service';
+import { useTranslation } from 'react-i18next';
 
 
 export function SmartHub() {
+    const { t } = useTranslation();
+
     const { navigation } = useBottomtabNavigation();
     const { apps, setApps } = useRokuSessionStore();
     const { selectedDevice, setActiveApp } = useRokuSessionStore();
+
     const deviceId = useRokuSessionStore(s => s.selectedDevice?.deviceId);
-    const config = useAppCustomizationStore(s => deviceId ? s.byDevice[deviceId] : null);
+    const config = useAppCustomizationStore(s =>
+        deviceId ? s.byDevice[deviceId] : null,
+    );
 
     const onAppPress = async (deviceIp: string, appId: string) => {
-        await launchRokuApp(deviceIp, appId)
+        await launchRokuApp(deviceIp, appId);
         const launchedApp = await fetchActiveRokuApp(deviceIp);
-        setActiveApp(launchedApp ?? {} as ActiveApp);
-    }
+        setActiveApp(launchedApp ?? ({} as ActiveApp));
+    };
 
     const sections: SmartHubSectionType[] = React.useMemo(() => {
         return [
             {
                 type: 'favorites',
                 data: filterHiddenApps(deviceId ?? '', config?.favorites ?? []),
-                title: 'Tus favoritos',
-                subtitle: 'Apps marcadas como favoritas',
+                title: t('smartHub.sections.favorites.title'),
+                subtitle: t('smartHub.sections.favorites.subtitle'),
                 iconName: 'heart',
                 scrollType: 'horizontal',
             },
-            ...buildAppsSections(apps ?? []),
+            ...buildAppsSections(apps ?? [], t),
         ];
-    }, [deviceId, config, apps]);
+    }, [deviceId, config, apps, t]);
 
     useEffect(() => {
         if (!selectedDevice) return;
@@ -55,15 +61,15 @@ export function SmartHub() {
     if (!apps || !apps.length) {
         return (
             <NoRokuDevice
-                title='Selecciona un Roku para empezar'
-                subtitle='Conéctate a un dispositivo Roku para ver y abrir tus apps desde aquí.'
-                iconName='tv-outline'
+                title={t('smartHub.noDevice.title')}
+                subtitle={t('smartHub.noDevice.subtitle')}
+                iconName="tv-outline"
                 actionButton={{
-                    label: 'Buscar dispositivos Roku',
+                    label: t('smartHub.noDevice.action.label'),
                     iconName: 'search',
                     variant: 'outline',
                     color: colors.gradient[2],
-                    onPress: () => navigation.navigate('Tv scanner')
+                    onPress: () => navigation.navigate('Tv scanner'),
                 }}
             />
         );
@@ -73,7 +79,12 @@ export function SmartHub() {
         <View style={[globalStyles.container, globalStyles.horizontalAppPadding]}>
             <AppBackground />
             <SmartHubSectionList sections={sections} />
-            <PinnedFabMenu apps={filterHiddenApps(deviceId ?? '', config?.pinned ?? [])} onPress={(app) => onAppPress(selectedDevice?.ip ?? '', app.id)} />
+            <PinnedFabMenu
+                apps={filterHiddenApps(deviceId ?? '', config?.pinned ?? [])}
+                onPress={app =>
+                    onAppPress(selectedDevice?.ip ?? '', app.id)
+                }
+            />
         </View>
-    )
+    );
 }

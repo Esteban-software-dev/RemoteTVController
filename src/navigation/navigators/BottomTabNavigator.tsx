@@ -4,6 +4,7 @@ import { BottomTabBar } from '../components/BottomTabBar';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { SmartHub } from '@src/features/scanner/screens/SmartHub';
 import { TVScanner } from '@src/features/scanner/screens/TVScanner';
+import { useTranslation } from 'react-i18next';
 
 export type RootBottomtabs = {
     'Tv scanner': undefined;
@@ -13,6 +14,7 @@ export type RootBottomtabs = {
 const Tab = createBottomTabNavigator();
 
 export function BottomTabsNavigator() {
+    const { t } = useTranslation();
 
     return (
         <Tab.Navigator
@@ -25,6 +27,7 @@ export function BottomTabsNavigator() {
             <Tab.Screen
                 name="Smarthub"
                 options={{
+                    tabBarLabel: t('tabs.smartHub'),
                     tabBarIcon: ({ focused, size }) => {
                         return (
                             <IonIcon
@@ -40,6 +43,7 @@ export function BottomTabsNavigator() {
             <Tab.Screen
             name="Tv scanner"
             options={{
+                tabBarLabel: t('tabs.tvScanner'),
                 tabBarIcon: ({ focused, size }) => {
                     return (
                         <IonIcon
@@ -54,6 +58,7 @@ export function BottomTabsNavigator() {
             <Tab.Screen
             name="Profile"
             options={{
+                tabBarLabel: t('tabs.profile'),
                 tabBarIcon: ({ focused, size }) => {
                     return (
                         <IonIcon

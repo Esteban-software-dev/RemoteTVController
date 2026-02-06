@@ -9,6 +9,7 @@ import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import { spacing } from '@src/config/theme/tokens';
 import { RokuApp } from '../interfaces/roku-app.interface';
 import { filterHiddenApps } from '../services/roku-preferences.service';
+import { t } from 'i18next';
 
 interface SmartHubSectionListProps {
     sections: SmartHubSectionType[];
@@ -62,9 +63,12 @@ export const SmartHubSectionList = memo(({ sections }: SmartHubSectionListProps)
                     title={section.title ?? 'Apps'}
                     subtitle={
                         section.type === 'favorites'
-                            ? `${section.data[0].length} app${section.data[0].length === 1 ? '' : 's'} favorita${section.data[0].length === 1 ? '' : 's'}`
+                            ? t('smartHub.sections.favorites.count', {
+                                count: section.data[0].length,
+                            })
                             : section.subtitle
                     }
+
                     iconName={section.iconName}
                 />
             )}

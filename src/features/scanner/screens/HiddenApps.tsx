@@ -1,13 +1,10 @@
 import {
     FlatList,
     StyleSheet,
-    Text,
     View,
 } from 'react-native';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
-import { colors } from '@src/config/theme/colors/colors';
 import { radius, spacing } from '@src/config/theme/tokens';
-import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { AppBackground } from '@src/shared/components/AppBackground';
 import { SectionHeader } from '@src/shared/components/SectionHeader';
 import { useAppBarPadding } from '@src/navigation/hooks/useAppbarPadding';
@@ -15,22 +12,20 @@ import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { useAppCustomizationStore } from '@src/store/roku/app-customization.store';
 import { ActionItem } from '../components/HiddenAppItem';
 import { AppIcon } from '../components/AppIcon';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CollapsibleSearchBar } from '@src/shared/components/CollapsibleSearchBar';
 import { EmptyList } from '../components/EmptyList';
+import { useTranslation } from 'react-i18next';
 
 export function HiddenApps() {
     const { appBarHeight } = useAppBarPadding();
+    const { t } = useTranslation();
 
     const deviceId = useRokuSessionStore(s => s.selectedDevice?.deviceId);
     const config = useAppCustomizationStore(s => deviceId ? s.byDevice[deviceId] : null);
     const showApp = useAppCustomizationStore(s => s.showApp);
 
     const [query, setQuery] = useState<string>('');
-
-    useEffect(() => {
-        console.log({hidden: config?.hidden});
-    });
 
     const filteredHidden = useMemo(() => {
         const list = config?.hidden ?? [];
@@ -54,10 +49,15 @@ export function HiddenApps() {
                 ListHeaderComponent={
                     <View style={{ marginBottom: spacing.md }}>
                         <SectionHeader
-                            title='Apps ocultas'
-                            subtitle={`Estas aplicaciones no aparecen en la vista principal.`}
+                            title={t('hiddenApps.header.title')}
+                            subtitle={t('hiddenApps.header.subtitle')}
                         />
-                        <CollapsibleSearchBar value={query} onChange={setQuery} />
+                        <CollapsibleSearchBar
+                            value={query}
+                            onChange={setQuery}
+                            placeholder={t('hiddenApps.search.placeholder')}
+                            collapsedLabel={t('hiddenApps.search.collapsed')}
+                        />
                     </View>
                 }
                 data={filteredHidden}
@@ -67,7 +67,7 @@ export function HiddenApps() {
                         <ActionItem
                             id={item.id}
                             title={`${index + 1}. ${item.name}`}
-                            subtitle="Hidden app"
+                            subtitle={t('hiddenApps.list.itemSubtitle')}
                             icon={
                                 <AppIcon
                                     appId={item.id}
@@ -75,14 +75,17 @@ export function HiddenApps() {
                                     style={{ width: '90%', height: '90%', borderRadius: radius.sm }}
                                 />
                             }
-                            actionLabel="Restore"
+                            actionLabel={t('hiddenApps.list.restoreAction')}
                             onAction={() => showApp(deviceId ?? '', item.id)}
                         />
                     </View>
                 )}
                 ListEmptyComponent={
                     <View style={globalStyles.emptyContainer}>
-                        <EmptyList />
+                        <EmptyList
+                            title={t('hiddenApps.empty.title')}
+                            subtitle={t('hiddenApps.empty.description')}
+                        />
                     </View>
                 }
             />

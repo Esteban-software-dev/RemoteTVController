@@ -40,14 +40,20 @@ export function BottomTabBar({ state, navigation, descriptors }: BottomTabBarPro
 
             {state.routes.map((route, index) => {
                 const isFocused = state.index === index;
-                const { tabBarIcon } = descriptors[route.key].options;
+                const { options } = descriptors[route.key];
+                const label =
+                    typeof options.tabBarLabel === 'string'
+                        ? options.tabBarLabel
+                        : typeof options.title === 'string'
+                        ? options.title
+                        : route.name;
 
                 return (
                     <TabItem
                         key={route.key}
-                        label={route.name}
+                        label={label}
                         active={isFocused}
-                        icon={tabBarIcon}
+                        icon={options.tabBarIcon}
                         onPress={() => {
                             if (!isFocused) navigation.navigate(route.name);
                         }}
