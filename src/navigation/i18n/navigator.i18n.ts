@@ -21,6 +21,7 @@ export const navigatorResources = {
 
             appbar: {
                 greeting: '¡Hola, {{name}}!',
+                noDevice: 'Ningun dispositivo conectado ...',
             },
 
             device: {
@@ -57,6 +58,7 @@ export const navigatorResources = {
 
             appbar: {
                 greeting: 'Hello, {{name}}!',
+                noDevice: 'No device connected ...',
             },
 
             device: {

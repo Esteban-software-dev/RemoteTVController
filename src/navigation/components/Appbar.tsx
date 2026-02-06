@@ -422,7 +422,7 @@ export function AppBar() {
                                         </Animated.View>
                                     ) : (
                                         <Animated.Text style={[{ fontSize: 13, fontWeight: '500' }, collapsedTextStyle]}>
-                                            Ningún dispositivo conectado...
+                                            {t('appbar.noDevice')}
                                         </Animated.Text>
                                     )}
                                 </View>
