@@ -9,20 +9,39 @@ import { spacing } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import { useTranslation } from 'react-i18next';
+import { BottomSheet } from '@src/shared/components/BottomSheet';
+import { LanguageOption } from '../components/LanguageOption';
+import { AppLanguages } from '@src/config/i18n/resources';
+import { changeLanguage } from '@src/config/i18n/config';
 
 export function Settings() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { top, bottom } = useSafeBarsArea();
 
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const [soundsEnabled, setSoundsEnabled] = useState(true);
     const [hapticsEnabled, setHapticsEnabled] = useState(false);
     const [animationsEnabled, setAnimationsEnabled] = useState(true);
+    const [languageSheetVisible, setLanguageSheetVisible] = useState(false);
 
     const switchColors = useMemo(() => ({
         true: withOpacityHex(colors.accent.purple.base, 0.35),
         false: withOpacityHex(colors.dark.base, 0.1),
     }), []);
+
+    const currentLanguage: AppLanguages = i18n.language?.startsWith('es') ? 'es' : 'en';
+    const languageLabel = currentLanguage === 'es'
+        ? t('settings.languages.spanish')
+        : t('settings.languages.english');
+
+    const handleLanguageChange = async (lang: AppLanguages) => {
+        if (lang === currentLanguage) {
+            setLanguageSheetVisible(false);
+            return;
+        }
+        await changeLanguage(lang);
+        setLanguageSheetVisible(false);
+    };
 
     return (
         <View style={globalStyles.container}>
@@ -50,9 +69,10 @@ export function Settings() {
                     <SettingsItem
                         title={t('settings.account.language.title')}
                         subtitle={t('settings.account.language.subtitle')}
-                        valueText={t('settings.account.language.value')}
+                        valueText={languageLabel}
                         iconName="globe-outline"
                         accentColor={colors.accent.teal.base}
+                        onPress={() => setLanguageSheetVisible(true)}
                     />
                     <SettingsItem
                         title={t('settings.account.privacy.title')}
@@ -201,6 +221,28 @@ export function Settings() {
                     />
                 </SettingsSection>
             </ScrollView>
+
+            <BottomSheet
+            enablePanToClose={false}
+            snapPoints={[.3, .5, .9]}
+            visible={languageSheetVisible}
+            onClose={() => setLanguageSheetVisible(false)}
+            title={t('settings.languageSheet.title')}
+            subtitle={t('settings.languageSheet.subtitle')}
+            initialSnapIndex={0}>
+                <LanguageOption
+                    label={t('settings.languages.spanish')}
+                    subtitle={t('settings.languages.spanishSubtitle')}
+                    selected={currentLanguage === 'es'}
+                    onPress={() => handleLanguageChange('es')}
+                />
+                <LanguageOption
+                    label={t('settings.languages.english')}
+                    subtitle={t('settings.languages.englishSubtitle')}
+                    selected={currentLanguage === 'en'}
+                    onPress={() => handleLanguageChange('en')}
+                />
+            </BottomSheet>
         </View>
     )
 }

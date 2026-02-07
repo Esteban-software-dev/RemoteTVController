@@ -34,7 +34,6 @@ export const settingsResources = {
                     language: {
                         title: 'Idioma',
                         subtitle: 'Selecciona tu idioma',
-                        value: 'Espanol',
                     },
                     privacy: {
                         title: 'Privacidad',
@@ -96,6 +95,16 @@ export const settingsResources = {
                         value: '1.0.0',
                     },
                 },
+                languageSheet: {
+                    title: 'Idioma de la app',
+                    subtitle: 'Se aplica de inmediato',
+                },
+                languages: {
+                    spanish: 'Español',
+                    spanishSubtitle: 'Recomendado para tu region',
+                    english: 'English',
+                    englishSubtitle: 'International',
+                },
             },
         },
     },
@@ -134,7 +143,6 @@ export const settingsResources = {
                     language: {
                         title: 'Language',
                         subtitle: 'Select your language',
-                        value: 'English',
                     },
                     privacy: {
                         title: 'Privacy',
@@ -195,6 +203,16 @@ export const settingsResources = {
                         subtitle: 'App details',
                         value: '1.0.0',
                     },
+                },
+                languageSheet: {
+                    title: 'App language',
+                    subtitle: 'Applies immediately',
+                },
+                languages: {
+                    spanish: 'Español',
+                    spanishSubtitle: 'Recommended for your region',
+                    english: 'English',
+                    englishSubtitle: 'International',
                 },
             },
         },
