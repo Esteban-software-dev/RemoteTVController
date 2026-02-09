@@ -53,69 +53,15 @@ const SPRING = {
 };
 
 const TYPE_STYLES: Record<ToastType, { bg: string; border: string; icon: string; text: string; action: string }> = {
-    default: {
-        bg: colors.dark.surface,
-        border: '#2A2F3A',
-        icon: colors.white.base,
-        text: colors.white.base,
-        action: colors.accent.teal.base,
-    },
-    info: {
-        bg: '#3DC2FF',
-        border: '#1B8BD8',
-        icon: colors.white.base,
-        text: colors.white.base,
-        action: colors.white.base,
-    },
-    success: {
-        bg: '#2DD36F',
-        border: '#21b664',
-        icon: colors.white.base,
-        text: colors.white.base,
-        action: colors.white.base,
-    },
-    warning: {
-        bg: '#FFC409',
-        border: '#D3A307',
-        icon: colors.dark.base,
-        text: colors.dark.base,
-        action: colors.dark.base,
-    },
-    danger: {
-        bg: '#EB445A',
-        border: '#B93A4C',
-        icon: colors.white.base,
-        text: colors.white.base,
-        action: colors.white.base,
-    },
-    primary: {
-        bg: '#3880FF',
-        border: '#2E6EE6',
-        icon: colors.white.base,
-        text: colors.white.base,
-        action: colors.white.base,
-    },
-    dark: {
-        bg: '#222428',
-        border: '#111214',
-        icon: colors.white.base,
-        text: colors.white.base,
-        action: colors.accent.teal.base,
-    },
-    medium: {
-        bg: '#92949C',
-        border: '#7A7B80',
-        icon: colors.white.base,
-        text: colors.white.base,
-        action: colors.white.base,
-    },
-    light: {
-        bg: '#F4F5F8',
-        border: '#D7D8DA',
-        icon: colors.dark.base,
-        text: colors.dark.base,
-        action: colors.accent.purple.base,
-    },
+    default: colors.toast.default,
+    info: colors.toast.info,
+    success: colors.toast.success,
+    warning: colors.toast.warning,
+    danger: colors.toast.danger,
+    primary: colors.toast.primary,
+    dark: colors.toast.dark,
+    medium: colors.toast.medium,
+    light: colors.toast.light,
 };
 
 export function Toast({

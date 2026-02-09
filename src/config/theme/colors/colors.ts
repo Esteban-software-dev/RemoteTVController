@@ -76,7 +76,72 @@ export const colors = {
     effects: {
         glowPurple: 'rgba(139,92,246,0.25)',
         glowPurpleDark: '#2A1240',
-    }
+    },
+    toast: {
+        default: {
+            bg: '#131621',
+            border: '#2A2F3A',
+            icon: '#FFFFFF',
+            text: '#FFFFFF',
+            action: '#2DD4BF',
+        },
+        info: {
+            bg: '#3DC2FF',
+            border: '#1B8BD8',
+            icon: '#FFFFFF',
+            text: '#FFFFFF',
+            action: '#FFFFFF',
+        },
+        success: {
+            bg: '#2DD36F',
+            border: '#1EA85C',
+            icon: '#FFFFFF',
+            text: '#FFFFFF',
+            action: '#FFFFFF',
+        },
+        warning: {
+            bg: '#FFC409',
+            border: '#D3A307',
+            icon: '#1D1D1D',
+            text: '#1D1D1D',
+            action: '#1D1D1D',
+        },
+        danger: {
+            bg: '#EB445A',
+            border: '#B93A4C',
+            icon: '#FFFFFF',
+            text: '#FFFFFF',
+            action: '#FFFFFF',
+        },
+        primary: {
+            bg: '#3880FF',
+            border: '#2E6EE6',
+            icon: '#FFFFFF',
+            text: '#FFFFFF',
+            action: '#FFFFFF',
+        },
+        dark: {
+            bg: '#222428',
+            border: '#111214',
+            icon: '#FFFFFF',
+            text: '#FFFFFF',
+            action: '#2DD4BF',
+        },
+        medium: {
+            bg: '#92949C',
+            border: '#7A7B80',
+            icon: '#FFFFFF',
+            text: '#FFFFFF',
+            action: '#FFFFFF',
+        },
+        light: {
+            bg: '#F4F5F8',
+            border: '#D7D8DA',
+            icon: '#1D1D1D',
+            text: '#1D1D1D',
+            action: '#8B5CF6',
+        },
+    },
     
 } as const;
 
