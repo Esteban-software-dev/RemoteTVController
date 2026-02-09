@@ -29,7 +29,6 @@ export function DrawerNavigator() {
                 backgroundColor: 'transparent',
                 flex: 1
             },
-            overlayColor: 'transparent',
         }}>
             <Drawer.Screen
                 name="Home"
