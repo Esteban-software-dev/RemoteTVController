@@ -56,7 +56,7 @@ export function HiddenApps() {
                             value={query}
                             onChange={setQuery}
                             placeholder={t('hiddenApps.search.placeholder')}
-                            collapsedLabel={t('hiddenApps.search.collapsed')}
+                            collapsible
                         />
                     </View>
                 }

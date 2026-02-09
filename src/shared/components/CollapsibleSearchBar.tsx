@@ -15,7 +15,6 @@ import Animated, {
     Easing,
     runOnJS,
     interpolate,
-    interpolateColor,
 } from 'react-native-reanimated';
 
 import { radius, spacing } from '@src/config/theme/tokens';
@@ -29,6 +28,7 @@ interface CollapsibleSearchBarProps {
     placeholder?: string;
     collapsedLabel?: string;
     style?: ViewStyle;
+    collapsible?: boolean;
 }
 
 export const CollapsibleSearchBar = memo(({
@@ -36,16 +36,17 @@ export const CollapsibleSearchBar = memo(({
     onChange,
     onSubmit,
     placeholder = 'Ej. Netflix, YouTube...',
-    collapsedLabel = 'Buscar',
+    collapsedLabel,
     style,
+    collapsible = false,
 }: CollapsibleSearchBarProps) => {
-    const COLLAPSED_MIN_WIDTH = 120;
-    const [expanded, setExpanded] = useState(false);
+    const COLLAPSED_MIN_WIDTH = 140;
+    const [expanded, setExpanded] = useState(collapsible ? false : true);
     const [isFocused, setIsFocused] = useState(false);
     const [localValue, setLocalValue] = useState(value);
     const inputRef = useRef<TextInput>(null);
 
-    const isExpanded = expanded || isFocused || value.length > 0;
+    const isExpanded = collapsible ? (expanded || isFocused || value.length > 0) : true;
 
     const progress = useSharedValue(0);
     const containerWidth = useSharedValue(0);
@@ -59,16 +60,20 @@ export const CollapsibleSearchBar = memo(({
     }, []);
 
     useEffect(() => {
+        if (!collapsible) {
+            progress.value = 1;
+            return;
+        }
         progress.value = withTiming(
             isExpanded ? 1 : 0,
-            { duration: 260, easing: Easing.out(Easing.cubic) },
+            { duration: 600, easing: Easing.out(Easing.cubic) },
             (finished) => {
                 if (finished && isExpanded) {
                     runOnJS(focusInput)();
                 }
             }
         );
-    }, [isExpanded, focusInput, progress]);
+    }, [isExpanded, focusInput, progress, collapsible]);
 
     useEffect(() => {
         if (value !== localValue && !isFocused) {
@@ -80,45 +85,36 @@ export const CollapsibleSearchBar = memo(({
     }, [value, localValue, isFocused]);
 
     const animatedStyle = useAnimatedStyle(() => {
-        const width =
-            containerWidth.value > 0
+        const collapsedWidth = collapsedLabel ? COLLAPSED_MIN_WIDTH : 44;
+        const width = !collapsible
+            ? '100%'
+            : (containerWidth.value > 0
                 ? interpolate(
-                        progress.value,
-                        [0, 1],
-                        [COLLAPSED_MIN_WIDTH, containerWidth.value]
+                    progress.value,
+                    [0, 1],
+                    [collapsedWidth, containerWidth.value]
                 )
-                : '100%';
+                : '100%');
+        const paddingHorizontal = (!collapsible || collapsedLabel)
+            ? spacing.md
+            : interpolate(progress.value, [0, 1], [0, spacing.md]);
         return {
             width,
-            backgroundColor: interpolateColor(
-                progress.value,
-                [0, 1],
-                ['rgba(0,0,0,0)', colors.dark.surface]
-            ),
-            borderColor: interpolateColor(
-                progress.value,
-                [0, 1],
-                ['rgba(0,0,0,0)', colors.accent.purple.base]
-            ),
-            shadowOpacity: interpolate(progress.value, [0, 1], [0, 0.22]),
-            elevation: interpolate(progress.value, [0, 1], [0, 6]),
+            paddingHorizontal,
             transform: [
-                { scale: interpolate(progress.value, [0, 1], [0.98, 1]) },
+                { scale: interpolate(progress.value, [0, 1], [0.99, 1]) },
             ],
+            justifyContent: !collapsible ? 'center' : undefined,
         };
     });
 
-    const inputAnimatedStyle = useAnimatedStyle(() => {
-        return {
-            opacity: interpolate(progress.value, [0, 1], [0, 1]),
-        };
-    });
+    const inputAnimatedStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(progress.value, [0, 1], [0, 1]),
+    }));
 
-    const collapsedAnimatedStyle = useAnimatedStyle(() => {
-        return {
-            opacity: interpolate(progress.value, [0, 1], [1, 0]),
-        };
-    });
+    const labelAnimatedStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(progress.value, [0, 1], [1, 0]),
+    }));
 
     const handleLayout = (event: LayoutChangeEvent) => {
         const { width } = event.nativeEvent.layout;
@@ -131,6 +127,7 @@ export const CollapsibleSearchBar = memo(({
     };
 
     const handleCollapse = () => {
+        if (!collapsible) return;
         setExpanded(false);
         setLocalValue('');
         onChange('');
@@ -139,22 +136,35 @@ export const CollapsibleSearchBar = memo(({
 
     return (
         <View style={[styles.wrapper, style]} onLayout={handleLayout}>
-            <Animated.View style={[styles.container, animatedStyle]} pointerEvents="box-none">
+            <Animated.View
+            style={[
+                styles.container,
+                animatedStyle,
+                collapsible && !collapsedLabel && !isExpanded ? styles.containerCentered : null,
+            ]}
+            pointerEvents="box-none">
                 <IonIcon
                     name="search-outline"
                     size={18}
                     color={colors.accent.purple.base}
-                    iconStyles={styles.icon}
+                    iconStyles={[
+                        styles.icon,
+                        collapsible && !collapsedLabel && !isExpanded ? styles.iconCentered : null,
+                    ]}
                 />
 
                 <Animated.View
-                style={[styles.inputWrapper, inputAnimatedStyle]}
+                style={[
+                    styles.inputWrapper,
+                    inputAnimatedStyle,
+                    collapsible && !collapsedLabel && !isExpanded ? styles.hiddenSlot : null,
+                ]}
                 pointerEvents={isExpanded ? 'auto' : 'none'}>
                     <TextInput
                         ref={inputRef}
                         value={localValue}
                         placeholder={placeholder}
-                        placeholderTextColor={colors.text.secondary}
+                        placeholderTextColor={colors.accent.gray.text}
                         style={styles.input}
                         autoCorrect={false}
                         autoCapitalize="none"
@@ -163,41 +173,50 @@ export const CollapsibleSearchBar = memo(({
                         editable={isExpanded}
                         onFocus={() => {
                             setIsFocused(true);
-                            setExpanded(true);
+                            if (collapsible) setExpanded(true);
                         }}
                         onBlur={() => {
                             setIsFocused(false);
-                            if (value.length === 0) setExpanded(false);
+                            if (collapsible && value.length === 0) setExpanded(false);
                         }}
                     />
                 </Animated.View>
 
                 <Animated.View
-                style={[styles.closeWrapper, inputAnimatedStyle]}
+                style={[
+                    styles.closeWrapper,
+                    inputAnimatedStyle,
+                    collapsible && !collapsedLabel && !isExpanded ? styles.hiddenSlot : null,
+                ]}
                 pointerEvents={isExpanded ? 'auto' : 'none'}>
                     <Pressable onPress={handleCollapse} hitSlop={10}>
                         <IonIcon
                             name="close"
                             size={18}
-                            color={colors.text.primary}
+                            color={colors.accent.gray.text}
                         />
                     </Pressable>
                 </Animated.View>
 
-                <Animated.View
-                style={[styles.collapsedOverlay, collapsedAnimatedStyle]}
-                pointerEvents={isExpanded ? 'none' : 'auto'}>
+                {collapsible && collapsedLabel && (
+                    <Animated.View
+                    style={[styles.collapsedLabel, labelAnimatedStyle]}
+                    pointerEvents={isExpanded ? 'none' : 'auto'}>
+                        <Pressable
+                        style={styles.collapsedPress}
+                        onPress={() => setExpanded(true)}>
+                            <Text style={styles.collapsedText}>{collapsedLabel}</Text>
+                        </Pressable>
+                    </Animated.View>
+                )}
+
+                {collapsible && !collapsedLabel && (
                     <Pressable
-                    style={styles.collapsed}
-                    onPress={() => setExpanded(true)}>
-                        <IonIcon
-                            name="search-outline"
-                            size={18}
-                            color={colors.accent.purple.base}
-                        />
-                        <Text style={styles.collapsedText}>{collapsedLabel}</Text>
-                    </Pressable>
-                </Animated.View>
+                        style={styles.iconTap}
+                        onPress={() => setExpanded(true)}
+                        pointerEvents={isExpanded ? 'none' : 'auto'}
+                    />
+                )}
             </Animated.View>
         </View>
     );
@@ -212,23 +231,22 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 
-    /* ------------------ Collapsed ------------------ */
-    collapsed: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-        height: 40,
-        paddingHorizontal: spacing.md,
-        borderRadius: radius.pill,
-        backgroundColor: colors.dark.surface,
-        borderWidth: 1,
-        borderColor: colors.accent.purple.base,
+    /* ------------------ Collapsed label ------------------ */
+    collapsedLabel: {
+        position: 'absolute',
+        left: spacing.md + 22,
+        right: spacing.md,
+        height: '100%',
+        justifyContent: 'center',
     },
-
+    collapsedPress: {
+        height: '100%',
+        justifyContent: 'center',
+    },
     collapsedText: {
         fontSize: 14,
         fontWeight: '500',
-        color: colors.accent.purple.base,
+        color: colors.accent.gray.text,
     },
 
     /* ------------------ Expanded ------------------ */
@@ -238,20 +256,27 @@ const styles = StyleSheet.create({
         width: '100%',
         borderRadius: radius.md,
         borderWidth: 1,
-        borderColor: colors.accent.purple.base,
-        backgroundColor: colors.dark.surface,
+        borderColor: colors.accent.gray.icon,
+        backgroundColor: colors.bone.soft,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        shadowColor: colors.accent.purple.base,
-        shadowOpacity: 0.22,
-        shadowRadius: 8,
-        elevation: 6,
+        shadowOpacity: 0,
+        elevation: 0,
         overflow: 'hidden',
+    },
+    containerCentered: {
+        justifyContent: 'center',
     },
 
     icon: {
         marginRight: spacing.sm,
+    },
+    iconCentered: {
+        marginRight: 0,
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        textAlign: 'center',
     },
 
     inputWrapper: {
@@ -260,6 +285,10 @@ const styles = StyleSheet.create({
 
     closeWrapper: {
         marginLeft: spacing.xs,
+    },
+    hiddenSlot: {
+        width: 0,
+        opacity: 0,
     },
 
     collapsedOverlay: {
@@ -270,11 +299,18 @@ const styles = StyleSheet.create({
         bottom: 0,
         justifyContent: 'center',
     },
+    iconTap: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+    },
 
     input: {
         flex: 1,
         fontSize: 14,
-        color: colors.text.primary,
+        color: colors.dark.base,
         paddingVertical: 0,
         paddingHorizontal: 0,
     },
