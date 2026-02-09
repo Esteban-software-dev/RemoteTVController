@@ -134,3 +134,11 @@ The screen also highlights the currently connected TV and provides quick access 
 https://github.com/user-attachments/assets/fd7f8025-283c-4dc1-902f-4c58c3259ba6
 
 ---
+
+### 🔔 Smart Toast System
+Custom animated toast notifications with gesture support, stacking behavior, action buttons, and adaptive positioning. Toasts can be swiped to dismiss, paused on hold, stacked intelligently by position, and styled by type (success, warning, danger, etc.) for clear and immediate feedback.
+
+https://github.com/user-attachments/assets/f6cc2452-39a4-437b-a1cc-795372b87610
+
+
+---
