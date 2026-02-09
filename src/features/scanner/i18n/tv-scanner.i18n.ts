@@ -21,6 +21,11 @@ export const tvScannerResources = {
                     retry: 'Volver a buscar',
                 },
             },
+            toast: {
+                deviceConnected: {
+                    title: 'TV conectada',
+                }
+            }
         },
     },
     en: {
@@ -45,6 +50,11 @@ export const tvScannerResources = {
                     retry: 'Search again',
                 },
             },
+            toast: {
+                deviceConnected: {
+                    title: 'TV connected',
+                }
+            }
         },
     },
 } as const;

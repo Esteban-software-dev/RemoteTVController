@@ -98,6 +98,10 @@ export const settingsResources = {
                 languageSheet: {
                     title: 'Idioma de la app',
                     subtitle: 'Se aplica de inmediato',
+                    changeSuccess: {
+                        title: 'Idioma cambiado',
+                        description: 'El idioma de la app ha sido cambiado exitosamente.'
+                    }
                 },
                 languages: {
                     spanish: 'Español',
@@ -207,6 +211,11 @@ export const settingsResources = {
                 languageSheet: {
                     title: 'App language',
                     subtitle: 'Applies immediately',
+                    changeSuccess: {
+                        title: 'Language changed',
+                        description: 'The app language has been changed successfully.'
+
+                    }
                 },
                 languages: {
                     spanish: 'Español',

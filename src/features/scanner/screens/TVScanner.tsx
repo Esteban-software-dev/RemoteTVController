@@ -24,11 +24,13 @@ import { NoRokuDevice } from '../components/NoRokuDevice';
 import { ActiveApp } from '../interfaces/active-app.interface';
 import { AppBackground } from '@src/shared/components/AppBackground';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '@src/shared/context/ToastContext';
 
 export function TVScanner() {
     const { t } = useTranslation();
     const { bottom, top } = useSafeBarsArea();
     const { devices, scanning, scan } = useRokuScanner();
+    const { show } = useToast();
 
     const setRokuDevice = useRokuSessionStore(s => s.selectDevice);
     const setActiveApp = useRokuSessionStore(s => s.setActiveApp);
@@ -49,6 +51,13 @@ export function TVScanner() {
         const rokuApps = await fetchSelectedRokuApps(rokuDevice.ip);
         setActiveApp(activeApp ?? ({} as ActiveApp));
         setApps(rokuApps && rokuApps.length ? rokuApps : defaultApps);
+        show({
+            title: t('toast.deviceConnected.title'),
+            subtitle: rokuDevice.friendlyDeviceName,
+            iconName: 'wifi',
+            type: 'success',
+            align: 'top',
+        });
     };
 
     const devicesSubtitle = scanning

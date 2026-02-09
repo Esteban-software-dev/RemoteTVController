@@ -13,6 +13,8 @@ import { ContextMenuProvider } from './shared/context/ContextMenu';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetProvider } from './shared/context/BottomSheetContext';
 import { colors } from './config/theme/colors/colors';
+import { ToastProvider } from './shared/context/ToastContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 function App() {
   const [height, setHeight] = useState(EXPANDED_HEIGHT);
@@ -24,19 +26,23 @@ function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <ContextMenuProvider>
-        <BottomSheetProvider>
-          <NavigationContainer>
-            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.accent.purple.soft} />
-            <AppBarLayoutContext.Provider value={{ height, setHeight }}>
-              <AppBar />
-              <DrawerNavigator />
-            </AppBarLayoutContext.Provider>
-          </NavigationContainer>
-        </BottomSheetProvider>
-      </ContextMenuProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ContextMenuProvider>
+          <BottomSheetProvider>
+            <ToastProvider>
+              <NavigationContainer>
+                <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.accent.purple.soft} />
+                <AppBarLayoutContext.Provider value={{ height, setHeight }}>
+                  <AppBar />
+                  <DrawerNavigator />
+                </AppBarLayoutContext.Provider>
+              </NavigationContainer>
+            </ToastProvider>
+          </BottomSheetProvider>
+        </ContextMenuProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 export default App;

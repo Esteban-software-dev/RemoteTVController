@@ -33,6 +33,52 @@ export const smartHubResources = {
                     title: 'Sin apps disponibles',
                     subtitle: 'Esta sección no tiene apps para mostrar.',
                 },
+                context: {
+                    favorite: {
+                        add: 'Agregar a favoritos',
+                        remove: 'Quitar de favoritos',
+                    },
+                    pin: {
+                        add: 'Anclar app',
+                        remove: 'Desanclar app',
+                    },
+                    hide: {
+                        add: 'Ocultar app',
+                        remove: 'Mostrar app',
+                    },
+                    toast: {
+                        favorites: {
+                            added: {
+                                title: 'Añadido a favoritos',
+                                subtitle: '{{app}} ahora está en tus favoritos.',
+                            },
+                            removed: {
+                                title: 'Quitado de favoritos',
+                                subtitle: '{{app}} ya no está en favoritos.',
+                            },
+                        },
+                        pinned: {
+                            added: {
+                                title: 'App anclada',
+                                subtitle: 'Acceso rápido a {{app}}.',
+                            },
+                            removed: {
+                                title: 'App desanclada',
+                                subtitle: '{{app}} ya no está anclada.',
+                            },
+                        },
+                        hidden: {
+                            added: {
+                                title: 'App oculta',
+                                subtitle: '{{app}} se ocultó de tu lista.',
+                            },
+                            removed: {
+                                title: 'App visible',
+                                subtitle: '{{app}} volvió a mostrarse.',
+                            },
+                        },
+                    },
+                },
             },
         },
     },
@@ -69,6 +115,52 @@ export const smartHubResources = {
                 emptyGrid: {
                     title: 'No apps available',
                     subtitle: 'This section has no apps to display.',
+                },
+                context: {
+                    favorite: {
+                        add: 'Add to favorites',
+                        remove: 'Remove from favorites',
+                    },
+                    pin: {
+                        add: 'Pin app',
+                        remove: 'Unpin app',
+                    },
+                    hide: {
+                        add: 'Hide app',
+                        remove: 'Show app',
+                    },
+                    toast: {
+                        favorites: {
+                            added: {
+                                title: 'Added to favorites',
+                                subtitle: '{{app}} is now in your favorites.',
+                            },
+                            removed: {
+                                title: 'Removed from favorites',
+                                subtitle: '{{app}} is no longer a favorite.',
+                            },
+                        },
+                        pinned: {
+                            added: {
+                                title: 'App pinned',
+                                subtitle: 'Quick access to {{app}}.',
+                            },
+                            removed: {
+                                title: 'App unpinned',
+                                subtitle: '{{app}} is no longer pinned.',
+                            },
+                        },
+                        hidden: {
+                            added: {
+                                title: 'App hidden',
+                                subtitle: '{{app}} was hidden from your list.',
+                            },
+                            removed: {
+                                title: 'App visible',
+                                subtitle: '{{app}} is visible again.',
+                            },
+                        },
+                    },
                 },
             },
         },
