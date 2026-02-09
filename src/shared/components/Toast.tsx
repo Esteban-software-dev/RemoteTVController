@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, ImageSourcePropType, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
     runOnJS,
     useAnimatedStyle,
@@ -24,7 +24,8 @@ export type ToastPosition = {
 
 export type ToastActionButton = {
     label: string;
-    onPress: () => void;
+    onPress?: (closeToast: () => void) => void;
+    closeOnPress?: boolean;
 };
 
 export interface ToastProps {
@@ -32,6 +33,9 @@ export interface ToastProps {
     title?: string;
     subtitle?: string;
     iconName?: IoniconsIconName;
+    iconSource?: ImageSourcePropType;
+    iconElement?: ReactNode;
+    iconBlurRadius?: number;
     type?: ToastType;
     align?: ToastAlign;
     position?: ToastPosition;
@@ -69,8 +73,11 @@ export function Toast({
     title,
     subtitle,
     iconName,
+    iconSource,
+    iconElement,
+    iconBlurRadius,
     type = 'default',
-    align = 'bottom',
+    align = 'top',
     position,
     onClose,
     renderContent,
@@ -90,6 +97,15 @@ export function Toast({
     const stackScaleSV = useSharedValue(stackScale);
     const handleClosePress = () => {
         onClose();
+    };
+    const handleActionPress = (action: ToastActionButton) => {
+        const shouldClose = action.closeOnPress !== false;
+        if (action.onPress) {
+            action.onPress(onClose);
+            if (shouldClose) onClose();
+            return;
+        }
+        if (shouldClose) onClose();
     };
 
     useEffect(() => {
@@ -168,6 +184,7 @@ export function Toast({
     );
 
     const actions = Array.isArray(actionButton) ? actionButton : (actionButton ? [actionButton] : []);
+    const shouldRenderIcon = Boolean(iconElement || iconSource || iconName);
 
     return (
         <GestureDetector gesture={composedGesture}>
@@ -185,9 +202,20 @@ export function Toast({
                         renderContent
                     ) : (
                         <View style={styles.row}>
-                            {iconName ? (
+                            {shouldRenderIcon ? (
                                 <View style={styles.iconWrap}>
-                                    <IonIcon name={iconName} size={18} color={styleByType.icon} />
+                                    {iconElement ? (
+                                        iconElement
+                                    ) : iconSource ? (
+                                        <Image
+                                            source={iconSource}
+                                            style={styles.iconImage}
+                                            resizeMode="contain"
+                                            blurRadius={iconBlurRadius}
+                                        />
+                                    ) : (
+                                        <IonIcon name={iconName!} size={18} color={styleByType.icon} />
+                                    )}
                                 </View>
                             ) : null}
                             <View style={styles.textBlock}>
@@ -203,7 +231,7 @@ export function Toast({
                                     {actions.map((action, index) => (
                                         <Pressable
                                         key={`${action.label}-${index}`}
-                                        onPress={action.onPress}
+                                        onPress={() => handleActionPress(action)}
                                         style={({ pressed }) => ([
                                             styles.actionButton,
                                             pressed ? styles.actionButtonPressed : null,
@@ -274,6 +302,12 @@ const styles = StyleSheet.create({
         backgroundColor: withOpacityHex(colors.white.base, 0.15),
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'hidden',
+    },
+    iconImage: {
+        width: 20,
+        height: 20,
+        borderRadius: 6,
     },
     textBlock: {
         flex: 1,

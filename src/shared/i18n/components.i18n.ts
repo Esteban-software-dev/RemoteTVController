@@ -9,6 +9,7 @@ export const componentsResources = {
                 ,
                 toast: {
                     closeButton: 'Cerrar',
+                    restore: 'Restaurar',
                 }
             }
         }
@@ -22,6 +23,7 @@ export const componentsResources = {
                 ,
                 toast: {
                     closeButton: 'Close',
+                    restore: 'Restore',
                 }
             }
         }

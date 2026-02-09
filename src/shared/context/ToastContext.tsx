@@ -6,6 +6,9 @@ export type ToastOptions = {
     title?: string;
     subtitle?: string;
     iconName?: ToastIconName;
+    iconSource?: import('react-native').ImageSourcePropType;
+    iconElement?: React.ReactNode;
+    iconBlurRadius?: number;
     type?: ToastType;
     align?: ToastAlign;
     position?: ToastPosition;
@@ -216,10 +219,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                             <Toast
                                 key={toast.id}
                                 visible={toast.visible}
-                                title={toast.title}
-                                subtitle={toast.subtitle}
-                                iconName={toast.iconName}
-                                type={toast.type}
+                        title={toast.title}
+                        subtitle={toast.subtitle}
+                        iconName={toast.iconName}
+                        iconSource={toast.iconSource}
+                        iconElement={toast.iconElement}
+                        iconBlurRadius={toast.iconBlurRadius}
+                        type={toast.type}
                                 align={toast.align}
                                 position={toast.position}
                                 renderContent={toast.renderContent}
