@@ -20,7 +20,6 @@ export function DrawerNavigator() {
         drawerContent={(props) => <SideMenu {...props} />}
         screenOptions={{
             drawerStatusBarAnimation: 'fade',
-            
             headerShown: false,
             drawerType: 'front',
             drawerStyle: {

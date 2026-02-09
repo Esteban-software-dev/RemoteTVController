@@ -12,6 +12,7 @@ import { AppBar } from './navigation/components/Appbar';
 import { ContextMenuProvider } from './shared/context/ContextMenu';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetProvider } from './shared/context/BottomSheetContext';
+import { colors } from './config/theme/colors/colors';
 
 function App() {
   const [height, setHeight] = useState(EXPANDED_HEIGHT);
@@ -27,7 +28,7 @@ function App() {
       <ContextMenuProvider>
         <BottomSheetProvider>
           <NavigationContainer>
-            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.accent.purple.soft} />
             <AppBarLayoutContext.Provider value={{ height, setHeight }}>
               <AppBar />
               <DrawerNavigator />

@@ -13,10 +13,17 @@ import { LanguageOption } from '../components/LanguageOption';
 import { AppLanguages } from '@src/config/i18n/resources';
 import { changeLanguage } from '@src/config/i18n/config';
 import { useBottomSheet } from '@src/shared/context/BottomSheetContext';
+import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
+import { useBottomtabNavigation } from '@src/navigation/hooks/useBottomtabNavigation';
+import { useDrawerNavigation } from '@src/navigation/hooks/useDrawerNavigation';
 
 export function Settings() {
     const { t, i18n } = useTranslation();
     const { top, bottom } = useSafeBarsArea();
+
+    const { navigation: bottomTabNavigation } = useBottomtabNavigation();
+    const { navigation: drawerNavigation } = useDrawerNavigation();
+    const selectedDevice = useRokuSessionStore(s => s.selectedDevice);
 
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const [soundsEnabled, setSoundsEnabled] = useState(true);
@@ -116,20 +123,26 @@ export function Settings() {
                     <SettingsItem
                         title={t('settings.device.connected.title')}
                         subtitle={t('settings.device.connected.subtitle')}
-                        valueText={t('settings.device.connected.value')}
+                        valueText={selectedDevice
+                            ? selectedDevice.friendlyDeviceName.length > 30
+                                ? selectedDevice.friendlyDeviceName.slice(0, 30) + '...'
+                                : selectedDevice.friendlyDeviceName
+                            : t('settings.device.connected.value')}
                         iconName="wifi-outline"
-                        accentColor={colors.accent.teal.base}
+                        accentColor={selectedDevice ? colors.accent.teal.base : colors.accent.gray.icon}
                     />
                     <SettingsItem
                         title={t('settings.device.scan.title')}
                         subtitle={t('settings.device.scan.subtitle')}
                         iconName="search-outline"
+                        onPress={() => bottomTabNavigation.navigate('Tv scanner')}
                         accentColor={colors.accent.purple.base}
                     />
                     <SettingsItem
                         title={t('settings.device.hiddenApps.title')}
                         subtitle={t('settings.device.hiddenApps.subtitle')}
                         iconName="eye-off-outline"
+                        onPress={() => drawerNavigation.navigate('HiddenApps')}
                         accentColor={colors.accent.gray.icon}
                         isLast
                     />
