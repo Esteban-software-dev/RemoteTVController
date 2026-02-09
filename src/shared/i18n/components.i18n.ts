@@ -6,6 +6,10 @@ export const componentsResources = {
                 bottomSheet: {
                     closeButton: 'Cerrar',
                 }
+                ,
+                toast: {
+                    closeButton: 'Cerrar',
+                }
             }
         }
     },
@@ -13,6 +17,10 @@ export const componentsResources = {
         translation: {
             components: {
                 bottomSheet: {
+                    closeButton: 'Close',
+                }
+                ,
+                toast: {
                     closeButton: 'Close',
                 }
             }
