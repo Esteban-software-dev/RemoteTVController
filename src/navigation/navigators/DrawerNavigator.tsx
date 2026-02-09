@@ -20,7 +20,6 @@ export function DrawerNavigator() {
         drawerContent={(props) => <SideMenu {...props} />}
         screenOptions={{
             drawerStatusBarAnimation: 'fade',
-            
             headerShown: false,
             drawerType: 'front',
             drawerStyle: {
@@ -29,7 +28,6 @@ export function DrawerNavigator() {
                 backgroundColor: 'transparent',
                 flex: 1
             },
-            overlayColor: 'transparent',
         }}>
             <Drawer.Screen
                 name="Home"

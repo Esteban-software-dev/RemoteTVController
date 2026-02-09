@@ -62,13 +62,12 @@ export function SideMenu({
     return (
         <View style={[StyleSheet.absoluteFill, { flex: 1, justifyContent: 'center' }]}>
             <AnimatedPressable
-                style={[StyleSheet.absoluteFill, blurStyle]}
-                onPress={() => {
-                    navigation.closeDrawer();
-                    blurOpacity.value = withTiming(0, { duration: 50 });
-                }}
-            >
-                <BlurBackground blurAmount={3} blurType="light" />
+            style={[StyleSheet.absoluteFill, blurStyle]}
+            onPress={() => {
+                navigation.closeDrawer();
+                blurOpacity.value = withTiming(0, { duration: 50 });
+            }}>
+                {/* <BlurBackground blurAmount={3} blurType="light" /> */}
             </AnimatedPressable>
 
             <Animated.View style={[styles.root, animatedContainer]}>

@@ -14,6 +14,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { colors } from '@src/config/theme/colors/colors';
 import { spacing } from '@src/config/theme/tokens';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
+import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const AnimatedBlurBackground = Animated.createAnimatedComponent(BlurBackground);
@@ -90,8 +91,8 @@ export function ContextMenuComponent<T>({
 
   return (
     <View style={[StyleSheet.absoluteFill, { zIndex: 999 }]} pointerEvents="box-none">
-      <AnimatedPressable style={StyleSheet.absoluteFill} onPress={close}>
-        <AnimatedBlurBackground style={StyleSheet.absoluteFill} blurType="dark" />
+      <AnimatedPressable style={[StyleSheet.absoluteFill, {backgroundColor: withOpacityHex(colors.dark.base, .7)}]} onPress={close}>
+        {/* <AnimatedBlurBackground style={StyleSheet.absoluteFill} blurType="dark" /> */}
       </AnimatedPressable>
 
       <View style={styles.centerContainer} pointerEvents="box-none">

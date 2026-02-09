@@ -4,7 +4,7 @@ export const navigatorResources = {
             tabs: {
                 smartHub: 'Smart Hub',
                 tvScanner: 'TV Escáner',
-                profile: 'Perfil',
+                settings: 'Configuración',
             },
 
             drawer: {
@@ -41,7 +41,7 @@ export const navigatorResources = {
             tabs: {
                 smartHub: 'Smart Hub',
                 tvScanner: 'TV Scanner',
-                profile: 'Profile',
+                settings: 'Settings',
             },
 
             drawer: {
