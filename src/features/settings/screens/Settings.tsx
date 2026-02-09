@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Button, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import React, { useMemo, useState } from 'react';
 import { AppBackground } from '@src/shared/components/AppBackground';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
@@ -16,6 +16,7 @@ import { useBottomSheet } from '@src/shared/context/BottomSheetContext';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { useBottomtabNavigation } from '@src/navigation/hooks/useBottomtabNavigation';
 import { useDrawerNavigation } from '@src/navigation/hooks/useDrawerNavigation';
+import { useToast } from '@src/shared/context/ToastContext';
 
 export function Settings() {
     const { t, i18n } = useTranslation();
@@ -30,7 +31,7 @@ export function Settings() {
     const [hapticsEnabled, setHapticsEnabled] = useState(false);
     const [animationsEnabled, setAnimationsEnabled] = useState(true);
     const { open, close } = useBottomSheet();
-
+    const { show } = useToast();
     const switchColors = useMemo(() => ({
         true: withOpacityHex(colors.accent.purple.base, 0.35),
         false: withOpacityHex(colors.dark.base, 0.1),
@@ -48,6 +49,13 @@ export function Settings() {
         }
         await changeLanguage(lang);
         close();
+        show({
+            type: 'success',
+            title: t('settings.languageSheet.changeSuccess.title', { lng: lang }),
+            subtitle: t('settings.languageSheet.changeSuccess.description', { lng: lang }),
+            align: 'top',
+            iconName: 'checkmark-circle-outline',
+        });
     };
 
     const openLanguageSheet = () => {
