@@ -118,9 +118,19 @@ https://github.com/user-attachments/assets/a34a3084-7841-4f1a-aed0-f26b2c73c862
 
 ---
 
-🕶️ Hidden Apps
+### 🕶️ Hidden Apps
 Manage hidden Roku apps: search, preview, and restore them to the main view.
 
 https://github.com/user-attachments/assets/eef8ca60-ee1e-4d1e-9b87-74024f89721c
+
+---
+
+### 🛠️ Settings Screen
+Configure and personalize how your TV controller app works.
+
+Manage account details, connected devices, and app preferences such as language, privacy, notifications, and sound feedback.
+The screen also highlights the currently connected TV and provides quick access to device scanning and hidden apps management.
+
+https://github.com/user-attachments/assets/fd7f8025-283c-4dc1-902f-4c58c3259ba6
 
 ---
