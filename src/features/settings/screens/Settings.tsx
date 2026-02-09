@@ -9,10 +9,10 @@ import { spacing } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import { useTranslation } from 'react-i18next';
-import { BottomSheet } from '@src/shared/components/BottomSheet';
 import { LanguageOption } from '../components/LanguageOption';
 import { AppLanguages } from '@src/config/i18n/resources';
 import { changeLanguage } from '@src/config/i18n/config';
+import { useBottomSheet } from '@src/shared/context/BottomSheetContext';
 
 export function Settings() {
     const { t, i18n } = useTranslation();
@@ -22,7 +22,7 @@ export function Settings() {
     const [soundsEnabled, setSoundsEnabled] = useState(true);
     const [hapticsEnabled, setHapticsEnabled] = useState(false);
     const [animationsEnabled, setAnimationsEnabled] = useState(true);
-    const [languageSheetVisible, setLanguageSheetVisible] = useState(false);
+    const { open, close } = useBottomSheet();
 
     const switchColors = useMemo(() => ({
         true: withOpacityHex(colors.accent.purple.base, 0.35),
@@ -36,11 +36,37 @@ export function Settings() {
 
     const handleLanguageChange = async (lang: AppLanguages) => {
         if (lang === currentLanguage) {
-            setLanguageSheetVisible(false);
+            close();
             return;
         }
         await changeLanguage(lang);
-        setLanguageSheetVisible(false);
+        close();
+    };
+
+    const openLanguageSheet = () => {
+        open({
+            title: t('settings.languageSheet.title'),
+            subtitle: t('settings.languageSheet.subtitle'),
+            snapPoints: [0.3, 0.5, 0.9],
+            initialSnapIndex: 0,
+            enablePanToClose: false,
+            content: (
+                <>
+                    <LanguageOption
+                        label={t('settings.languages.spanish')}
+                        subtitle={t('settings.languages.spanishSubtitle')}
+                        selected={currentLanguage === 'es'}
+                        onPress={() => handleLanguageChange('es')}
+                    />
+                    <LanguageOption
+                        label={t('settings.languages.english')}
+                        subtitle={t('settings.languages.englishSubtitle')}
+                        selected={currentLanguage === 'en'}
+                        onPress={() => handleLanguageChange('en')}
+                    />
+                </>
+            ),
+        });
     };
 
     return (
@@ -72,7 +98,7 @@ export function Settings() {
                         valueText={languageLabel}
                         iconName="globe-outline"
                         accentColor={colors.accent.teal.base}
-                        onPress={() => setLanguageSheetVisible(true)}
+                        onPress={openLanguageSheet}
                     />
                     <SettingsItem
                         title={t('settings.account.privacy.title')}
@@ -222,27 +248,6 @@ export function Settings() {
                 </SettingsSection>
             </ScrollView>
 
-            <BottomSheet
-            enablePanToClose={false}
-            snapPoints={[.3, .5, .9]}
-            visible={languageSheetVisible}
-            onClose={() => setLanguageSheetVisible(false)}
-            title={t('settings.languageSheet.title')}
-            subtitle={t('settings.languageSheet.subtitle')}
-            initialSnapIndex={0}>
-                <LanguageOption
-                    label={t('settings.languages.spanish')}
-                    subtitle={t('settings.languages.spanishSubtitle')}
-                    selected={currentLanguage === 'es'}
-                    onPress={() => handleLanguageChange('es')}
-                />
-                <LanguageOption
-                    label={t('settings.languages.english')}
-                    subtitle={t('settings.languages.englishSubtitle')}
-                    selected={currentLanguage === 'en'}
-                    onPress={() => handleLanguageChange('en')}
-                />
-            </BottomSheet>
         </View>
     )
 }

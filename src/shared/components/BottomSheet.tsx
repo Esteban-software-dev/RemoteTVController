@@ -7,7 +7,7 @@ import Animated, {
     withSpring,
     withTiming,
     interpolate,
-    Extrapolate,
+    Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -109,7 +109,7 @@ export function BottomSheet({
             translateY.value,
             [maxHeightSV.value, 0],
             [0, backdropOpacity.value],
-            Extrapolate.CLAMP
+            Extrapolation.CLAMP
         ),
     }));
 

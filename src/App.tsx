@@ -11,6 +11,7 @@ import { DrawerNavigator } from './navigation/navigators/DrawerNavigator';
 import { AppBar } from './navigation/components/Appbar';
 import { ContextMenuProvider } from './shared/context/ContextMenu';
 import { useTranslation } from 'react-i18next';
+import { BottomSheetProvider } from './shared/context/BottomSheetContext';
 
 function App() {
   const [height, setHeight] = useState(EXPANDED_HEIGHT);
@@ -24,13 +25,15 @@ function App() {
   return (
     <SafeAreaProvider>
       <ContextMenuProvider>
-        <NavigationContainer>
-          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-          <AppBarLayoutContext.Provider value={{ height, setHeight }}>
-            <AppBar />
-            <DrawerNavigator />
-          </AppBarLayoutContext.Provider>
-        </NavigationContainer>
+        <BottomSheetProvider>
+          <NavigationContainer>
+            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+            <AppBarLayoutContext.Provider value={{ height, setHeight }}>
+              <AppBar />
+              <DrawerNavigator />
+            </AppBarLayoutContext.Provider>
+          </NavigationContainer>
+        </BottomSheetProvider>
       </ContextMenuProvider>
     </SafeAreaProvider>
   );
