@@ -140,5 +140,17 @@ Custom animated toast notifications with gesture support, stacking behavior, act
 
 https://github.com/user-attachments/assets/f6cc2452-39a4-437b-a1cc-795372b87610
 
-
 ---
+
+### ⚠️ Alert Message System
+Modern, Ionic-inspired alert dialogs for confirmations and multi-use prompts. Alerts support presets (default, info, success, warning, danger) with predefined icons and colors, custom icons, and fully configurable buttons with roles (cancel, destructive, default). The system is global via context + hook, supports backdropDismiss, and includes onDidDismiss for clean lifecycle handling.
+
+#### Highlights
+- Global useAlert() hook with show() / hide()
+- Presets with icon + color
+- Custom content slot (icons, previews, or any ReactNode)
+- i18n-friendly default buttons (OK/Cancel)
+- Backdrop dismiss + onDidDismiss callbacks
+
+https://github.com/user-attachments/assets/57e57f7e-adfc-427f-963f-6e7d03b0b701
+
