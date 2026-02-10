@@ -18,6 +18,20 @@
                     placeholder: 'Buscar apps ocultas...',
                     collapsed: 'Buscar',
                 },
+                alert: {
+                    restore: {
+                        title: '¿Quieres mostrar {{appName}} de nuevo?',
+                        message: 'Al mostrar esta app, volverá a aparecer en la vista principal.',
+                        cancel: 'Cancelar',
+                        confirm: 'Mostrar',
+                    },
+                    openHidden: {
+                        title: 'Abrir app',
+                        message: 'Esta app está oculta. Si continúas, se abrirá en la pantalla principal de tu TV.',
+                        cancel: 'Cancelar',
+                        confirm: 'Abrir app',
+                    },
+                }
             },
         },
     },
@@ -40,6 +54,20 @@
                     placeholder: 'Search hidden apps...',
                     collapsed: 'Search',
                 },
+                alert: {
+                    restore: {
+                        title: 'Show {{appName}} again?',
+                        message: 'This app will reappear in the main view.',
+                        cancel: 'Cancel',
+                        confirm: 'Show app',
+                    },
+                    openHidden: {
+                        title: 'Open app',
+                        message: 'This app is hidden. If you continue, it will open on your TV main screen.',
+                        cancel: 'Cancel',
+                        confirm: 'Open app',
+                    },
+                }
             },
         },
     },
