@@ -11,6 +11,11 @@ export const componentsResources = {
                     closeButton: 'Cerrar',
                     restore: 'Restaurar',
                 }
+                ,
+                alert: {
+                    ok: 'Aceptar',
+                    cancel: 'Cancelar',
+                }
             }
         }
     },
@@ -24,6 +29,11 @@ export const componentsResources = {
                 toast: {
                     closeButton: 'Close',
                     restore: 'Restore',
+                }
+                ,
+                alert: {
+                    ok: 'OK',
+                    cancel: 'Cancel',
                 }
             }
         }

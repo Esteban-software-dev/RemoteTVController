@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { BottomSheetProvider } from './shared/context/BottomSheetContext';
 import { colors } from './config/theme/colors/colors';
 import { ToastProvider } from './shared/context/ToastContext';
+import { AlertProvider } from './shared/context/AlertContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 function App() {
@@ -31,13 +32,15 @@ function App() {
         <ContextMenuProvider>
           <BottomSheetProvider>
             <ToastProvider>
-              <NavigationContainer>
-                <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.accent.purple.soft} />
-                <AppBarLayoutContext.Provider value={{ height, setHeight }}>
-                  <AppBar />
-                  <DrawerNavigator />
-                </AppBarLayoutContext.Provider>
-              </NavigationContainer>
+              <AlertProvider>
+                <NavigationContainer>
+                  <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.accent.purple.soft} />
+                  <AppBarLayoutContext.Provider value={{ height, setHeight }}>
+                    <AppBar />
+                    <DrawerNavigator />
+                  </AppBarLayoutContext.Provider>
+                </NavigationContainer>
+              </AlertProvider>
             </ToastProvider>
           </BottomSheetProvider>
         </ContextMenuProvider>
