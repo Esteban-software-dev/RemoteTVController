@@ -8,8 +8,8 @@ import { Settings } from '@src/features/settings/screens/Settings';
 
 export type RootBottomtabs = {
     'Tv scanner': undefined;
-    Profile: undefined;
     Smarthub: undefined;
+    Settings: undefined;
 }
 const Tab = createBottomTabNavigator();
 

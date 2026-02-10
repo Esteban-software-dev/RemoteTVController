@@ -22,6 +22,7 @@ interface ActionItemProps {
     id: string;
     title: string;
     subtitle?: string;
+    onPress?: () => void;
 
     /** Opcional */
     icon?: React.ReactNode;
@@ -36,6 +37,7 @@ export function ActionItem({
     title,
     subtitle,
     icon,
+    onPress,
     actionLabel,
     onAction,
     containerStyle,
@@ -54,6 +56,7 @@ export function ActionItem({
         onPressOut={() => {
             scale.value = withTiming(1, { duration: 120 });
         }}
+        onPress={onPress}
         style={[styles.container, animatedStyle, containerStyle]}>
             {icon && <View style={styles.iconWrapper}>{icon}</View>}
 

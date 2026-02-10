@@ -1,12 +1,14 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { NavigatorScreenParams } from '@react-navigation/native';
 import { BottomTabsNavigator } from './BottomTabNavigator';
 import { SideMenu } from '../components/SideMenu';
 import { HiddenApps } from '@src/features/scanner/screens/HiddenApps';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { useTranslation } from 'react-i18next';
+import { RootBottomtabs } from './BottomTabNavigator';
 
 export type RootDrawerParamList = {
-    Home: undefined;
+    Home: NavigatorScreenParams<RootBottomtabs>;
     HiddenApps: undefined;
 };
 
