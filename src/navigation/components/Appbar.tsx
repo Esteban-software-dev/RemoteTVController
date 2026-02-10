@@ -1,6 +1,6 @@
 import { AUTO_COLLAPSE_DELAY, COLLAPSED_HEIGHT, COLLAPSED_WIDTH, EXPANDED_HEIGHT, EXPANDED_WIDTH, MAX_DRAG } from '../constants/appbarDimensions.constant';
 import { View, StyleSheet, PanResponder, Pressable, Text, Image } from 'react-native';
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -27,6 +27,7 @@ import { fetchActiveRokuApp } from '@src/features/scanner/services/roku-device-i
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import { t } from 'i18next';
 import { RootDrawerParamList } from '../navigators/DrawerNavigator';
+import { getCurrentRouteName, navigationRef } from '../navigationRef';
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -57,11 +58,13 @@ export function AppBar() {
 
     const insets = useSafeAreaInsets();
 
+    const [routeName, setRouteName] = useState<string | null>(null);
     const dragX = useSharedValue(0);
     const dragY = useSharedValue(0);
     const width = useSharedValue(EXPANDED_WIDTH);
     const height = useSharedValue(EXPANDED_HEIGHT);
     const collapsedAnim = useSharedValue(0);
+    const appbarHide = useSharedValue(0);
     const gradientRotation = useSharedValue(0);
     const deviceActiveAnim = useSharedValue(0);
     const scale = useSharedValue(1);
@@ -92,6 +95,16 @@ export function AppBar() {
         }
     }
 
+    useEffect(() => {
+        const unsubscribe = navigationRef.addListener('state', () => {
+            setRouteName(getCurrentRouteName());
+        });
+
+        return unsubscribe;
+    }, []);
+
+
+    
     useEffect(() => {
         startCollapseTimer();
         return () => {
@@ -284,12 +297,37 @@ export function AppBar() {
         ),
     }));
 
+    const hideAppbar = routeName === 'RemoteControl';
+    const [isHidden, setIsHidden] = useState(false);
+
+    useEffect(() => {
+        if (hideAppbar) {
+            appbarHide.value = withTiming(1, { duration: 220 });
+            const id = setTimeout(() => setIsHidden(true), 240);
+            return () => clearTimeout(id);
+        }
+        setIsHidden(false);
+        appbarHide.value = withTiming(0, { duration: 220 });
+    }, [hideAppbar]);
+
+    const appbarVisibilityStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(appbarHide.value, [0, 1], [1, 0]),
+        transform: [{ translateY: interpolate(appbarHide.value, [0, 1], [0, -12]) }],
+    }));
+
     return (
-        <View style={[styles.container, {
-            paddingTop: insets.top === 0 ? spacing.sm : insets.top,
-            paddingBottom: insets.top === 0 ? spacing.sm : insets.top,
-            flexDirection: 'row'
-        }]}>
+        <Animated.View
+        style={[
+            styles.container,
+            appbarVisibilityStyle,
+            isHidden ? styles.hidden : null,
+            {
+                paddingTop: insets.top === 0 ? spacing.sm : insets.top,
+                paddingBottom: insets.bottom === 0 ? spacing.md : insets.bottom,
+                flexDirection: 'row'
+            }
+        ]}
+        pointerEvents={isHidden ? 'none' : 'auto'}>
             <Animated.View style={[rokuDeviceActions, {
                 alignSelf: 'flex-start',
                 marginRight: 'auto',
@@ -446,9 +484,13 @@ export function AppBar() {
                 alignSelf: 'flex-start',
                 marginLeft: 'auto',
             }]}>
-                <RokuDeviceActionButton iconName="keypad" color={colors.accent.purple.strong} />
+                <RokuDeviceActionButton
+                    iconName="keypad"
+                    color={colors.accent.purple.strong}
+                    onPress={() => navigation.navigate('RemoteControl')}
+                />
             </Animated.View>
-        </View>
+        </Animated.View>
     );
 }
 
@@ -507,6 +549,9 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
+    },
+    hidden: {
+        display: 'none',
     },
     bar: {
         borderRadius: radius.lg,
