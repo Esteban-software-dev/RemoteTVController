@@ -23,7 +23,9 @@ export type ToastPosition = {
 };
 
 export type ToastActionButton = {
-    label: string;
+    label?: string;
+    iconName?: IoniconsIconName;
+    iconPosition?: 'left' | 'right';
     onPress?: (closeToast: () => void) => void;
     closeOnPress?: boolean;
 };
@@ -56,6 +58,14 @@ const SPRING = {
     mass: 0.9,
 };
 
+const MAX_DRAG = 80;
+const applyResistance = (value: number) => {
+    'worklet';
+    const abs = Math.abs(value);
+    const sign = Math.sign(value);
+    if (abs < MAX_DRAG) return value;
+    return sign * (MAX_DRAG + (abs - MAX_DRAG) * 0.2);
+};
 const TYPE_STYLES: Record<ToastType, { bg: string; border: string; icon: string; text: string; action: string }> = {
     default: colors.toast.default,
     info: colors.toast.info,
@@ -142,7 +152,7 @@ export function Toast({
             }
         })
         .onUpdate((event) => {
-            const drag = event.translationY;
+            const drag = applyResistance(event.translationY);
             const damped = drag > 0 ? drag * 0.25 : drag;
             const next = startY.value + damped;
             // allow a tiny downward move, but focus on upward swipe to dismiss
@@ -156,17 +166,6 @@ export function Toast({
                 runOnJS(onClose)();
             } else {
                 translateY.value = withSpring(0, SPRING);
-                if (onHoldEnd) {
-                    runOnJS(onHoldEnd)();
-                }
-            }
-        });
-
-    const holdTap = Gesture.Tap()
-        .maxDuration(10_000)
-        .onBegin(() => {
-            if (onHoldStart) {
-                runOnJS(onHoldStart)();
             }
         })
         .onFinalize(() => {
@@ -175,7 +174,7 @@ export function Toast({
             }
         });
 
-    const composedGesture = Gesture.Simultaneous(pan, holdTap);
+    const composedGesture = Gesture.Simultaneous(pan);
 
     const styleByType = TYPE_STYLES[type];
     const subtitleColor = useMemo(
@@ -197,7 +196,8 @@ export function Toast({
                     backgroundColor: styleByType.bg,
                     borderColor: styleByType.border,
                 },
-            ]}>
+            ]}
+            >
                     {renderContent ? (
                         renderContent
                     ) : (
@@ -228,17 +228,29 @@ export function Toast({
                             </View>
                             {(actions.length > 0 || showCloseButton) ? (
                                 <View style={styles.actions}>
-                                    {actions.map((action, index) => (
+                                    {actions
+                                        .filter((action) => action.label || action.iconName)
+                                        .map((action, index) => (
                                         <Pressable
-                                        key={`${action.label}-${index}`}
+                                        key={`${action.label ?? action.iconName ?? 'action'}-${index}`}
                                         onPress={() => handleActionPress(action)}
                                         style={({ pressed }) => ([
                                             styles.actionButton,
                                             pressed ? styles.actionButtonPressed : null,
                                         ])}>
-                                            <Text style={[styles.actionText, { color: styleByType.action }]}>
-                                                {action.label}
-                                            </Text>
+                                            <View style={styles.actionContent}>
+                                                {action.iconName && action.iconPosition !== 'right' && (
+                                                    <IonIcon name={action.iconName} size={16} color={styleByType.action} />
+                                                )}
+                                                {action.label ? (
+                                                    <Text style={[styles.actionText, { color: styleByType.action }]}>
+                                                        {action.label}
+                                                    </Text>
+                                                ) : null}
+                                                {action.iconName && action.iconPosition === 'right' && (
+                                                    <IonIcon name={action.iconName} size={16} color={styleByType.action} />
+                                                )}
+                                            </View>
                                         </Pressable>
                                     ))}
                                     {showCloseButton ? (
@@ -337,5 +349,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.xs,
+    },
+    actionContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
     },
 });

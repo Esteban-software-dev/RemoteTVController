@@ -46,6 +46,7 @@ export function useToast() {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
     const [state, setState] = useState<ToastState[]>([]);
+    const stateRef = useRef<ToastState[]>([]);
     const timeoutsRef = useRef<Record<string, any>>({});
     const MAX_VISIBLE = 5;
 
@@ -169,17 +170,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             });
         },
         hide: () => {
-            setState((prev) => {
-                if (!prev.length) return prev;
-                const top = prev[prev.length - 1];
-                return prev.map((t) => (
-                    t.id === top.id ? { ...t, visible: false, running: false } : t
-                ));
-            });
+            const current = stateRef.current;
+            if (!current.length) return;
+            const top = current[current.length - 1];
+            closeToast(top.id);
         },
     }), []);
 
     useEffect(() => {
+        stateRef.current = state;
         clearAllTimers();
         const tops = getTopByGroup(state);
         tops.forEach((top) => {

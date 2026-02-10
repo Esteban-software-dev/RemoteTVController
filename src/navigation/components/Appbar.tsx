@@ -1,5 +1,5 @@
 import { AUTO_COLLAPSE_DELAY, COLLAPSED_HEIGHT, COLLAPSED_WIDTH, EXPANDED_HEIGHT, EXPANDED_WIDTH, MAX_DRAG } from '../constants/appbarDimensions.constant';
-import { View, StyleSheet, PanResponder, Pressable, Text } from 'react-native';
+import { View, StyleSheet, PanResponder, Pressable, Text, Image } from 'react-native';
 import React, { useContext, useEffect, useRef } from 'react';
 import Animated, {
     useSharedValue,
@@ -18,14 +18,15 @@ import LinearGradient from 'react-native-linear-gradient';
 import { colors } from '@src/config/theme/colors/colors';
 import  { scheduleOnRN } from 'react-native-worklets'
 import { IonIcon } from '@src/shared/components/IonIcon';
-import { DrawerActions, useNavigation } from '@react-navigation/native';
+import { DrawerActions, NavigationProp, useNavigation } from '@react-navigation/native';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { RokuDeviceActionButton } from './RokuDeviceActionButton';
-import { powerRokuDevice } from '@src/features/scanner/services/roku-apps.service';
+import { getAppIconCached, powerRokuDevice } from '@src/features/scanner/services/roku-apps.service';
 import { fetchActiveRokuApp } from '@src/features/scanner/services/roku-device-info.service';
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import { t } from 'i18next';
+import { RootDrawerParamList } from '../navigators/DrawerNavigator';
 
 const applyResistance = (value: number) => {
     const abs = Math.abs(value);
@@ -49,7 +50,7 @@ const COLLAPSED_COLORS = {
     },
 };
 export function AppBar() {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp<RootDrawerParamList>>();
 
     const { selectedDevice, isOnline, isLoading, activeApp, setActiveApp } = useRokuSessionStore();
     const { setHeight } = useContext(AppBarLayoutContext);
@@ -388,7 +389,13 @@ export function AppBar() {
                                 onPressOut={() => {
                                     scale.value = withTiming(1, { duration: 120 });
                                 }}
-                                onPress={() => navigation.navigate('Tv scanner' as never)}>
+                                onPress={() => {
+                                    const targetScreen = activeApp?.id ? 'Smarthub' : 'Tv scanner';
+
+                                    navigation.navigate('Home', {
+                                        screen: targetScreen,
+                                    });
+                                }}>
                                     <Animated.View
                                     style={[
                                         styles.icon,
@@ -397,7 +404,10 @@ export function AppBar() {
                                         scaleAnimatedStyle
                                     ]}>
                                         <Animated.Text style={collapsedIconAnimatedStyle}>
-                                            <IonIcon name="tv" size={20} iconStyles={{color: collapsedIconAnimatedStyle.color}} />
+                                            <ActiveAppIcon
+                                                activeAppId={activeApp?.id}
+                                                color={collapsedIconAnimatedStyle.color}
+                                            />
                                         </Animated.Text>
                                     </Animated.View>
                                 </Pressable>
@@ -459,6 +469,33 @@ const renderMiniAction = (icon: IoniconsIconName) => (
     </Pressable>
 );
 
+function ActiveAppIcon({
+    activeAppId,
+    color,
+}: {
+    activeAppId?: string;
+    color: string;
+}) {
+    const { selectedDevice } = useRokuSessionStore();
+    const [hasError, setHasError] = React.useState(false);
+
+    if (!activeAppId || !selectedDevice || hasError) {
+        return <IonIcon name="tv" size={20} iconStyles={{ color }} />;
+    }
+
+    const uri = getAppIconCached(selectedDevice.deviceId, activeAppId, selectedDevice.ip);
+    if (!uri) {
+        return <IonIcon name="tv" size={20} iconStyles={{ color }} />;
+    }
+
+    return (
+        <Image
+            source={{ uri }}
+            style={{ width: '100%', height: '100%', borderRadius: 6 }}
+            onError={() => setHasError(true)}
+        />
+    );
+}
 
 const styles = StyleSheet.create({
     container: {

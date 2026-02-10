@@ -23,8 +23,8 @@ export function useRokuAppMenu() {
         const deviceId = selectedDevice.deviceId;
         const appIcon = getAppIconCached(deviceId, app.id, selectedDevice.ip);
         const deviceConfig = useAppCustomizationStore
-        .getState()
-        .getDeviceConfig(deviceId);
+            .getState()
+            .getDeviceConfig(deviceId);
 
         const isFavorite = rokuPreferencesService.existsInList(deviceConfig?.favorites ?? [], app.id);
         const isPinned = rokuPreferencesService.existsInList(deviceConfig?.pinned ?? [], app.id);
@@ -99,7 +99,7 @@ export function useRokuAppMenu() {
                                                 app: app.name,
                                             }),
                                             iconSource: appIcon ? { uri: appIcon } : undefined,
-                                        })
+                                        });
                                     }
                                 }
                             ],
