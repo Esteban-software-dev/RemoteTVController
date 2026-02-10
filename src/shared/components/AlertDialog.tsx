@@ -6,6 +6,7 @@ import { radius, spacing, typography } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import { IonIcon } from '@src/shared/components/IonIcon';
+import { getContrastColor } from '@src/config/theme/utils/contrast-color';
 
 export type AlertRole = 'cancel' | 'destructive' | 'default';
 
@@ -13,6 +14,7 @@ export type AlertButton = {
     label: string;
     role?: AlertRole;
     onPress?: () => void;
+    color?: string;
 };
 
 export type AlertPreset = 'default' | 'info' | 'success' | 'warning' | 'danger';
@@ -98,11 +100,13 @@ export function AlertDialog({
                                     styles.actionButton,
                                     pressed ? styles.actionPressed : null,
                                     btn.role === 'destructive' ? styles.actionDanger : null,
+                                    btn.color ? { backgroundColor: btn.color, borderColor: btn.color } : null,
                                 ])}>
                                     <Text style={[
                                         styles.actionText,
                                         btn.role === 'destructive' ? styles.actionDangerText : null,
                                         btn.role === 'cancel' ? styles.actionCancelText : null,
+                                        btn.color ? { color: getContrastColor(btn.color) } : null,
                                     ]}>
                                         {btn.label}
                                     </Text>
