@@ -17,6 +17,9 @@ export const navigatorResources = {
                 hiddenApps: {
                     title: 'Aplicaciones ocultas',
                 },
+                remoteControl: {
+                    title: 'Control remoto'
+                }
             },
 
             appbar: {
@@ -54,6 +57,9 @@ export const navigatorResources = {
                 hiddenApps: {
                     title: 'Hidden apps',
                 },
+                remoteControl: {
+                    title: 'Remote control'
+                }
             },
 
             appbar: {

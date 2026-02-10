@@ -115,11 +115,10 @@ export function SideMenu({
                         {/* Primary Actions */}
                         <View style={styles.primaryActions}>
                             <Text
-                                style={{
-                                    fontSize: typography.size.sm,
-                                    color: colors.text.inverted,
-                                }}
-                            >
+                            style={{
+                                fontSize: typography.size.sm,
+                                color: colors.text.inverted,
+                            }}>
                                 {t('drawer.section.navigation')}
                             </Text>
 

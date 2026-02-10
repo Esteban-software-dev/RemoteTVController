@@ -16,6 +16,7 @@ import { colors } from './config/theme/colors/colors';
 import { ToastProvider } from './shared/context/ToastContext';
 import { AlertProvider } from './shared/context/AlertContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { navigationRef } from './navigation/navigationRef';
 
 function App() {
   const [height, setHeight] = useState(EXPANDED_HEIGHT);
@@ -33,7 +34,7 @@ function App() {
           <BottomSheetProvider>
             <ToastProvider>
               <AlertProvider>
-                <NavigationContainer>
+                <NavigationContainer ref={navigationRef}>
                   <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.accent.purple.soft} />
                   <AppBarLayoutContext.Provider value={{ height, setHeight }}>
                     <AppBar />

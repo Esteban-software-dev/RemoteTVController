@@ -43,7 +43,8 @@ export function RouteItem({
         style={[
             styles.item,
             focused && styles.itemActive,
-            animatedStyle
+            animatedStyle,
+            options.drawerItemStyle
         ]}>
             {focused && <View style={styles.activeIndicator} />}
 

@@ -6,10 +6,12 @@ import { HiddenApps } from '@src/features/scanner/screens/HiddenApps';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { useTranslation } from 'react-i18next';
 import { RootBottomtabs } from './BottomTabNavigator';
+import { RemoteControl } from '@src/features/remote-control/screens/RemoteControl';
 
 export type RootDrawerParamList = {
     Home: NavigatorScreenParams<RootBottomtabs>;
     HiddenApps: undefined;
+    RemoteControl: undefined;
 };
 
 const Drawer = createDrawerNavigator();
@@ -49,6 +51,16 @@ export function DrawerNavigator() {
                     drawerIcon: ({ color, size }) => (
                         <IonIcon name="eye-off" color={color} size={size} />
                     ),
+                }}
+            />
+            <Drawer.Screen
+                name="RemoteControl"
+                component={RemoteControl}
+                options={{
+                    title: t('drawer.remoteControl.title'),
+                    drawerItemStyle: {
+                        display: 'none'
+                    }
                 }}
             />
         </Drawer.Navigator>
