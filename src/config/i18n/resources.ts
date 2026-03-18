@@ -5,6 +5,7 @@ import { tvScannerResources } from '@src/features/scanner/i18n/tv-scanner.i18n';
 import { settingsResources } from '@src/features/settings/i18n/settings.i18n';
 import { navigatorResources } from '@src/navigation/i18n/navigator.i18n';
 import { componentsResources } from '@src/shared/i18n/components.i18n';
+import { remoteControlResources } from '@src/features/remote-control/i18n/remote-control.i18n';
 
 export const resources = {
     es: {
@@ -16,6 +17,7 @@ export const resources = {
             ... settingsResources.es.translation,
             ... navigatorResources.es.translation,
             ... componentsResources.es.translation,
+            ... remoteControlResources.es.translation,
         },
     },
     en: {
@@ -27,6 +29,7 @@ export const resources = {
             ... settingsResources.en.translation,
             ... navigatorResources.en.translation,
             ... componentsResources.en.translation,
+            ... remoteControlResources.en.translation,
         },
     },
 } as const;
