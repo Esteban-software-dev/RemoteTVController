@@ -5,6 +5,7 @@
  * @returns string with 'rgba(r, g, b, alpha)' format
  */
 export function withOpacityHex(hexColor: string, alpha: number): string {
+    'worklet';
     let hex = hexColor.replace('#', '');
 
     if (hex.length === 3) {
