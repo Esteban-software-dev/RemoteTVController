@@ -35,6 +35,11 @@ export const GridApps = memo(({ apps, deviceId, deviceIp }: GridAppsProps) => {
                 appId={item.id}
                 deviceId={deviceId}
                 deviceIp={deviceIp}
+                appType={item.type}
+                version={item.version}
+                isLaunchable={item.isLaunchable}
+                isSystem={item.isSystem}
+                compact
                 onPress={() => onAppPress(item.id)}
                 onLongPress={() => openMenu(item)}
                 onMenuPress={() => openMenu(item)}

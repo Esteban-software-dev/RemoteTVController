@@ -5,10 +5,8 @@ import { RokuApp } from '../../interfaces/roku-app.interface';
 import { useRokuAppMenu } from '../../hooks/useRokuAppMenu';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { AppItem } from '../AppItem';
-import { IonIcon } from '@src/shared/components/IonIcon';
 import { colors } from '@src/config/theme/colors/colors';
 import { radius, spacing } from '@src/config/theme/tokens';
-import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { fetchActiveRokuApp } from '../../services/roku-device-info.service';
 import { ActiveApp } from '../../interfaces/active-app.interface';
 import { EmptyList } from '../EmptyList';
@@ -37,6 +35,11 @@ export const HorizontalAppsRow = memo(({ apps, deviceId, deviceIp }: HorizontalA
                     appId={item.id}
                     deviceId={deviceId}
                     deviceIp={deviceIp}
+                    appType={item.type}
+                    version={item.version}
+                    isLaunchable={item.isLaunchable}
+                    isSystem={item.isSystem}
+                    compact
                     onPress={() => onAppPress(item.id)}
                     onLongPress={() => openMenu(item)}
                     onMenuPress={() => openMenu(item)}
