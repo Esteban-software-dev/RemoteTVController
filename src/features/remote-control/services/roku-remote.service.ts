@@ -35,15 +35,20 @@ const COMMAND_ENDPOINTS: Record<RokuRemoteCommand, string> = {
     power: ROKU_API.KEY_PRESS.POWER,
 };
 
-export async function sendRokuRemoteCommand(ip: string, command: RokuRemoteCommand) {
-    if (!ip) return;
+export async function sendRokuRemoteCommand(ip: string, command: RokuRemoteCommand): Promise<boolean> {
+    if (!ip) return false;
 
     const endpoint = COMMAND_ENDPOINTS[command];
-    if (!endpoint) return;
+    if (!endpoint) return false;
 
     try {
-        await fetch(`${ROKU_API.BASE_URL(ip)}${endpoint}`, {
+        const response = await fetch(`${ROKU_API.BASE_URL(ip)}${endpoint}`, {
             method: 'POST',
         });
-    } catch (error) {}
+
+        console.log({response});
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
 }

@@ -4,7 +4,7 @@ import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { AppIcon } from '@src/features/scanner/components/AppIcon';
 import { RokuApp } from '@src/features/scanner/interfaces/roku-app.interface';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -16,6 +16,8 @@ interface PinnedQuickLaunchRowProps {
     onPress: (app: RokuApp) => void;
     emptyLabel: string;
     selectedAppId?: string;
+    loadingAppId?: string | null;
+    disabled?: boolean;
 }
 
 export function PinnedQuickLaunchRow({
@@ -23,6 +25,8 @@ export function PinnedQuickLaunchRow({
     onPress,
     emptyLabel,
     selectedAppId,
+    loadingAppId,
+    disabled = false,
 }: PinnedQuickLaunchRowProps) {
     if (!apps.length) {
         return (
@@ -45,6 +49,8 @@ export function PinnedQuickLaunchRow({
                     key={app.id}
                     app={app}
                     selected={selectedAppId === app.id}
+                    loading={loadingAppId === app.id}
+                    disabled={disabled}
                     onPress={() => onPress(app)}
                 />
             ))}
@@ -55,10 +61,14 @@ export function PinnedQuickLaunchRow({
 function QuickAppChip({
     app,
     selected = false,
+    loading = false,
+    disabled = false,
     onPress,
 }: {
     app: RokuApp;
     selected?: boolean;
+    loading?: boolean;
+    disabled?: boolean;
     onPress: () => void;
 }) {
     const scale = useSharedValue(1);
@@ -72,25 +82,37 @@ function QuickAppChip({
     return (
         <Animated.View style={[styles.itemWrap, animatedStyle]}>
             <Pressable
+            disabled={disabled || loading}
             onPress={onPress}
             onPressIn={() => {
+                if (disabled || loading) return;
                 scale.value = withTiming(0.94, { duration: 110 });
                 opacity.value = withTiming(0.88, { duration: 110 });
             }}
             onPressOut={() => {
+                if (disabled || loading) return;
                 scale.value = withTiming(1, { duration: 160 });
                 opacity.value = withTiming(1, { duration: 160 });
             }}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: disabled || loading, busy: loading, selected }}
+            accessibilityLabel={app.name}
             style={[
                 styles.item,
                 selected ? styles.itemSelected : null,
+                (disabled || loading) ? styles.itemDisabled : null,
             ]}>
                 <View style={styles.iconWrap}>
-                    <AppIcon
-                        name={app.name}
-                        appId={app.id}
-                        style={styles.icon}
-                    />
+                    {loading ? (
+                        <ActivityIndicator size="small" color={colors.accent.teal.strong} />
+                    ) : (
+                        <AppIcon
+                            name={app.name}
+                            appId={app.id}
+                            style={styles.icon}
+                        />
+                    )}
                 </View>
                 <Text
                     numberOfLines={1}
@@ -135,7 +157,13 @@ const styles = StyleSheet.create({
         borderColor: withOpacityHex(colors.accent.teal.strong, 0.75),
         backgroundColor: withOpacityHex(colors.accent.teal.strong, 0.14),
     },
+    itemDisabled: {
+        opacity: 0.58,
+    },
     iconWrap: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         width: 30,
         height: 30,
         borderRadius: radius.pill,

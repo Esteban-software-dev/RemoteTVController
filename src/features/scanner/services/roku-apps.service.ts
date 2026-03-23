@@ -10,14 +10,18 @@ export async function powerRokuDevice(ip: string) {
     } catch (error) {}
 }
 
-export async function launchRokuApp(ip: string, appId: string): Promise<void> {
-    if (!ip || !appId) return;
+export async function launchRokuApp(ip: string, appId: string): Promise<boolean> {
+    if (!ip || !appId) return false;
     try {
-        await fetch(
+        const response = await fetch(
             `${ROKU_API.BASE_URL(ip)}${ROKU_API.LAUNCH.APP(appId)}`,
             { method: 'POST' }
         );
-    } catch (error) {}
+
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
 }
 
 export function getAppIconCached(

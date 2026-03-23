@@ -1,25 +1,25 @@
 import { colors } from '@src/config/theme/colors/colors';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { getContrastColor } from '@src/config/theme/utils/contrast-color';
-import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import React, { useEffect } from 'react';
-import { Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
+import {
+    ActivityIndicator,
+    Insets,
+    Pressable,
+    StyleProp,
+    StyleSheet,
+    Text,
+    ViewStyle,
+} from 'react-native';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
-    withSpring,
     withTiming,
 } from 'react-native-reanimated';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-const SPRING_CONFIG = {
-    damping: 20,
-    stiffness: 200,
-    mass: 0.8,
-};
 
 interface RemoteActionButtonProps {
     iconName: IoniconsIconName;
@@ -30,6 +30,11 @@ interface RemoteActionButtonProps {
     variant?: 'soft' | 'filled';
     iconOnly?: boolean;
     style?: StyleProp<ViewStyle>;
+    disabled?: boolean;
+    loading?: boolean;
+    accessibilityLabel?: string;
+    accessibilityHint?: string;
+    hitSlop?: number | Insets;
 }
 
 export function RemoteActionButton({
@@ -41,6 +46,11 @@ export function RemoteActionButton({
     variant = 'soft',
     iconOnly = false,
     style,
+    disabled = false,
+    loading = false,
+    accessibilityLabel,
+    accessibilityHint,
+    hitSlop,
 }: RemoteActionButtonProps) {
     const sizeMap = {
         sm: { height: 42, minWidth: 42, icon: 16, px: spacing.sm },
@@ -50,13 +60,14 @@ export function RemoteActionButton({
 
     const filled = variant === 'filled';
     const contentColor = filled ? getContrastColor(color) : color;
+    const isDisabled = disabled || loading;
 
-    const scale = useSharedValue(0.9);
+    const scale = useSharedValue(0.96);
     const opacity = useSharedValue(0);
 
     useEffect(() => {
-        scale.value = withSpring(1, SPRING_CONFIG);
-        opacity.value = withTiming(1, { duration: 150 });
+        scale.value = withTiming(1, { duration: 140 });
+        opacity.value = withTiming(1, { duration: 140 });
     }, []);
 
     const animatedStyle = useAnimatedStyle(() => ({
@@ -66,33 +77,46 @@ export function RemoteActionButton({
 
     return (
         <AnimatedPressable
+            disabled={isDisabled}
             onPress={onPress}
             onPressIn={() => {
-                scale.value = withSpring(0.94, SPRING_CONFIG);
+                if (isDisabled) return;
+                scale.value = withTiming(0.96, { duration: 90 });
             }}
             onPressOut={() => {
-                scale.value = withSpring(1, SPRING_CONFIG);
+                if (isDisabled) return;
+                scale.value = withTiming(1, { duration: 120 });
             }}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isDisabled, busy: loading }}
+            accessibilityLabel={accessibilityLabel ?? label}
+            accessibilityHint={accessibilityHint}
+            hitSlop={hitSlop}
             style={[
                 styles.button,
+                isDisabled ? styles.buttonDisabled : null,
                 {
                     minHeight: sizeMap.height,
                     minWidth: sizeMap.minWidth,
                     paddingHorizontal: iconOnly ? 0 : sizeMap.px,
-                    borderColor: withOpacityHex(color, filled ? 0.88 : 0.45),
-                    backgroundColor: filled ? color : withOpacityHex(color, 0.1),
+                    borderColor: color,
+                    backgroundColor: filled ? color : colors.white.base,
                     borderRadius: size === 'lg' ? radius.lg : radius.md,
                     shadowColor: color,
-                    shadowOpacity: filled ? 0.25 : 0,
-                    shadowRadius: filled ? 10 : 0,
-                    shadowOffset: { width: 0, height: filled ? 4 : 0 },
-                    elevation: filled ? 6 : 0,
+                    shadowOpacity: filled ? 0.22 : 0.12,
+                    shadowRadius: filled ? 10 : 8,
+                    shadowOffset: { width: 0, height: filled ? 4 : 3 },
+                    elevation: filled ? 6 : 3,
                 },
                 animatedStyle,
                 style,
             ]}
         >
-            <IonIcon name={iconName} size={sizeMap.icon} color={contentColor} />
+            {loading ? (
+                <ActivityIndicator size="small" color={contentColor} />
+            ) : (
+                <IonIcon name={iconName} size={sizeMap.icon} color={contentColor} />
+            )}
             {label ? <Text style={[styles.label, { color: contentColor }]}>{label}</Text> : null}
         </AnimatedPressable>
     );
@@ -106,6 +130,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: spacing.xs,
+    },
+    buttonDisabled: {
+        opacity: 0.58,
     },
     label: {
         fontSize: 12,
