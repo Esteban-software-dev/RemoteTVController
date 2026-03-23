@@ -4,7 +4,7 @@ import './config/i18n';
 import { StatusBar, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EXPANDED_HEIGHT } from './navigation/constants/appbarDimensions.constant';
 import { AppBarLayoutContext } from './navigation/context/AppbarLayoutContext';
 import { DrawerNavigator } from './navigation/navigators/DrawerNavigator';
@@ -17,13 +17,42 @@ import { ToastProvider } from './shared/context/ToastContext';
 import { AlertProvider } from './shared/context/AlertContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { navigationRef } from './navigation/navigationRef';
+import { useRokuSessionStore } from './store/roku/roku-session.store';
+import { useAppCustomizationStore } from './store/roku/app-customization.store';
 
 function App() {
   const [height, setHeight] = useState(EXPANDED_HEIGHT);
+  const [isReady, setIsReady] = useState(false);
   const isDarkMode = useColorScheme() === 'dark';
 
   const { i18n } = useTranslation();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const hydrateStores = async () => {
+      await Promise.all([
+        useRokuSessionStore.getState().hydrate(),
+        useAppCustomizationStore.getState().hydrate(),
+      ]);
+
+      if (isMounted) {
+        setIsReady(true);
+      }
+    };
+
+    void hydrateStores();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   if (!i18n.isInitialized) {
+    return null;
+  }
+
+  if (!isReady) {
     return null;
   }
 

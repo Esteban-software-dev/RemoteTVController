@@ -58,9 +58,9 @@ export const GridApps = memo(({ apps, deviceIp }: GridAppsProps) => {
                     />
                 </View>
             }
-            initialNumToRender={6}
-            maxToRenderPerBatch={6}
-            windowSize={5}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            windowSize={8}
             removeClippedSubviews
         />
     );
