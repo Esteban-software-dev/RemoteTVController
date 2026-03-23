@@ -14,30 +14,33 @@ import { t } from 'i18next';
 
 interface GridAppsProps {
     apps: RokuApp[];
+    deviceId: string;
     deviceIp: string;
 }
 
-export const GridApps = memo(({ apps, deviceIp }: GridAppsProps) => {
-    const { setActiveApp } = useRokuSessionStore();
+export const GridApps = memo(({ apps, deviceId, deviceIp }: GridAppsProps) => {
+    const setActiveApp = useRokuSessionStore(s => s.setActiveApp);
     const { openMenu } = useRokuAppMenu();
 
     const onAppPress = async (deviceIp: string, appId: string) => {
-        await launchRokuApp(deviceIp, appId)
+        await launchRokuApp(deviceIp, appId);
         const launchedApp = await fetchActiveRokuApp(deviceIp);
         setActiveApp(launchedApp ?? {} as ActiveApp);
-    }
+    };
 
     const renderItem = useCallback(
         ({ item }: { item: RokuApp }) => (
             <AppItem
                 name={item.name}
                 appId={item.id}
+                deviceId={deviceId}
+                deviceIp={deviceIp}
                 onPress={() => onAppPress(deviceIp, item.id)}
                 onLongPress={() => openMenu(item)}
                 onMenuPress={() => openMenu(item)}
             />
         ),
-        [deviceIp]
+        [deviceId, deviceIp, openMenu]
     );
 
     return (
@@ -58,9 +61,6 @@ export const GridApps = memo(({ apps, deviceIp }: GridAppsProps) => {
                     />
                 </View>
             }
-            initialNumToRender={10}
-            maxToRenderPerBatch={10}
-            windowSize={8}
             removeClippedSubviews
         />
     );

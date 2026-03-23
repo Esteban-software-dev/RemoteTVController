@@ -36,6 +36,8 @@ export function useRokuAppMenu() {
                 <AppItem
                     appId={app.id}
                     name={app.name}
+                    deviceId={selectedDevice.deviceId}
+                    deviceIp={selectedDevice.ip}
                     selected
                 />
             ),

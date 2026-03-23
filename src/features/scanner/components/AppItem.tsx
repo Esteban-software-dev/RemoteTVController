@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Pressable, Image, GestureResponderEvent } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, StyleSheet, Pressable, GestureResponderEvent } from 'react-native';
+import React, { memo, useEffect } from 'react';
 import { Gradient } from '@src/shared/components/Gradient';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { colors } from '@src/config/theme/colors/colors';
@@ -14,6 +14,8 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 interface RokuAppItemProps {
     appId: string;
     name: string;
+    deviceId?: string;
+    deviceIp?: string;
     index?: number;
     selected?: boolean;
     disabled?: boolean;
@@ -22,9 +24,11 @@ interface RokuAppItemProps {
     onLongPress?: ({}: {e: GestureResponderEvent, appId: string}) => void;
 }
 
-export function AppItem({
+export const AppItem = memo(function AppItem({
     appId,
     name,
+    deviceId,
+    deviceIp,
     disabled,
     index,
     onPress,
@@ -86,6 +90,8 @@ export function AppItem({
           <AppIcon
             name={name}
             appId={appId}
+            deviceId={deviceId}
+            deviceIp={deviceIp}
             style={styles.appIcon}
           />
         </View>
@@ -99,8 +105,8 @@ export function AppItem({
         </Text>
       </View>
     </AnimatedPressable>
-  )
-}
+  );
+});
 
 const styles = StyleSheet.create({
   container: {

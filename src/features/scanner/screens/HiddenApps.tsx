@@ -141,6 +141,8 @@ export function HiddenApps() {
                                 <AppIcon
                                     appId={item.id}
                                     name={item.name}
+                                    deviceId={deviceId ?? ''}
+                                    deviceIp={deviceIp ?? ''}
                                     style={{ width: '90%', height: '90%', borderRadius: radius.sm }}
                                 />
                             }

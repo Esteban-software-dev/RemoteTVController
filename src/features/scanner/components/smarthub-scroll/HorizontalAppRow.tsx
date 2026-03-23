@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { launchRokuApp } from '../../services/roku-apps.service';
 import { RokuApp } from '../../interfaces/roku-app.interface';
 import { useRokuAppMenu } from '../../hooks/useRokuAppMenu';
@@ -16,17 +16,18 @@ import { globalStyles } from '@src/config/theme/styles/global.styles';
 
 interface HorizontalAppsRowProps {
     apps: RokuApp[];
+    deviceId: string;
     deviceIp: string;
 }
-export const HorizontalAppsRow = memo(({ apps, deviceIp }: HorizontalAppsRowProps) => {
-    const { selectedDevice, setActiveApp } = useRokuSessionStore();
+export const HorizontalAppsRow = memo(({ apps, deviceId, deviceIp }: HorizontalAppsRowProps) => {
+    const setActiveApp = useRokuSessionStore(s => s.setActiveApp);
     const { openMenu } = useRokuAppMenu();
 
     const onAppPress = async (deviceIp: string, appId: string) => {
-        await launchRokuApp(deviceIp, appId)
+        await launchRokuApp(deviceIp, appId);
         const launchedApp = await fetchActiveRokuApp(deviceIp);
         setActiveApp(launchedApp ?? {} as ActiveApp);
-    }
+    };
 
     const renderItem = useCallback(
         ({ item }: { item: RokuApp }) => (
@@ -34,13 +35,15 @@ export const HorizontalAppsRow = memo(({ apps, deviceIp }: HorizontalAppsRowProp
                 <AppItem
                     name={item.name}
                     appId={item.id}
+                    deviceId={deviceId}
+                    deviceIp={deviceIp}
                     onPress={() => onAppPress(deviceIp, item.id)}
                     onLongPress={() => openMenu(item)}
                     onMenuPress={() => openMenu(item)}
                 />
             </View>
         ),
-        [deviceIp, selectedDevice]
+        [deviceId, deviceIp, openMenu]
     );
 
     if (!apps.length) {

@@ -199,6 +199,8 @@ export function RemoteControl() {
                         apps={pinnedApps}
                         onPress={onLaunchPinned}
                         emptyLabel={t('remoteControl.pinned.empty')}
+                        deviceId={selectedDevice.deviceId}
+                        deviceIp={selectedDevice.ip}
                         selectedAppId={activeApp?.id}
                     />
                 </View>

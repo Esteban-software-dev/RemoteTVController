@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { SmartHubSectionType } from '../interfaces/section.types';
@@ -15,20 +15,32 @@ import { launchRokuApp } from '../services/roku-apps.service';
 import { fetchActiveRokuApp } from '../services/roku-device-info.service';
 import { ActiveApp } from '../interfaces/active-app.interface';
 import { AppBackground } from '@src/shared/components/AppBackground';
-import { filterHiddenApps } from '../services/roku-preferences.service';
+import { buildHiddenAppIds, filterAppsByHiddenIds } from '../services/roku-preferences.service';
 import { useTranslation } from 'react-i18next';
 
+
+const EMPTY_APPS: typeof defaultApps = [];
 
 export function SmartHub() {
     const { t } = useTranslation();
 
     const { navigation } = useBottomtabNavigation();
-    const { apps, setApps } = useRokuSessionStore();
-    const { selectedDevice, setActiveApp } = useRokuSessionStore();
+    const apps = useRokuSessionStore(s => s.apps ?? EMPTY_APPS);
+    const setApps = useRokuSessionStore(s => s.setApps);
+    const selectedDevice = useRokuSessionStore(s => s.selectedDevice);
+    const setActiveApp = useRokuSessionStore(s => s.setActiveApp);
 
-    const deviceId = useRokuSessionStore(s => s.selectedDevice?.deviceId);
-    const config = useAppCustomizationStore(s =>
-        deviceId ? s.byDevice[deviceId] : null,
+    const deviceId = selectedDevice?.deviceId ?? '';
+    const deviceIp = selectedDevice?.ip ?? '';
+
+    const favorites = useAppCustomizationStore(s =>
+        s.byDevice[deviceId]?.favorites ?? EMPTY_APPS
+    );
+    const pinned = useAppCustomizationStore(s =>
+        s.byDevice[deviceId]?.pinned ?? EMPTY_APPS
+    );
+    const hidden = useAppCustomizationStore(s =>
+        s.byDevice[deviceId]?.hidden ?? EMPTY_APPS
     );
 
     const onAppPress = async (deviceIp: string, appId: string) => {
@@ -37,28 +49,32 @@ export function SmartHub() {
         setActiveApp(launchedApp ?? ({} as ActiveApp));
     };
 
-    const sections: SmartHubSectionType[] = React.useMemo(() => {
+    const hiddenIds = useMemo(() => buildHiddenAppIds(hidden), [hidden]);
+    const visibleFavorites = useMemo(() => filterAppsByHiddenIds(favorites, hiddenIds), [favorites, hiddenIds]);
+    const visiblePinned = useMemo(() => filterAppsByHiddenIds(pinned, hiddenIds), [pinned, hiddenIds]);
+
+    const sections: SmartHubSectionType[] = useMemo(() => {
         return [
             {
                 type: 'favorites',
-                data: filterHiddenApps(deviceId ?? '', config?.favorites ?? []),
+                data: visibleFavorites,
                 title: t('smartHub.sections.favorites.title'),
                 subtitle: t('smartHub.sections.favorites.subtitle'),
                 iconName: 'heart',
                 scrollType: 'horizontal',
             },
-            ...buildAppsSections(apps ?? [], t),
+            ...buildAppsSections(filterAppsByHiddenIds(apps, hiddenIds), t),
         ];
-    }, [deviceId, config, apps, t]);
+    }, [apps, hiddenIds, t, visibleFavorites]);
 
     useEffect(() => {
         if (!selectedDevice) return;
-        if (apps && apps.length > 0) return;
+        if (apps.length > 0) return;
 
         setApps(defaultApps);
-    }, [selectedDevice]);
+    }, [apps.length, selectedDevice, setApps]);
 
-    if (!apps || !apps.length) {
+    if (!apps.length) {
         return (
             <NoRokuDevice
                 title={t('smartHub.noDevice.title')}
@@ -78,11 +94,17 @@ export function SmartHub() {
     return (
         <View style={[globalStyles.container, globalStyles.horizontalAppPadding]}>
             <AppBackground />
-            <SmartHubSectionList sections={sections} />
+            <SmartHubSectionList
+                sections={sections}
+                deviceId={deviceId}
+                deviceIp={deviceIp}
+            />
             <PinnedFabMenu
-                apps={filterHiddenApps(deviceId ?? '', config?.pinned ?? [])}
+                apps={visiblePinned}
+                deviceId={deviceId}
+                deviceIp={deviceIp}
                 onPress={app =>
-                    onAppPress(selectedDevice?.ip ?? '', app.id)
+                    onAppPress(deviceIp, app.id)
                 }
             />
         </View>
