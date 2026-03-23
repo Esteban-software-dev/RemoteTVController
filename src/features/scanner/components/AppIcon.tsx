@@ -11,7 +11,7 @@ interface AppIconProps {
     style?: StyleProp<ImageStyle>;
 }
 
-export const AppIcon = memo(function AppIcon({
+function AppIconComponent({
     name,
     appId,
     deviceId,
@@ -41,4 +41,14 @@ export const AppIcon = memo(function AppIcon({
             onError={() => setHasError(true)}
         />
     );
-});
+}
+
+export const AppIcon = memo(
+    AppIconComponent,
+    (prevProps, nextProps) =>
+        prevProps.appId === nextProps.appId &&
+        prevProps.name === nextProps.name &&
+        prevProps.deviceId === nextProps.deviceId &&
+        prevProps.deviceIp === nextProps.deviceIp &&
+        prevProps.style === nextProps.style
+);

@@ -22,11 +22,11 @@ export const GridApps = memo(({ apps, deviceId, deviceIp }: GridAppsProps) => {
     const setActiveApp = useRokuSessionStore(s => s.setActiveApp);
     const { openMenu } = useRokuAppMenu();
 
-    const onAppPress = async (deviceIp: string, appId: string) => {
+    const onAppPress = useCallback(async (appId: string) => {
         await launchRokuApp(deviceIp, appId);
         const launchedApp = await fetchActiveRokuApp(deviceIp);
         setActiveApp(launchedApp ?? {} as ActiveApp);
-    };
+    }, [deviceIp, setActiveApp]);
 
     const renderItem = useCallback(
         ({ item }: { item: RokuApp }) => (
@@ -35,12 +35,12 @@ export const GridApps = memo(({ apps, deviceId, deviceIp }: GridAppsProps) => {
                 appId={item.id}
                 deviceId={deviceId}
                 deviceIp={deviceIp}
-                onPress={() => onAppPress(deviceIp, item.id)}
+                onPress={() => onAppPress(item.id)}
                 onLongPress={() => openMenu(item)}
                 onMenuPress={() => openMenu(item)}
             />
         ),
-        [deviceId, deviceIp, openMenu]
+        [deviceId, deviceIp, onAppPress, openMenu]
     );
 
     return (

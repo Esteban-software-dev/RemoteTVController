@@ -23,11 +23,11 @@ export const HorizontalAppsRow = memo(({ apps, deviceId, deviceIp }: HorizontalA
     const setActiveApp = useRokuSessionStore(s => s.setActiveApp);
     const { openMenu } = useRokuAppMenu();
 
-    const onAppPress = async (deviceIp: string, appId: string) => {
+    const onAppPress = useCallback(async (appId: string) => {
         await launchRokuApp(deviceIp, appId);
         const launchedApp = await fetchActiveRokuApp(deviceIp);
         setActiveApp(launchedApp ?? {} as ActiveApp);
-    };
+    }, [deviceIp, setActiveApp]);
 
     const renderItem = useCallback(
         ({ item }: { item: RokuApp }) => (
@@ -37,13 +37,13 @@ export const HorizontalAppsRow = memo(({ apps, deviceId, deviceIp }: HorizontalA
                     appId={item.id}
                     deviceId={deviceId}
                     deviceIp={deviceIp}
-                    onPress={() => onAppPress(deviceIp, item.id)}
+                    onPress={() => onAppPress(item.id)}
                     onLongPress={() => openMenu(item)}
                     onMenuPress={() => openMenu(item)}
                 />
             </View>
         ),
-        [deviceId, deviceIp, openMenu]
+        [deviceId, deviceIp, onAppPress, openMenu]
     );
 
     if (!apps.length) {

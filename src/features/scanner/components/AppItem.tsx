@@ -24,7 +24,7 @@ interface RokuAppItemProps {
     onLongPress?: ({}: {e: GestureResponderEvent, appId: string}) => void;
 }
 
-export const AppItem = memo(function AppItem({
+function AppItemComponent({
     appId,
     name,
     deviceId,
@@ -51,9 +51,8 @@ export const AppItem = memo(function AppItem({
 
   return (
     <AnimatedPressable
-    key={index}
     pointerEvents={selected ? 'none' : 'auto'}
-    onPressIn={(e) => {
+    onPressIn={() => {
       if (selected) return;
       scale.value = withTiming(0.96, { duration: 90 });
     }}
@@ -106,7 +105,19 @@ export const AppItem = memo(function AppItem({
       </View>
     </AnimatedPressable>
   );
-});
+}
+
+export const AppItem = memo(
+  AppItemComponent,
+  (prevProps, nextProps) =>
+    prevProps.appId === nextProps.appId &&
+    prevProps.name === nextProps.name &&
+    prevProps.deviceId === nextProps.deviceId &&
+    prevProps.deviceIp === nextProps.deviceIp &&
+    prevProps.index === nextProps.index &&
+    prevProps.selected === nextProps.selected &&
+    prevProps.disabled === nextProps.disabled
+);
 
 const styles = StyleSheet.create({
   container: {
