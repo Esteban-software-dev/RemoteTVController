@@ -1,40 +1,51 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { SectionList, StyleSheet } from 'react-native';
-import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { SmartHubSectionType } from '../interfaces/section.types';
 import { HorizontalAppsRow } from './smarthub-scroll/HorizontalAppRow';
 import { GridApps } from './smarthub-scroll/GridApps';
 import { SectionHeader } from '@src/shared/components/SectionHeader';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import { spacing } from '@src/config/theme/tokens';
-import { RokuApp } from '../interfaces/roku-app.interface';
-import { filterHiddenApps } from '../services/roku-preferences.service';
 import { t } from 'i18next';
 
 interface SmartHubSectionListProps {
     sections: SmartHubSectionType[];
+    deviceId: string;
+    deviceIp: string;
 }
 
-export const SmartHubSectionList = memo(({ sections }: SmartHubSectionListProps) => {
+type RenderSection = Omit<SmartHubSectionType, 'data'> & {
+    data: [];
+    apps: SmartHubSectionType['data'];
+    itemCount: number;
+};
+
+export const SmartHubSectionList = memo(({ sections, deviceId, deviceIp }: SmartHubSectionListProps) => {
     const { top, bottom } = useSafeBarsArea();
-    const selectedDevice = useRokuSessionStore(s => s.selectedDevice);
 
     const sectionListData = useMemo(
         () =>
         sections.map(section => ({
             ...section,
-            data: [section.data],
+            data: [],
+            apps: section.data,
+            itemCount: section.data.length,
         })),
         [sections]
     );
 
-    const renderItem = useCallback(
-        ({ item, section }: {item: RokuApp[], section: any}) => {
+    const renderSectionFooter = useCallback(
+        ({ section }: { section: RenderSection }) => {
+            if (section.itemCount === 0) {
+                return null;
+            }
+
             if (section.type === 'favorites') {
                 return (
                     <HorizontalAppsRow
-                        apps={filterHiddenApps(selectedDevice?.deviceId ?? '', item)}
-                        deviceIp={selectedDevice?.ip ?? ''}
+                        apps={section.apps}
+                        deviceId={deviceId}
+                        deviceIp={deviceIp}
                     />
                 );
             }
@@ -42,21 +53,22 @@ export const SmartHubSectionList = memo(({ sections }: SmartHubSectionListProps)
             if (section.type === 'apps') {
                 return (
                     <GridApps
-                        apps={filterHiddenApps(selectedDevice?.deviceId ?? '', item)}
-                        deviceIp={selectedDevice?.ip ?? ''}
+                        apps={section.apps}
+                        deviceId={deviceId}
+                        deviceIp={deviceIp}
                     />
                 );
             }
             return null;
         },
-        [selectedDevice?.ip]
+        [deviceId, deviceIp]
     );
 
     return (
         <SectionList
-            sections={sectionListData}
+            sections={sectionListData as RenderSection[]}
             keyExtractor={(_, index) => String(index)}
-            renderItem={renderItem}
+            renderSectionFooter={renderSectionFooter}
             renderSectionHeader={({ section }) => (
                 <SectionHeader
                     containerStyle={{marginTop: spacing.md}}
@@ -64,7 +76,7 @@ export const SmartHubSectionList = memo(({ sections }: SmartHubSectionListProps)
                     subtitle={
                         section.type === 'favorites'
                             ? t('smartHub.sections.favorites.count', {
-                                count: section.data[0].length,
+                                count: section.itemCount,
                             })
                             : section.subtitle
                     }

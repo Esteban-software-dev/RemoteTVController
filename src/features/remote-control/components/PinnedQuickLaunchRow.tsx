@@ -15,6 +15,8 @@ interface PinnedQuickLaunchRowProps {
     apps: RokuApp[];
     onPress: (app: RokuApp) => void;
     emptyLabel: string;
+    deviceId?: string;
+    deviceIp?: string;
     selectedAppId?: string;
     loadingAppId?: string | null;
     disabled?: boolean;
@@ -24,6 +26,8 @@ export function PinnedQuickLaunchRow({
     apps,
     onPress,
     emptyLabel,
+    deviceId,
+    deviceIp,
     selectedAppId,
     loadingAppId,
     disabled = false,
@@ -48,6 +52,8 @@ export function PinnedQuickLaunchRow({
                 <QuickAppChip
                     key={app.id}
                     app={app}
+                    deviceId={deviceId}
+                    deviceIp={deviceIp}
                     selected={selectedAppId === app.id}
                     loading={loadingAppId === app.id}
                     disabled={disabled}
@@ -60,12 +66,16 @@ export function PinnedQuickLaunchRow({
 
 function QuickAppChip({
     app,
+    deviceId,
+    deviceIp,
     selected = false,
     loading = false,
     disabled = false,
     onPress,
 }: {
     app: RokuApp;
+    deviceId?: string;
+    deviceIp?: string;
     selected?: boolean;
     loading?: boolean;
     disabled?: boolean;
@@ -110,6 +120,8 @@ function QuickAppChip({
                         <AppIcon
                             name={app.name}
                             appId={app.id}
+                            deviceId={deviceId}
+                            deviceIp={deviceIp}
                             style={styles.icon}
                         />
                     )}

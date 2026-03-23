@@ -1,54 +1,105 @@
-import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types'
-import { RokuApp } from '@src/features/scanner/interfaces/roku-app.interface'
-import { ActiveApp } from '@src/features/scanner/interfaces/active-app.interface'
+import { create } from 'zustand';
+import {
+    RokuSessionPersistedState,
+    rokuStorageService,
+} from './roku-storage.service';
 
-type RokuSessionStore = {
-    selectedDevice: RokuDeviceInfo | null;
-    activeApp: ActiveApp | null;
-    apps: RokuApp[] | null;
-    isOnline: boolean;
-    isLoading: boolean;
+type RokuSessionStore = RokuSessionPersistedState & {
+    isHydrated: boolean;
 
-    selectDevice: (device: RokuDeviceInfo) => void;
-    setActiveApp: (app: ActiveApp) => void;
-    setApps: (apps: RokuApp[]) => void;
+    hydrate: () => Promise<void>;
+    selectDevice: (device: NonNullable<RokuSessionPersistedState['selectedDevice']>) => void;
+    setActiveApp: (app: NonNullable<RokuSessionPersistedState['activeApp']>) => void;
+    setApps: (apps: NonNullable<RokuSessionPersistedState['apps']>) => void;
     clearSession: () => void;
-}
+};
 
-export const useRokuSessionStore = create<RokuSessionStore>()(
-    persist(
-        (set) => ({
-            selectedDevice: null,
-            activeApp: null,
-            apps: null,
-            isOnline: false,
-            isLoading: false,
+const defaultSessionState: RokuSessionPersistedState = {
+    selectedDevice: null,
+    activeApp: null,
+    apps: null,
+    isOnline: false,
+    isLoading: false,
+};
 
-            selectDevice: (device) =>
-                set({
-                    selectedDevice: device,
-                    apps: null,
-                    isOnline: true,
-                }),
+const persistSession = (session: RokuSessionPersistedState) =>
+    rokuStorageService.saveSession(session);
 
-            setActiveApp: (app) => set({activeApp: app}),
+export const useRokuSessionStore = create<RokuSessionStore>()((set) => ({
+    ...defaultSessionState,
+    isHydrated: false,
 
-            setApps: (apps) => set({ apps }),
+    hydrate: async () => {
+        const storedState = await rokuStorageService.loadSession();
 
-            clearSession: () =>
-                set({
-                    selectedDevice: null,
-                    apps: null,
-                    isOnline: false,
-                    isLoading: false,
-                }),
+        set({
+            ...defaultSessionState,
+            ...storedState,
+            isHydrated: true,
+        });
+    },
+
+    selectDevice: (device) =>
+        set(state => {
+            const nextState = {
+                ...state,
+                selectedDevice: device,
+                apps: null,
+                isOnline: true,
+            };
+
+            void persistSession({
+                selectedDevice: nextState.selectedDevice,
+                activeApp: nextState.activeApp,
+                apps: nextState.apps,
+                isOnline: nextState.isOnline,
+                isLoading: nextState.isLoading,
+            });
+
+            return nextState;
         }),
-        {
-            name: 'roku-session',
-            storage: createJSONStorage(() => AsyncStorage),
-        }
-    )
-)
+
+    setActiveApp: (app) =>
+        set(state => {
+            const nextState = {
+                ...state,
+                activeApp: app,
+            };
+
+            void persistSession({
+                selectedDevice: nextState.selectedDevice,
+                activeApp: nextState.activeApp,
+                apps: nextState.apps,
+                isOnline: nextState.isOnline,
+                isLoading: nextState.isLoading,
+            });
+
+            return nextState;
+        }),
+
+    setApps: (apps) =>
+        set(state => {
+            const nextState = {
+                ...state,
+                apps,
+            };
+
+            void persistSession({
+                selectedDevice: nextState.selectedDevice,
+                activeApp: nextState.activeApp,
+                apps: nextState.apps,
+                isOnline: nextState.isOnline,
+                isLoading: nextState.isLoading,
+            });
+
+            return nextState;
+        }),
+
+    clearSession: () => {
+        void rokuStorageService.clearSession();
+        set({
+            ...defaultSessionState,
+            isHydrated: true,
+        });
+    },
+}));

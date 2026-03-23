@@ -1,23 +1,17 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RokuApp } from '@src/features/scanner/interfaces/roku-app.interface';
-import { SmartHubSectionType } from '@src/features/scanner/interfaces/section.types';
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
-
-type DeviceAppCustomization = {
-    pinned: RokuApp[];
-    favorites: RokuApp[];
-    hidden: RokuApp[];
-
-    layout: {
-        pinned: 'grid' | 'list';
-        favorites: 'grid' | 'carousel';
-    };
-};
+import {
+    createDefaultDeviceConfig,
+    DeviceAppCustomization,
+    DeviceAppCustomizationLayoutSection,
+    rokuStorageService,
+} from './roku-storage.service';
 
 type AppCustomizationStore = {
     byDevice: Record<string, DeviceAppCustomization>;
+    isHydrated: boolean;
 
+    hydrate: () => Promise<void>;
     getDeviceConfig: (deviceId: string) => DeviceAppCustomization;
 
     pinApp: (deviceId: string, app: RokuApp) => void;
@@ -31,23 +25,12 @@ type AppCustomizationStore = {
 
     setLayout: (
         deviceId: string,
-        section: Exclude<SmartHubSectionType['type'], 'recent' | 'apps'>,
+        section: DeviceAppCustomizationLayoutSection,
         layout: DeviceAppCustomization['layout'][keyof DeviceAppCustomization['layout']]
     ) => void;
 
     clearDeviceConfig: (deviceId: string) => void;
 };
-
-const defaultDeviceConfig = {
-    pinned: [],
-    favorites: [],
-    hidden: [],
-    layout: {
-        pinned: 'grid',
-        favorites: 'grid',
-    },
-};
-
 
 const upsertById = (list: RokuApp[], app: RokuApp) => {
     const exists = list.some(item => item.id === app.id);
@@ -56,131 +39,147 @@ const upsertById = (list: RokuApp[], app: RokuApp) => {
         : [...list, app];
 };
 
-export const useAppCustomizationStore = create<AppCustomizationStore>()(
-    persist(
-        (set, get) => ({
-            byDevice: {},
+export const useAppCustomizationStore = create<AppCustomizationStore>()((set, get) => ({
+    byDevice: {},
+    isHydrated: false,
 
-            getDeviceConfig: (deviceId) =>
-                get().byDevice[deviceId] ?? defaultDeviceConfig,
+    hydrate: async () => {
+        const storedState = await rokuStorageService.loadAppCustomization();
 
-            pinApp: (deviceId, app) =>
-                set(state => {
-                    const device = state.byDevice[deviceId] ?? defaultDeviceConfig;
+        set({
+            byDevice: storedState?.byDevice ?? {},
+            isHydrated: true,
+        });
+    },
 
-                    return {
-                        byDevice: {
-                            ...state.byDevice,
-                            [deviceId]: {
-                                ...device,
-                                pinned: upsertById(device.pinned, app),
-                            },
-                        },
-                    };
-                }),
+    getDeviceConfig: (deviceId) =>
+        get().byDevice[deviceId] ?? createDefaultDeviceConfig(),
 
-            unpinApp: (deviceId, appId) =>
-                set(state => {
-                    const device = state.byDevice[deviceId] ?? defaultDeviceConfig;
+    pinApp: (deviceId, app) =>
+        set(state => {
+            const device = state.byDevice[deviceId] ?? createDefaultDeviceConfig();
+            const byDevice = {
+                ...state.byDevice,
+                [deviceId]: {
+                    ...device,
+                    pinned: upsertById(device.pinned, app),
+                },
+            };
 
-                    return {
-                        byDevice: {
-                        ...state.byDevice,
-                        [deviceId]: {
-                            ...device,
-                            pinned: device.pinned.filter(app => app.id !== appId),
-                        },
-                        },
-                    };
-                }),
+            void rokuStorageService.saveAppCustomization({ byDevice });
 
-            addFavorite: (deviceId, app) =>
-                set(state => {
-                    const device = state.byDevice[deviceId] ?? defaultDeviceConfig;
-
-                    return {
-                        byDevice: {
-                        ...state.byDevice,
-                        [deviceId]: {
-                            ...device,
-                            favorites: upsertById(device.favorites, app),
-                        },
-                        },
-                    };
-                }),
-
-            removeFavorite: (deviceId, appId) =>
-                set(state => {
-                    const device = state.byDevice[deviceId] ?? defaultDeviceConfig;
-
-                    return {
-                        byDevice: {
-                        ...state.byDevice,
-                        [deviceId]: {
-                            ...device,
-                            favorites: device.favorites.filter(app => app.id !== appId),
-                        },
-                        },
-                    };
-                }),
-
-            hideApp: (deviceId, app) =>
-                set(state => {
-                    const device = state.byDevice[deviceId] ?? defaultDeviceConfig;
-
-                    return {
-                        byDevice: {
-                        ...state.byDevice,
-                        [deviceId]: {
-                            ...device,
-                            hidden: upsertById(device.hidden, app),
-                        },
-                        },
-                    };
-                }),
-
-            showApp: (deviceId, appId) =>
-                set(state => {
-                    const device = state.byDevice[deviceId] ?? defaultDeviceConfig;
-
-                    return {
-                        byDevice: {
-                        ...state.byDevice,
-                        [deviceId]: {
-                            ...device,
-                            hidden: device.hidden.filter(app => app.id !== appId),
-                        },
-                        },
-                    };
-                }),
-
-            setLayout: (deviceId, section, layout) =>
-                set(state => {
-                    const device = state.byDevice[deviceId] ?? defaultDeviceConfig;
-
-                    return {
-                        byDevice: {
-                        ...state.byDevice,
-                        [deviceId]: {
-                            ...device,
-                            layout: {
-                            ...device.layout,
-                            [section]: layout,
-                            },
-                        },
-                        },
-                    };
-                }),
-
-            clearDeviceConfig: (deviceId) =>
-                set(state => {
-                    const { [deviceId]: _, ...rest } = state.byDevice;
-                    return { byDevice: rest };
-                }),
+            return { byDevice };
         }),
-        {
-            name: 'app-customization',
-            storage: createJSONStorage(() => AsyncStorage),
-        }
-    )
-);
+
+    unpinApp: (deviceId, appId) =>
+        set(state => {
+            const device = state.byDevice[deviceId] ?? createDefaultDeviceConfig();
+            const byDevice = {
+                ...state.byDevice,
+                [deviceId]: {
+                    ...device,
+                    pinned: device.pinned.filter(app => app.id !== appId),
+                },
+            };
+
+            void rokuStorageService.saveAppCustomization({ byDevice });
+
+            return { byDevice };
+        }),
+
+    addFavorite: (deviceId, app) =>
+        set(state => {
+            const device = state.byDevice[deviceId] ?? createDefaultDeviceConfig();
+            const byDevice = {
+                ...state.byDevice,
+                [deviceId]: {
+                    ...device,
+                    favorites: upsertById(device.favorites, app),
+                },
+            };
+
+            void rokuStorageService.saveAppCustomization({ byDevice });
+
+            return { byDevice };
+        }),
+
+    removeFavorite: (deviceId, appId) =>
+        set(state => {
+            const device = state.byDevice[deviceId] ?? createDefaultDeviceConfig();
+            const byDevice = {
+                ...state.byDevice,
+                [deviceId]: {
+                    ...device,
+                    favorites: device.favorites.filter(app => app.id !== appId),
+                },
+            };
+
+            void rokuStorageService.saveAppCustomization({ byDevice });
+
+            return { byDevice };
+        }),
+
+    hideApp: (deviceId, app) =>
+        set(state => {
+            const device = state.byDevice[deviceId] ?? createDefaultDeviceConfig();
+            const byDevice = {
+                ...state.byDevice,
+                [deviceId]: {
+                    ...device,
+                    hidden: upsertById(device.hidden, app),
+                },
+            };
+
+            void rokuStorageService.saveAppCustomization({ byDevice });
+
+            return { byDevice };
+        }),
+
+    showApp: (deviceId, appId) =>
+        set(state => {
+            const device = state.byDevice[deviceId] ?? createDefaultDeviceConfig();
+            const byDevice = {
+                ...state.byDevice,
+                [deviceId]: {
+                    ...device,
+                    hidden: device.hidden.filter(app => app.id !== appId),
+                },
+            };
+
+            void rokuStorageService.saveAppCustomization({ byDevice });
+
+            return { byDevice };
+        }),
+
+    setLayout: (deviceId, section, layout) =>
+        set(state => {
+            const device = state.byDevice[deviceId] ?? createDefaultDeviceConfig();
+            const byDevice = {
+                ...state.byDevice,
+                [deviceId]: {
+                    ...device,
+                    layout: {
+                        ...device.layout,
+                        [section]: layout,
+                    },
+                },
+            };
+
+            void rokuStorageService.saveAppCustomization({ byDevice });
+
+            return { byDevice };
+        }),
+
+    clearDeviceConfig: (deviceId) =>
+        set(state => {
+            const { [deviceId]: _, ...rest } = state.byDevice;
+
+            if (Object.keys(rest).length === 0) {
+                void rokuStorageService.clearAppCustomization();
+            } else {
+                void rokuStorageService.saveAppCustomization({ byDevice: rest });
+            }
+
+            return { byDevice: rest };
+        }),
+}));

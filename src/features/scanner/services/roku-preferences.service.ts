@@ -37,8 +37,14 @@ export const rokuPreferencesService = {
     },
 };
 
-export function filterHiddenApps(deviceId: string, apps: RokuApp[]) {
-    const { getDeviceConfig } = useAppCustomizationStore.getState();
-    const { hidden } = getDeviceConfig(deviceId);
-    return apps.filter(app => !hidden.some(hApp => hApp.id === app.id));
+export function buildHiddenAppIds(apps: RokuApp[]) {
+    return new Set(apps.map(app => app.id));
+}
+
+export function filterAppsByHiddenIds(apps: RokuApp[], hiddenIds: Set<string>) {
+    if (hiddenIds.size === 0) {
+        return apps;
+    }
+
+    return apps.filter(app => !hiddenIds.has(app.id));
 }

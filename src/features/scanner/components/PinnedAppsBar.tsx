@@ -22,10 +22,14 @@ const ITEMS_PADDING = spacing.md;
 
 interface PinnedFabMenuProps {
     apps: RokuApp[];
+    deviceId: string;
+    deviceIp: string;
     onPress: (app: RokuApp) => void;
 }
 export function PinnedFabMenu({
     apps,
+    deviceId,
+    deviceIp,
     onPress
 }: PinnedFabMenuProps) {
     const { bottom } = useSafeBarsArea();
@@ -69,7 +73,7 @@ export function PinnedFabMenu({
 
             <Animated.View style={[styles.items, itemsAnim]}>
                 {apps.slice(0, MAX_ITEMS).map(app => (
-                    <PinnedAppButton app={app} onPress={onPress} key={app.id} />
+                    <PinnedAppButton app={app} deviceId={deviceId} deviceIp={deviceIp} onPress={onPress} key={app.id} />
                 ))}
             </Animated.View>
 
@@ -94,9 +98,13 @@ export function PinnedFabMenu({
 
 function PinnedAppButton({
     app,
+    deviceId,
+    deviceIp,
     onPress
 }: {
     app: RokuApp,
+    deviceId: string,
+    deviceIp: string,
     onPress: (app: RokuApp) => void,
 }) {
     const progress = useSharedValue(1);
@@ -116,7 +124,7 @@ function PinnedAppButton({
             }}
             onPress={() => onPress(app)}
             style={StyleSheet.absoluteFill}>
-                <AppIcon appId={app.id} name={app.name} style={styles.icon} />
+                <AppIcon appId={app.id} name={app.name} deviceId={deviceId} deviceIp={deviceIp} style={styles.icon} />
             </Pressable>
         </Animated.View>
     )
