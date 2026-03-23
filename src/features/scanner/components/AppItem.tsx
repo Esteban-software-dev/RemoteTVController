@@ -41,6 +41,7 @@ function CompactAppItem({
     selected,
     disabled,
     onPress,
+    onMenuPress,
     onLongPress,
 }: RokuAppItemProps) {
     const categoryLabel = isSystem
@@ -79,11 +80,16 @@ function CompactAppItem({
                     <Text style={styles.compactBadgeText}>{categoryLabel}</Text>
                 </View>
 
-                <View
-                    style={[
-                        styles.compactStatusDot,
-                        isLaunchable ? styles.compactStatusLive : styles.compactStatusOff,
-                    ]}
+                <SmallButton
+                    stopPropagation
+                    size="sm"
+                    iconName="ellipsis-horizontal"
+                    containerStyle={styles.compactMenuButton}
+                    color={colors.white.base}
+                    variant="ghost"
+                    hitSlop={8}
+                    onPress={onMenuPress}
+                    reduceAnimations
                 />
             </View>
 
@@ -259,6 +265,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: spacing.xs,
         marginBottom: spacing.xs,
+        position: 'absolute',
+        top: spacing.sm,
+        left: spacing.sm,
+        right: spacing.sm,
+        zIndex: 10,
     },
     compactBadge: {
         paddingHorizontal: 8,
@@ -266,7 +277,7 @@ const styles = StyleSheet.create({
         borderRadius: radius.pill,
     },
     compactBadgeApp: {
-        backgroundColor: withOpacityHex(colors.accent.purple.base, 0.22),
+        backgroundColor: withOpacityHex(colors.accent.purple.base, 0.50),
     },
     compactBadgeInput: {
         backgroundColor: withOpacityHex(colors.state.info, 0.18),
@@ -281,16 +292,11 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
         letterSpacing: 0.5,
     },
-    compactStatusDot: {
-        width: 10,
-        height: 10,
-        borderRadius: radius.pill,
-    },
-    compactStatusLive: {
-        backgroundColor: colors.state.success,
-    },
-    compactStatusOff: {
-        backgroundColor: withOpacityHex(colors.accent.gray.icon, 0.7),
+    compactMenuButton: {
+        minWidth: 28,
+        height: 28,
+        paddingHorizontal: 0,
+        backgroundColor: withOpacityHex(colors.dark.base, 0.60),
     },
     compactAppIcon: {
         width: '100%',
