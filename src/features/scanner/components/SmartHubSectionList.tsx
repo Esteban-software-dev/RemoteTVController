@@ -36,10 +36,6 @@ export const SmartHubSectionList = memo(({ sections, deviceId, deviceIp }: Smart
 
     const renderSectionFooter = useCallback(
         ({ section }: { section: RenderSection }) => {
-            if (section.itemCount === 0) {
-                return null;
-            }
-
             if (section.type === 'favorites') {
                 return (
                     <HorizontalAppsRow
@@ -51,6 +47,10 @@ export const SmartHubSectionList = memo(({ sections, deviceId, deviceIp }: Smart
             }
 
             if (section.type === 'apps') {
+                if (section.itemCount === 0) {
+                    return null;
+                }
+
                 return (
                     <GridApps
                         apps={section.apps}

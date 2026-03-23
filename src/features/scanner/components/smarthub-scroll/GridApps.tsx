@@ -61,7 +61,6 @@ export const GridApps = memo(({ apps, deviceId, deviceIp }: GridAppsProps) => {
                     />
                 </View>
             }
-            removeClippedSubviews
         />
     );
 });
