@@ -8,8 +8,6 @@ import { AppItem } from '../components/AppItem';
 import { getAppIconCached } from '../services/roku-apps.service';
 import { useToast } from '@src/shared/context/ToastContext';
 import { t } from 'i18next';
-import { AppIcon } from '../components/AppIcon';
-
 
 export function useRokuAppMenu() {
     const { open } = useContextMenu<RokuApp>();
@@ -39,6 +37,9 @@ export function useRokuAppMenu() {
                     deviceId={selectedDevice.deviceId}
                     deviceIp={selectedDevice.ip}
                     selected
+                    compact
+                    appType={app.type}
+                    version={app.version}
                 />
             ),
             actions: [

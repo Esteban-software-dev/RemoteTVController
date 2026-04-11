@@ -1,16 +1,20 @@
 import { View, Text, StyleSheet, Pressable, GestureResponderEvent } from 'react-native';
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import { Gradient } from '@src/shared/components/Gradient';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { colors } from '@src/config/theme/colors/colors';
 import { SmallButton } from '@src/shared/components/SmallButton';
+import { PressableFeedback } from '@src/shared/components/PressableFeedback';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
 import { getAppGradient } from '@src/config/theme/utils/gradient-generator';
+import {
+    androidRippleLightInkForeground,
+    iosPressOpacity,
+    PRESS_DELAY_SCROLL_FRIENDLY_MS,
+} from '@src/shared/ui/pressFeedback';
 import { AppIcon } from './AppIcon';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+import { formatVersion } from '@src/shared/utils/math.utils';
 
 interface RokuAppItemProps {
     appId: string;
@@ -44,6 +48,7 @@ function CompactAppItem({
     onMenuPress,
     onLongPress,
 }: RokuAppItemProps) {
+    const gradientConfig = getAppGradient(appId);
     const categoryLabel = isSystem
         ? 'System'
         : appType === 'menu'
@@ -57,22 +62,30 @@ function CompactAppItem({
             : styles.compactBadgeApp;
 
     return (
-        <Pressable
-            disabled={disabled}
-            pointerEvents={selected ? 'none' : 'auto'}
-            onPress={() => {
-                if (selected) return;
-                onPress?.(appId);
-            }}
-            onLongPress={(e: GestureResponderEvent) => {
-                onLongPress?.({ e, appId });
-            }}
-            delayLongPress={500}
-            style={[
-                styles.compactContainer,
-                selected ? styles.compactSelected : null,
-                disabled ? styles.compactDisabled : null,
-            ]}>
+        <PressableFeedback
+        disabled={disabled}
+        feedbackDisabled={!!disabled || !!selected}
+        pressDelayMs={PRESS_DELAY_SCROLL_FRIENDLY_MS}
+        pointerEvents={selected ? 'none' : 'auto'}
+        onPress={() => {
+            if (selected) return;
+            onPress?.(appId);
+        }}
+        onLongPress={(e: GestureResponderEvent) => {
+            onLongPress?.({ e, appId });
+        }}
+        delayLongPress={500}
+        android_ripple={androidRippleLightInkForeground({color: withOpacityHex(gradientConfig.colors[1], .50),})}
+        style={[
+            styles.compactContainer,
+            selected ? styles.compactSelected : null,
+            disabled ? styles.compactDisabled : null,
+        ]}>
+            <Gradient
+                colors={gradientConfig.colors}
+                start={gradientConfig.start}
+                end={gradientConfig.end}
+            />
             <View style={styles.compactGlow} />
 
             <View style={styles.compactTopRow}>
@@ -89,7 +102,6 @@ function CompactAppItem({
                     variant="ghost"
                     hitSlop={8}
                     onPress={onMenuPress}
-                    reduceAnimations
                 />
             </View>
 
@@ -104,23 +116,23 @@ function CompactAppItem({
             </View>
 
             <View style={styles.compactTextBlock}>
-                <Text style={styles.compactName} numberOfLines={2}>
+                <Text style={styles.compactName} numberOfLines={1}>
                     {name}
                 </Text>
 
                 <View style={styles.compactMetaRow}>
-                    {version ? (
-                        <View style={styles.compactVersionPill}>
-                            <Text style={styles.compactVersionText}>v{version}</Text>
-                        </View>
-                    ) : null}
 
                     <Text style={styles.compactHint} numberOfLines={1}>
                         {isSystem ? 'Roku service' : isLaunchable ? 'Ready to launch' : 'Unavailable'}
                     </Text>
+                    {version ? (
+                        <View style={styles.compactVersionPill}>
+                            <Text style={styles.compactVersionText}>v{formatVersion(version, 2)}</Text>
+                        </View>
+                    ) : null}
                 </View>
             </View>
-        </Pressable>
+        </PressableFeedback>
     );
 }
 
@@ -135,40 +147,27 @@ function RichAppItem({
     onLongPress,
     selected,
 }: RokuAppItemProps) {
-    const scale = useSharedValue(1);
-    const opacity = useSharedValue(1);
     const gradientConfig = getAppGradient(appId);
 
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-        opacity: opacity.value,
-    }));
-
-    useEffect(() => {
-        opacity.value = withTiming(disabled ? 0.6 : 1, { duration: 180 });
-    }, [disabled, opacity]);
-
     return (
-        <AnimatedPressable
+        <Pressable
             pointerEvents={selected ? 'none' : 'auto'}
-            onPressIn={() => {
-                if (selected) return;
-                scale.value = withTiming(0.96, { duration: 90 });
-            }}
-            onPressOut={() => {
-                if (selected) return;
-                scale.value = withTiming(1, { duration: 120 });
-            }}
             onPress={() => {
                 if (selected) return;
                 onPress?.(appId);
             }}
             onLongPress={(e: GestureResponderEvent) => {
-                scale.value = withTiming(1, { duration: 120 });
                 onLongPress?.({ e, appId });
             }}
             delayLongPress={500}
-            style={[globalStyles.shadow, styles.container, animatedStyle]}>
+            unstable_pressDelay={PRESS_DELAY_SCROLL_FRIENDLY_MS}
+            android_ripple={androidRippleLightInkForeground()}
+            style={({ pressed }) => [
+                globalStyles.shadow,
+                styles.container,
+                disabled ? styles.itemDisabled : null,
+                selected || disabled ? null : iosPressOpacity(pressed, false),
+            ]}>
             <Gradient
                 colors={gradientConfig.colors}
                 start={gradientConfig.start}
@@ -204,7 +203,7 @@ function RichAppItem({
                     Last used · 2 days ago
                 </Text>
             </View>
-        </AnimatedPressable>
+        </Pressable>
     );
 }
 
@@ -251,6 +250,9 @@ const styles = StyleSheet.create({
     compactDisabled: {
         opacity: 0.55,
     },
+    itemDisabled: {
+        opacity: 0.6,
+    },
     compactIconZone: {
         flex: 1,
         borderRadius: radius.md,
@@ -280,10 +282,10 @@ const styles = StyleSheet.create({
         backgroundColor: withOpacityHex(colors.accent.purple.base, 0.50),
     },
     compactBadgeInput: {
-        backgroundColor: withOpacityHex(colors.state.info, 0.18),
+        backgroundColor: withOpacityHex(colors.state.info, 0.50),
     },
     compactBadgeSystem: {
-        backgroundColor: withOpacityHex(colors.accent.teal.strong, 0.18),
+        backgroundColor: withOpacityHex(colors.accent.teal.strong, 0.50),
     },
     compactBadgeText: {
         fontSize: 9,

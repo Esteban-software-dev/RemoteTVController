@@ -2,7 +2,6 @@ import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import { Pressable, PressableProps, StyleSheet } from 'react-native';
 import Animated, {
     useAnimatedStyle,
-    useSharedValue,
     withTiming,
 } from 'react-native-reanimated';
 
@@ -12,6 +11,7 @@ import { radius } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { colors } from '@src/config/theme/colors/colors';
 import { getContrastColor } from '@src/config/theme/utils/contrast-color';
+import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 
 interface RokuDeviceActionButtonProps extends PressableProps {
     iconName: IoniconsIconName;
@@ -34,7 +34,6 @@ export function RokuDeviceActionButton({
     ...pressableProps
 }: RokuDeviceActionButtonProps) {
     const { selectedDevice } = useRokuSessionStore();
-    const scale = useSharedValue(1);
     const contrastIconColor = getContrastColor(color);
 
     const containerAnimatedStyle = useAnimatedStyle(() => {
@@ -50,23 +49,13 @@ export function RokuDeviceActionButton({
         };
     });
 
-    const pressAnimatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-    }));
-
     return (
         <Animated.View style={containerAnimatedStyle}>
             <Pressable
-            {...pressableProps}
-            disabled={disabled}
-            onPressIn={() => {
-                scale.value = withTiming(0.9, { duration: 120 });
-            }}
-            onPressOut={() => {
-                scale.value = withTiming(1, { duration: 120 });
-            }}>
-                <Animated.View
-                style={[
+                {...pressableProps}
+                disabled={disabled}
+                android_ripple={androidRipple({ color: withOpacityHex(contrastIconColor, 0.25) })}
+                style={({ pressed }) => [
                     styles.button,
                     {
                         width: size,
@@ -74,10 +63,9 @@ export function RokuDeviceActionButton({
                         borderRadius: size / 2.4,
                         backgroundColor: color,
                     },
-                    pressAnimatedStyle,
+                    disabled ? { opacity: 0.5 } : iosPressOpacity(pressed, false),
                 ]}>
-                    <IonIcon name={iconName} size={iconSize} color={contrastIconColor} />
-                </Animated.View>
+                <IonIcon name={iconName} size={iconSize} color={contrastIconColor} />
             </Pressable>
         </Animated.View>
     );
@@ -87,6 +75,7 @@ const styles = StyleSheet.create({
     button: {
         justifyContent: 'center',
         alignItems: 'center',
+        overflow: 'hidden',
 
         borderWidth: 1,
         borderColor: withOpacityHex(colors.dark.base, 0.1),

@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { RokuApp } from '../../interfaces/roku-app.interface';
 import { AppItem } from '../AppItem';
@@ -12,6 +12,23 @@ import { ActiveApp } from '../../interfaces/active-app.interface';
 import { EmptyList } from '../EmptyList';
 import { t } from 'i18next';
 
+/** Set to `false` to silence mount audit logs in dev. See `docs/smart-hub-performance.md`. */
+const GRID_APPS_MOUNT_AUDIT = __DEV__ && true;
+
+function GridAppMountTick({
+    onMount,
+    onUnmount,
+}: {
+    onMount: () => void;
+    onUnmount: () => void;
+}) {
+    useEffect(() => {
+        onMount();
+        return onUnmount;
+    }, [onMount, onUnmount]);
+    return null;
+}
+
 interface GridAppsProps {
     apps: RokuApp[];
     deviceId: string;
@@ -22,6 +39,27 @@ export const GridApps = memo(({ apps, deviceId, deviceIp }: GridAppsProps) => {
     const setActiveApp = useRokuSessionStore(s => s.setActiveApp);
     const { openMenu } = useRokuAppMenu();
 
+    const mountedCellsRef = useRef(0);
+    const bumpMount = useCallback(() => {
+        mountedCellsRef.current += 1;
+    }, []);
+    const bumpUnmount = useCallback(() => {
+        mountedCellsRef.current -= 1;
+    }, []);
+
+    useEffect(() => {
+        if (!GRID_APPS_MOUNT_AUDIT) {
+            return;
+        }
+        const timeoutId = setTimeout(() => {
+            console.log('[GridApps] mount audit', {
+                dataLength: apps.length,
+                mountedCells: mountedCellsRef.current,
+            });
+        }, 0);
+        return () => clearTimeout(timeoutId);
+    }, [apps]);
+
     const onAppPress = useCallback(async (appId: string) => {
         await launchRokuApp(deviceIp, appId);
         const launchedApp = await fetchActiveRokuApp(deviceIp);
@@ -30,22 +68,27 @@ export const GridApps = memo(({ apps, deviceId, deviceIp }: GridAppsProps) => {
 
     const renderItem = useCallback(
         ({ item }: { item: RokuApp }) => (
-            <AppItem
-                name={item.name}
-                appId={item.id}
-                deviceId={deviceId}
-                deviceIp={deviceIp}
-                appType={item.type}
-                version={item.version}
-                isLaunchable={item.isLaunchable}
-                isSystem={item.isSystem}
-                compact
-                onPress={() => onAppPress(item.id)}
-                onLongPress={() => openMenu(item)}
-                onMenuPress={() => openMenu(item)}
-            />
+            <>
+                {GRID_APPS_MOUNT_AUDIT && (
+                    <GridAppMountTick onMount={bumpMount} onUnmount={bumpUnmount} />
+                )}
+                <AppItem
+                    name={item.name}
+                    appId={item.id}
+                    deviceId={deviceId}
+                    deviceIp={deviceIp}
+                    appType={item.type}
+                    version={item.version}
+                    isLaunchable={item.isLaunchable}
+                    isSystem={item.isSystem}
+                    compact
+                    onPress={() => onAppPress(item.id)}
+                    onLongPress={() => openMenu(item)}
+                    onMenuPress={() => openMenu(item)}
+                />
+            </>
         ),
-        [deviceId, deviceIp, onAppPress, openMenu]
+        [bumpMount, bumpUnmount, deviceId, deviceIp, onAppPress, openMenu]
     );
 
     return (
@@ -66,6 +109,7 @@ export const GridApps = memo(({ apps, deviceId, deviceIp }: GridAppsProps) => {
                     />
                 </View>
             }
+            maxToRenderPerBatch={10}
         />
     );
 });

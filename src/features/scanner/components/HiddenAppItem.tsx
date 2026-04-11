@@ -6,17 +6,11 @@ import {
     ViewStyle,
 } from 'react-native';
 import React from 'react';
-import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from 'react-native-reanimated';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { colors } from '@src/config/theme/colors/colors';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { SmallButton } from '@src/shared/components/SmallButton';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 
 interface ActionItemProps {
     id: string;
@@ -24,7 +18,7 @@ interface ActionItemProps {
     subtitle?: string;
     onPress?: () => void;
 
-    /** Opcional */
+    /** Optional */
     icon?: React.ReactNode;
     actionLabel?: string;
     onAction?: (id: string) => void;
@@ -42,22 +36,15 @@ export function ActionItem({
     onAction,
     containerStyle,
 }: ActionItemProps) {
-    const scale = useSharedValue(1);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-    }));
-
     return (
-        <AnimatedPressable
-        onPressIn={() => {
-            scale.value = withTiming(0.985, { duration: 80 });
-        }}
-        onPressOut={() => {
-            scale.value = withTiming(1, { duration: 120 });
-        }}
+        <Pressable
         onPress={onPress}
-        style={[styles.container, animatedStyle, containerStyle]}>
+        android_ripple={androidRipple({ color: withOpacityHex(colors.dark.base, 0.08) })}
+        style={({ pressed }) => [
+            styles.container,
+            iosPressOpacity(pressed, false),
+            containerStyle,
+        ]}>
             {icon && <View style={styles.iconWrapper}>{icon}</View>}
 
             <View style={styles.textZone}>
@@ -81,7 +68,7 @@ export function ActionItem({
                     onPress={() => onAction(id)}
                 />
             )}
-        </AnimatedPressable>
+        </Pressable>
     );
 }
 
@@ -91,6 +78,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: spacing.sm,
         borderRadius: radius.md,
+        overflow: 'hidden',
         backgroundColor: withOpacityHex(colors.dark.base, 0.035),
         borderWidth: 1,
         borderColor: withOpacityHex(colors.dark.base, 0.06),

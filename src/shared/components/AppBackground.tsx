@@ -1,56 +1,12 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Dimensions } from 'react-native';
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withTiming,
-    withRepeat,
-    interpolate,
-} from 'react-native-reanimated';
+import { StyleSheet, Dimensions, Image } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
-const SCALE = 1.25;
-const EXTRA_X = width * (SCALE - 1);
-const EXTRA_Y = height * (SCALE - 1);
-
 export function AppBackground() {
-    const progress = useSharedValue(0);
-
-    useEffect(() => {
-        progress.value = withRepeat(
-            withTiming(1, { duration: 90000 }),
-            -1,
-            true
-        );
-    }, []);
-
-    const animatedStyle = useAnimatedStyle(() => {
-        const translateX = interpolate(
-            progress.value,
-            [0, 1],
-            [-EXTRA_X / 2, EXTRA_X / 2]
-        );
-
-        const translateY = interpolate(
-            progress.value,
-            [0, 1],
-            [-EXTRA_Y / 2, EXTRA_Y / 2]
-        );
-
-        return {
-            transform: [
-                { translateX },
-                { translateY },
-                { scale: SCALE },
-            ],
-        };
-    });
-
     return (
-        <Animated.Image
+        <Image
             source={require('@src/assets/backgrounds/background-image.png')}
-            style={[styles.image, animatedStyle]}
+            style={[styles.image]}
             resizeMode="cover"
             blurRadius={10}
         />

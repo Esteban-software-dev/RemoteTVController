@@ -1,9 +1,11 @@
 import { colors } from '@src/config/theme/colors/colors';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { getContrastColor } from '@src/config/theme/utils/contrast-color';
+import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { IonIcon } from '@src/shared/components/IonIcon';
+import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
     ActivityIndicator,
     Insets,
@@ -13,13 +15,6 @@ import {
     Text,
     ViewStyle,
 } from 'react-native';
-import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from 'react-native-reanimated';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface RemoteActionButtonProps {
     iconName: IoniconsIconName;
@@ -62,37 +57,21 @@ export function RemoteActionButton({
     const contentColor = filled ? getContrastColor(color) : color;
     const isDisabled = disabled || loading;
 
-    const scale = useSharedValue(0.96);
-    const opacity = useSharedValue(0);
-
-    useEffect(() => {
-        scale.value = withTiming(1, { duration: 140 });
-        opacity.value = withTiming(1, { duration: 140 });
-    }, []);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-        opacity: opacity.value,
-    }));
+    const ripple = filled
+        ? androidRipple({ color: withOpacityHex(colors.white.base, 0.22) })
+        : androidRipple({ color: withOpacityHex(color, 0.16) });
 
     return (
-        <AnimatedPressable
+        <Pressable
             disabled={isDisabled}
             onPress={onPress}
-            onPressIn={() => {
-                if (isDisabled) return;
-                scale.value = withTiming(0.96, { duration: 90 });
-            }}
-            onPressOut={() => {
-                if (isDisabled) return;
-                scale.value = withTiming(1, { duration: 120 });
-            }}
+            android_ripple={ripple}
             accessibilityRole="button"
             accessibilityState={{ disabled: isDisabled, busy: loading }}
             accessibilityLabel={accessibilityLabel ?? label}
             accessibilityHint={accessibilityHint}
             hitSlop={hitSlop}
-            style={[
+            style={({ pressed }) => [
                 styles.button,
                 isDisabled ? styles.buttonDisabled : null,
                 {
@@ -108,7 +87,7 @@ export function RemoteActionButton({
                     shadowOffset: { width: 0, height: filled ? 4 : 3 },
                     elevation: filled ? 6 : 3,
                 },
-                animatedStyle,
+                isDisabled ? null : iosPressOpacity(pressed, false),
                 style,
             ]}
         >
@@ -118,13 +97,14 @@ export function RemoteActionButton({
                 <IonIcon name={iconName} size={sizeMap.icon} color={contentColor} />
             )}
             {label ? <Text style={[styles.label, { color: contentColor }]}>{label}</Text> : null}
-        </AnimatedPressable>
+        </Pressable>
     );
 }
 
 const styles = StyleSheet.create({
     button: {
         borderRadius: radius.md,
+        overflow: 'hidden',
         borderWidth: 1,
         flexDirection: 'row',
         alignItems: 'center',

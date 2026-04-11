@@ -4,7 +4,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  interpolate,
 } from 'react-native-reanimated';
 
 import { IonIcon } from '@src/shared/components/IonIcon';
@@ -15,6 +14,7 @@ import { colors } from '@src/config/theme/colors/colors';
 import { spacing } from '@src/config/theme/tokens';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
+import { androidRippleOnLightInk, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const AnimatedBlurBackground = Animated.createAnimatedComponent(BlurBackground);
@@ -163,46 +163,15 @@ export function MenuItemButton({
   disabled,
   onPress,
 }: MenuItemButtonProps) {
-  const scale = useSharedValue(1);
-  const opacity = useSharedValue(1);
-  const disabledProgress = useSharedValue(disabled ? 1 : 0);
-
-  useEffect(() => {
-    disabledProgress.value = withTiming(disabled ? 1 : 0, { duration: 180 });
-  }, [disabled]);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    const disabledOpacity = interpolate(
-      disabledProgress.value,
-      [0, 1],
-      [1, 0.45]
-    );
-  
-    const disabledScale = interpolate(
-      disabledProgress.value,
-      [0, 1],
-      [1, 0.97]
-    );
-
-    return {
-      transform: [{ scale: scale.value * disabledScale }],
-      opacity: opacity.value * disabledOpacity,
-    };
-  });
-
   return (
-    <AnimatedPressable
+    <Pressable
     onPress={onPress}
-    onPressIn={() => {
-      scale.value = withTiming(0.96, { duration: 90 });
-      opacity.value = withTiming(0.85, { duration: 90 });
-    }}
-    onPressOut={() => {
-      scale.value = withTiming(1, { duration: 120 });
-      opacity.value = withTiming(1, { duration: 120 });
-    }}
     disabled={disabled}
-    style={[menuItemButtonStyles.container, animatedStyle]}>
+    android_ripple={androidRippleOnLightInk()}
+    style={({ pressed }) => [
+      menuItemButtonStyles.container,
+      disabled ? { opacity: 0.45 } : iosPressOpacity(pressed, false),
+    ]}>
       <View style={menuItemButtonStyles.content}>
         {icon && (
           <IonIcon
@@ -220,12 +189,13 @@ export function MenuItemButton({
           {label}
         </Text>
       </View>
-    </AnimatedPressable>
+    </Pressable>
   );
 }
 const menuItemButtonStyles = StyleSheet.create({
   container: {
     borderRadius: 12,
+    overflow: 'hidden',
   },
   content: {
     flexDirection: 'row',

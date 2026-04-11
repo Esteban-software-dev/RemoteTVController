@@ -71,8 +71,8 @@ export const HorizontalAppsRow = memo(({ apps, deviceId, deviceIp }: HorizontalA
                 offset: (110 + spacing.sm) * index,
                 index,
             })}
+            maxToRenderPerBatch={10}
         />
-
     );
 });
 

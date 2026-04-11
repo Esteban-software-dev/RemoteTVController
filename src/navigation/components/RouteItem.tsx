@@ -1,18 +1,12 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import React from 'react';
-import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-} from 'react-native-reanimated';
 import { DrawerContentComponentProps, DrawerNavigationOptions } from '@react-navigation/drawer';
 import { NavigationRoute, ParamListBase } from '@react-navigation/native';
 import { radius, spacing, typography } from '@src/config/theme/tokens';
 import { colors } from '@src/config/theme/colors/colors';
 import { globalStyles } from '../../config/theme/styles/global.styles';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 
 interface RouteItemProps {
     focused: boolean;
@@ -28,22 +22,15 @@ export function RouteItem({
     route
 }: RouteItemProps) {
 
-    const scale = useSharedValue(1);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }]
-    }));
-
     return (
-        <AnimatedPressable
+        <Pressable
         disabled={focused}
         onPress={() => navigation.navigate(route.name)}
-        onPressIn={() => scale.value = withSpring(0.97)}
-        onPressOut={() => scale.value = withSpring(1)}
-        style={[
+        android_ripple={androidRipple({ color: withOpacityHex(colors.accent.purple.base, 0.18) })}
+        style={({ pressed }) => [
             styles.item,
             focused && styles.itemActive,
-            animatedStyle,
+            focused ? null : iosPressOpacity(pressed, false),
             options.drawerItemStyle
         ]}>
             {focused && <View style={styles.activeIndicator} />}
@@ -63,7 +50,7 @@ export function RouteItem({
             ]}>
                 {options.title ?? route.name}
             </Text>
-        </AnimatedPressable>
+        </Pressable>
     );
 }
 
@@ -75,6 +62,7 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm + 3,
         paddingHorizontal: spacing.md,
         borderRadius: radius.md,
+        overflow: 'hidden',
 
         backgroundColor: colors.bone.base,
         borderWidth: 1,

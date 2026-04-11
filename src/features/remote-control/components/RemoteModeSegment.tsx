@@ -12,11 +12,11 @@ import {
 } from 'react-native';
 import Animated, {
     interpolateColor,
-    interpolate,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
 } from 'react-native-reanimated';
+import { androidRippleOnLightInk, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 
 type ControlMode = 'classic' | 'touch';
 
@@ -39,7 +39,6 @@ export function RemoteModeSegment({
 }: RemoteModeSegmentProps) {
     const [width, setWidth] = useState(0);
     const modeAnim = useSharedValue(value === 'classic' ? 0 : 1);
-    const interactionAnim = useSharedValue(0);
 
     useEffect(() => {
         modeAnim.value = withTiming(value === 'classic' ? 0 : 1, {
@@ -75,62 +74,32 @@ export function RemoteModeSegment({
         ),
     }));
 
-    const classicPressStyle = useAnimatedStyle(() => ({
-        transform: [
-            {
-                scale: interpolate(modeAnim.value, [0, 1], [1, 0.97]),
-            },
-            {
-                scale: interpolate(interactionAnim.value, [0, 1], [1, 0.985]),
-            },
-        ],
-    }));
-
-    const touchPressStyle = useAnimatedStyle(() => ({
-        transform: [
-            {
-                scale: interpolate(modeAnim.value, [0, 1], [0.97, 1]),
-            },
-            {
-                scale: interpolate(interactionAnim.value, [0, 1], [1, 0.985]),
-            },
-        ],
-    }));
+    const segmentRipple = androidRippleOnLightInk();
 
     return (
         <View style={[styles.wrap, style]} onLayout={onLayout}>
             <Animated.View style={[styles.thumb, thumbStyle]} />
-            <Animated.View style={[styles.segment, classicPressStyle]}>
+            <View style={styles.segment}>
                 <Pressable
-                style={styles.hitArea}
-                onPress={() => onChange('classic')}
-                onPressIn={() => {
-                    interactionAnim.value = withTiming(1, { duration: 100 });
-                }}
-                onPressOut={() => {
-                    interactionAnim.value = withTiming(0, { duration: 140 });
-                }}>
+                style={({ pressed }) => [styles.hitArea, styles.hitAreaClassic, iosPressOpacity(pressed, false)]}
+                android_ripple={segmentRipple}
+                onPress={() => onChange('classic')}>
                     <Animated.Text numberOfLines={1} style={[styles.label, classicTextStyle]}>
                         {classicLabel}
                     </Animated.Text>
                 </Pressable>
-            </Animated.View>
+            </View>
 
-            <Animated.View style={[styles.segment, touchPressStyle]}>
+            <View style={styles.segment}>
                 <Pressable
-                style={styles.hitArea}
-                onPress={() => onChange('touch')}
-                onPressIn={() => {
-                    interactionAnim.value = withTiming(1, { duration: 100 });
-                }}
-                onPressOut={() => {
-                    interactionAnim.value = withTiming(0, { duration: 140 });
-                }}>
+                style={({ pressed }) => [styles.hitArea, styles.hitAreaTouch, iosPressOpacity(pressed, false)]}
+                android_ripple={segmentRipple}
+                onPress={() => onChange('touch')}>
                     <Animated.Text numberOfLines={1} style={[styles.label, touchTextStyle]}>
                         {touchLabel}
                     </Animated.Text>
                 </Pressable>
-            </Animated.View>
+            </View>
         </View>
     );
 }
@@ -156,6 +125,7 @@ const styles = StyleSheet.create({
     segment: {
         flex: 1,
         zIndex: 1,
+        overflow: 'hidden',
     },
     hitArea: {
         flex: 1,
@@ -163,6 +133,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingVertical: spacing.xs + 2,
         paddingHorizontal: spacing.sm + 2,
+    },
+    hitAreaClassic: {
+        borderTopLeftRadius: radius.pill,
+        borderBottomLeftRadius: radius.pill,
+        overflow: 'hidden',
+    },
+    hitAreaTouch: {
+        borderTopRightRadius: radius.pill,
+        borderBottomRightRadius: radius.pill,
+        overflow: 'hidden',
     },
     label: {
         fontSize: 12,

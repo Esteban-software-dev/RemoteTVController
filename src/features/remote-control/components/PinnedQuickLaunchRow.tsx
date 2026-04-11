@@ -5,11 +5,7 @@ import { AppIcon } from '@src/features/scanner/components/AppIcon';
 import { RokuApp } from '@src/features/scanner/interfaces/roku-app.interface';
 import React from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from 'react-native-reanimated';
+import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 
 interface PinnedQuickLaunchRowProps {
     apps: RokuApp[];
@@ -81,37 +77,21 @@ function QuickAppChip({
     disabled?: boolean;
     onPress: () => void;
 }) {
-    const scale = useSharedValue(1);
-    const opacity = useSharedValue(1);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-        opacity: opacity.value,
-    }));
-
     return (
-        <Animated.View style={[styles.itemWrap, animatedStyle]}>
+        <View style={styles.itemWrap}>
             <Pressable
             disabled={disabled || loading}
             onPress={onPress}
-            onPressIn={() => {
-                if (disabled || loading) return;
-                scale.value = withTiming(0.94, { duration: 110 });
-                opacity.value = withTiming(0.88, { duration: 110 });
-            }}
-            onPressOut={() => {
-                if (disabled || loading) return;
-                scale.value = withTiming(1, { duration: 160 });
-                opacity.value = withTiming(1, { duration: 160 });
-            }}
+            android_ripple={androidRipple({ color: withOpacityHex(colors.accent.purple.base, 0.22) })}
             hitSlop={8}
             accessibilityRole="button"
             accessibilityState={{ disabled: disabled || loading, busy: loading, selected }}
             accessibilityLabel={app.name}
-            style={[
+            style={({ pressed }) => [
                 styles.item,
                 selected ? styles.itemSelected : null,
                 (disabled || loading) ? styles.itemDisabled : null,
+                disabled || loading ? null : iosPressOpacity(pressed, false),
             ]}>
                 <View style={styles.iconWrap}>
                     {loading ? (
@@ -136,7 +116,7 @@ function QuickAppChip({
                     {app.name}
                 </Text>
             </Pressable>
-        </Animated.View>
+        </View>
     );
 }
 

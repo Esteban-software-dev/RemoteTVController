@@ -10,6 +10,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { colors } from '@src/config/theme/colors/colors';
+import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { RokuApp } from '../interfaces/roku-app.interface';
 import { AppIcon } from './AppIcon';
 
@@ -36,7 +38,6 @@ export function PinnedFabMenu({
     const [collapsed, setCollapsed] = useState(false);
 
     const progress = useSharedValue(1);
-    const scale = useSharedValue(1);
 
     const maxItems = Math.min(apps.length, MAX_ITEMS);
     const itemsHeight = maxItems * ITEM_SIZE + (maxItems - 1) * ITEM_GAP + ITEMS_PADDING;
@@ -56,19 +57,14 @@ export function PinnedFabMenu({
         )
     }));
 
-    const onPressAnim = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-    }));
-
     const itemsAnim = useAnimatedStyle(() => ({
         opacity: progress.value,
-        display: progress.value === 0 ? 'none' : 'flex',
     }));
 
     if (!apps.length) return null;
 
     return (
-        <Animated.View style={[ styles.container, { bottom }, barAnim, onPressAnim ]}>
+        <Animated.View style={[ styles.container, { bottom }, barAnim ]}>
             <View style={styles.glow} />
 
             <Animated.View style={[styles.items, itemsAnim]}>
@@ -78,14 +74,9 @@ export function PinnedFabMenu({
             </Animated.View>
 
             <Pressable
-            onPressIn={() => {
-                scale.value = withTiming(!collapsed ? 0.99 : 0.96, { duration: 120 });
-            }}
-            onPressOut={() => {
-                scale.value = withTiming(1, { duration: 120 });
-            }}
             onPress={toggle}
-            style={styles.toggle}>
+            android_ripple={androidRipple({ color: withOpacityHex(colors.white.base, 0.16) })}
+            style={({ pressed }) => [styles.toggle, iosPressOpacity(pressed, false)]}>
                 <IonIcon
                     name={collapsed ? 'chevron-up' : 'chevron-down'}
                     size={18}
@@ -107,26 +98,13 @@ function PinnedAppButton({
     deviceIp: string,
     onPress: (app: RokuApp) => void,
 }) {
-    const progress = useSharedValue(1);
-
-    const pressAnimation = useAnimatedStyle(() => ({
-        transform: [{scale: progress.value}]
-    }));
-
     return (
-        <Animated.View style={[pressAnimation, styles.item]}>
-            <Pressable
-            onPressIn={() => {
-                progress.value = withTiming(.90, {duration: 150});
-            }}
-            onPressOut={() => {
-                progress.value = withTiming(1, {duration: 150});
-            }}
+        <Pressable
             onPress={() => onPress(app)}
-            style={StyleSheet.absoluteFill}>
+            android_ripple={androidRipple({ color: withOpacityHex(colors.accent.purple.base, 0.28) })}
+            style={({ pressed }) => [styles.item, iosPressOpacity(pressed, false)]}>
                 <AppIcon appId={app.id} name={app.name} deviceId={deviceId} deviceIp={deviceIp} style={styles.icon} />
-            </Pressable>
-        </Animated.View>
+        </Pressable>
     )
 }
 
@@ -159,6 +137,7 @@ const styles = StyleSheet.create({
         width: ITEM_SIZE,
         height: ITEM_SIZE,
         borderRadius: radius.md,
+        overflow: 'hidden',
         backgroundColor: colors.dark.surfaceItem,
         borderWidth: 1,
         borderColor: colors.accent.purple.base,
@@ -176,10 +155,11 @@ const styles = StyleSheet.create({
     },
     toggle: {
         height: TOGGLE_HEIGHT,
+        overflow: 'hidden',
         borderTopWidth: 1,
         borderColor: colors.dark.borderStrong,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: colors.dark.surfaceInset,
-    }
+    },
 });

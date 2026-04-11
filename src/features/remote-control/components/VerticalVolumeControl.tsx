@@ -1,20 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, {
-    runOnJS,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from 'react-native-reanimated';
+import Animated, { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@src/config/theme/colors/colors';
 import { radius, spacing } from '@src/config/theme/tokens';
-import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { VerticalProgressBar } from '@src/shared/components/VerticalProgressBar';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const TRACK_HEIGHT = 172;
 const DEFAULT_VALUE = 0.55;
@@ -49,8 +43,6 @@ export function VerticalVolumeControl({
 
     const progressSV = useSharedValue(initialProgress);
     const dragStartProgressSV = useSharedValue(initialProgress);
-    const upScale = useSharedValue(1);
-    const downScale = useSharedValue(1);
 
     useEffect(() => {
         if (typeof value !== 'number') return;
@@ -145,35 +137,27 @@ export function VerticalVolumeControl({
             runOnJS(endDrag)();
         });
 
-    const upButtonStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: upScale.value }],
-    }));
-
-    const downButtonStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: downScale.value }],
-    }));
+    const volumeRipple = androidRipple({ color: withOpacityHex(colors.accent.teal.strong, 0.28) });
 
     return (
         <View style={[styles.root, disabled ? styles.rootDisabled : null]}>
-            <AnimatedPressable
+            <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('remoteControl.actions.volumeUp')}
                 accessibilityHint={t('remoteControl.actions.volumeUpHint')}
                 accessibilityState={{ disabled }}
                 disabled={disabled}
                 hitSlop={10}
+                android_ripple={volumeRipple}
                 onPress={() => {
                     void handleButtonPress('up');
                 }}
-                onPressIn={() => {
-                    upScale.value = withTiming(1.08, { duration: 90 });
-                }}
-                onPressOut={() => {
-                    upScale.value = withTiming(1, { duration: 120 });
-                }}
-                style={[styles.iconButton, upButtonStyle]}>
+                style={({ pressed }) => [
+                    styles.iconButton,
+                    disabled ? null : iosPressOpacity(pressed, false),
+                ]}>
                 <IonIcon name="add" size={18} color={colors.accent.teal.strong} />
-            </AnimatedPressable>
+            </Pressable>
 
             <GestureDetector gesture={panGesture}>
                 <View
@@ -192,25 +176,23 @@ export function VerticalVolumeControl({
                 </View>
             </GestureDetector>
 
-            <AnimatedPressable
+            <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('remoteControl.actions.volumeDown')}
                 accessibilityHint={t('remoteControl.actions.volumeDownHint')}
                 accessibilityState={{ disabled }}
                 disabled={disabled}
                 hitSlop={10}
+                android_ripple={volumeRipple}
                 onPress={() => {
                     void handleButtonPress('down');
                 }}
-                onPressIn={() => {
-                    downScale.value = withTiming(1.08, { duration: 90 });
-                }}
-                onPressOut={() => {
-                    downScale.value = withTiming(1, { duration: 120 });
-                }}
-                style={[styles.iconButton, downButtonStyle]}>
+                style={({ pressed }) => [
+                    styles.iconButton,
+                    disabled ? null : iosPressOpacity(pressed, false),
+                ]}>
                 <IonIcon name="remove" size={18} color={colors.accent.teal.strong} />
-            </AnimatedPressable>
+            </Pressable>
         </View>
     );
 }
@@ -239,6 +221,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: radius.pill,
+        overflow: 'hidden',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: withOpacityHex(colors.accent.teal.strong, 0.08),

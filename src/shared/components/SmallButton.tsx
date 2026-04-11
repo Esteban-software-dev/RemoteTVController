@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, PressableProps, Text, ViewStyle, TextStyle, StyleProp } from 'react-native';
+import { androidRipple, iosPressOpacity, rippleClipStyle } from '@src/shared/ui/pressFeedback';
 import { colors } from '@src/config/theme/colors/colors';
 import { radius } from '@src/config/theme/tokens';
 import { IonIcon } from './IonIcon';
@@ -21,7 +22,6 @@ export interface SmallButtonProps extends PressableProps {
     containerStyle?: StyleProp<ViewStyle>;
     textStyle?: TextStyle;
     stopPropagation?: boolean;
-    reduceAnimations?: boolean;
 }
 
 export function SmallButton({
@@ -35,7 +35,6 @@ export function SmallButton({
     containerStyle,
     textStyle,
     stopPropagation = false,
-    reduceAnimations = false,
     ...pressableProps
 }: SmallButtonProps) {
     const isIconOnly = !!iconName && !label;
@@ -59,6 +58,7 @@ export function SmallButton({
     const baseStyle: ViewStyle = {
         ...sizeStyles,
         borderRadius: radius.sm,
+        ...rippleClipStyle,
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'row',
@@ -81,9 +81,15 @@ export function SmallButton({
                     borderWidth: 0,
                 };
 
+    const ripple =
+        variant === 'filled'
+            ? androidRipple({ color: withOpacityHex(colors.white.base, 0.22) })
+            : androidRipple({ color: withOpacityHex(color, 0.18) });
+
     return (
         <Pressable
         disabled={disabled}
+        android_ripple={ripple}
         onPressIn={(e) => {
             if (stopPropagation) {
                 e.stopPropagation();
@@ -92,12 +98,7 @@ export function SmallButton({
         style={({ pressed }) => [
             baseStyle,
             variantStyle,
-            disabled ? { opacity: 0.6 } : null,
-            pressed
-                ? reduceAnimations
-                    ? { opacity: 0.95 }
-                    : { transform: [{ scale: 0.98 }], opacity: 0.9 }
-                : null,
+            disabled ? { opacity: 0.6 } : iosPressOpacity(pressed, false),
             containerStyle,
         ]}
         {...pressableProps}>

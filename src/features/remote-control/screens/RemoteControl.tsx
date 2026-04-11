@@ -1,10 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-} from 'react-native-reanimated';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import { useTranslation } from 'react-i18next';
@@ -29,8 +24,7 @@ import { TrackpadSurface } from '../components/TrackpadSurface';
 import { VerticalVolumeControl } from '../components/VerticalVolumeControl';
 import { RokuRemoteCommand, sendRokuRemoteCommand } from '../services/roku-remote.service';
 import { GridButtonConfig, VoiceButtonProps } from '../data/interfaces/remote-control.interface';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 
 type ControlMode = 'classic' | 'touch';
 
@@ -47,38 +41,21 @@ function VoiceButton({
     accessibilityLabel,
     accessibilityHint,
 }: VoiceButtonProps) {
-    const scale = useSharedValue(1);
-    const opacity = useSharedValue(1);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-        opacity: opacity.value,
-    }));
-
     return (
-        <AnimatedPressable
+        <Pressable
             disabled={disabled}
             onPress={onPress}
-            onPressIn={() => {
-                if (disabled) return;
-                scale.value = withTiming(0.96, { duration: 90 });
-                opacity.value = withTiming(0.96, { duration: 90 });
-            }}
-            onPressOut={() => {
-                if (disabled) return;
-                scale.value = withTiming(1, { duration: 120 });
-                opacity.value = withTiming(1, { duration: 120 });
-            }}
+            android_ripple={androidRipple({ color: withOpacityHex(colors.accent.teal.strong, 0.28) })}
             accessibilityRole="button"
             accessibilityState={{ disabled, busy: isListening }}
             accessibilityLabel={accessibilityLabel}
             accessibilityHint={accessibilityHint}
             hitSlop={10}
-            style={[
+            style={({ pressed }) => [
                 styles.voiceMainButton,
                 isListening ? styles.voiceMainButtonActive : null,
                 disabled ? styles.voiceMainButtonDisabled : null,
-                animatedStyle,
+                disabled ? null : iosPressOpacity(pressed, false),
             ]}>
             <IonIcon
                 name={isListening ? 'mic-circle' : 'mic-outline'}
@@ -88,7 +65,7 @@ function VoiceButton({
             <Text style={[styles.voiceMainText, isListening ? styles.voiceMainTextActive : null]}>
                 {isListening ? listeningText : idleText}
             </Text>
-        </AnimatedPressable>
+        </Pressable>
     );
 }
 
@@ -112,9 +89,6 @@ export function RemoteControl() {
     const [isMuted, setIsMuted] = useState(false);
     const [optimisticVolume, setOptimisticVolume] = useState(0.55);
 
-    const muteScale = useSharedValue(1);
-    const muteOpacity = useSharedValue(1);
-
     const activeAppLabel = activeApp?.text?.trim() || t('remoteControl.connected.unknownApp');
     const isBusy = Boolean(pendingCommand || launchingAppId || isRefreshingApp);
     const isVolumeControlDisabled = Boolean(launchingAppId || isRefreshingApp);
@@ -125,11 +99,6 @@ export function RemoteControl() {
     const muteStatusLabel = isMuted
         ? t('remoteControl.states.muted')
         : t('remoteControl.states.volumeLevel', { value: Math.round(optimisticVolume * 100) });
-
-    const muteAnimatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: muteScale.value }],
-        opacity: muteOpacity.value,
-    }));
 
     const guardDevice = () => {
         if (selectedDevice) return selectedDevice;
@@ -483,7 +452,7 @@ export function RemoteControl() {
                                 accessibilityLabel={t('remoteControl.actions.power')}
                                 accessibilityHint={t('remoteControl.actions.powerHint')}
                             />
-                            <AnimatedPressable
+                            <Pressable
                             accessibilityRole="switch"
                             accessibilityState={{
                                 checked: isMuted,
@@ -492,20 +461,12 @@ export function RemoteControl() {
                             accessibilityLabel={t('remoteControl.actions.mute')}
                             accessibilityHint={t('remoteControl.actions.muteHint')}
                             onPress={onToggleMute}
-                            onPressIn={() => {
-                                if (mutePending || isBusy) return;
-                                muteScale.value = withTiming(0.96, { duration: 100 });
-                                muteOpacity.value = withTiming(0.97, { duration: 100 });
-                            }}
-                            onPressOut={() => {
-                                muteScale.value = withTiming(1, { duration: 180 });
-                                muteOpacity.value = withTiming(1, { duration: 180 });
-                            }}
-                            style={[
+                            android_ripple={androidRipple({ color: withOpacityHex(colors.accent.purple.base, 0.16) })}
+                            style={({ pressed }) => [
                                 styles.muteToggleCard,
                                 isMuted ? styles.muteToggleCardActive : null,
                                 mutePending || isBusy ? styles.muteToggleDisabled : null,
-                                muteAnimatedStyle,
+                                mutePending || isBusy ? null : iosPressOpacity(pressed, false),
                             ]}>
                                 <View style={styles.muteToggleLeft}>
                                     <View
@@ -536,7 +497,7 @@ export function RemoteControl() {
                                     trackColor={switchColors}
                                     thumbColor={colors.white.base}
                                 />
-                            </AnimatedPressable>
+                            </Pressable>
                         </View>
                     </View>
                     {mode === 'classic' ? (
@@ -1028,6 +989,7 @@ const styles = StyleSheet.create({
         flex: 1.2,
         minHeight: 58,
         borderRadius: radius.lg,
+        overflow: 'hidden',
         borderWidth: 1,
         borderColor: withOpacityHex(colors.accent.gray.icon, 0.18),
         backgroundColor: colors.white.base,
@@ -1105,6 +1067,7 @@ const styles = StyleSheet.create({
     voiceMainButton: {
         minHeight: 58,
         borderRadius: radius.lg,
+        overflow: 'hidden',
         borderWidth: 1.5,
         borderColor: colors.accent.teal.strong,
         backgroundColor: colors.white.base,

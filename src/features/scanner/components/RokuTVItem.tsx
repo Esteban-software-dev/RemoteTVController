@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
     View,
     Text,
@@ -6,20 +6,13 @@ import {
     ViewStyle,
     StyleSheet,
 } from 'react-native';
-import Animated, {
-    FadeInUp,
-    useSharedValue,
-    useAnimatedStyle,
-    withTiming,
-    interpolateColor,
-} from 'react-native-reanimated';
-
 import { colors } from '@src/config/theme/colors/colors';
 import { RokuDeviceInfo } from '@src/shared/ssdp/types/ssdp.types';
 import { GradientCard } from '@src/shared/components/GradientCard';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
+import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 
 interface TVDeviceItemProps extends RokuDeviceInfo {
     index?: number;
@@ -46,76 +39,45 @@ export function RokuTVItem({
     modelName,
     softwareVersion,
 }: TVDeviceItemProps) {
-    const scale = useSharedValue(1);
-    const selectedAnim = useSharedValue(selected ? 1 : 0);
     const activeDeviceBG = withOpacityHex(colors.green.base, .18)
-
-    useEffect(() => {
-        selectedAnim.value = withTiming(selected ? 1 : 0, {
-            duration: 220,
-        })
-    }, [selected]);
-
-    const animatedCardStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: scale.value }],
-        backgroundColor: interpolateColor(
-            selectedAnim.value,
-            [0, 1],
-            [colors.white.base, 'rgba(77, 109, 79, 0.08)']
-        ),
-        borderColor: interpolateColor(
-            selectedAnim.value,
-            [0, 1],
-            ['transparent', colors.green.base]
-        ),
-        opacity: disabled ? 0.45 : 1,
-    }));
-
-    const iconAnimatedStyle = useAnimatedStyle(() => ({
-        backgroundColor: interpolateColor(
-            selectedAnim.value,
-            [0, 1],
-            [colors.white.base, activeDeviceBG]
-        ),
-        borderColor: interpolateColor(
-            selectedAnim.value,
-            [0, 1],
-            [colors.dark.base, colors.green.base]
-        )
-    }));
-
     return (
-        <Animated.View entering={FadeInUp.delay(index * 40)}>
-            <Animated.View
-                style={[containerStyle, animatedCardStyle, { borderRadius: radius.lg }]}>
+        <View>
+            <View
+                style={[
+                    containerStyle,
+                    styles.cardContainer,
+                    disabled ? styles.cardDisabled : null,
+                    { borderRadius: radius.lg },
+                ]}>
                 <GradientCard>
-                    <Animated.View>
+                    <View>
                         <Pressable
                         disabled={disabled}
-                        onPress={() =>
+                        onPress={() => {
                             onPress?.({
                                 ip,
                                 friendlyDeviceName,
                                 modelName,
                                 softwareVersion,
                             } as RokuDeviceInfo)
-                        }
-                        onPressIn={() => {
-                            if (!disabled) {
-                                scale.value = withTiming(0.97, { duration: 90 })
-                            }
                         }}
-                        onPressOut={() => {
-                            scale.value = withTiming(1, { duration: 120 })
-                        }}
-                        style={styles.card}>
-                            <Animated.View style={[styles.icon, iconAnimatedStyle]}>
+                        android_ripple={androidRipple({ color: withOpacityHex(colors.dark.base, 0.1) })}
+                        style={({ pressed }) => [
+                            styles.card,
+                            disabled ? null : iosPressOpacity(pressed, false),
+                        ]}>
+                            <View
+                                style={[
+                                    styles.icon,
+                                    selected ? styles.iconSelected : null,
+                                    { backgroundColor: selected ? activeDeviceBG : colors.white.base }
+                                ]}>
                                 <IonIcon
                                     name="tv"
                                     size={18}
                                     color={selected ? colors.green.base : colors.dark.base}
                                 />
-                            </Animated.View>
+                            </View>
 
                             <View style={styles.info}>
                                 <Text
@@ -141,19 +103,29 @@ export function RokuTVItem({
                                 />
                             )}
                         </Pressable>
-                    </Animated.View>
+                    </View>
                 </GradientCard>
-            </Animated.View>
-        </Animated.View>
+            </View>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
+    cardContainer: {
+        backgroundColor: colors.white.base,
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
+    cardDisabled: {
+        opacity: 0.45,
+    },
     card: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: spacing.md,
         gap: spacing.md,
+        borderRadius: radius.lg,
+        overflow: 'hidden',
     },
     icon: {
         width: 36,
@@ -162,6 +134,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: .6
+    },
+    iconSelected: {
+        borderColor: colors.green.base,
     },
     info: {
         flex: 1,
