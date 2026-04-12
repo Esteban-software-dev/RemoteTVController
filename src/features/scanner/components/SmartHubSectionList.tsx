@@ -86,14 +86,8 @@ export const SmartHubSectionList = memo(({ sections, deviceId, deviceIp }: Smart
             )}
             stickySectionHeadersEnabled={false}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={[styles.container, { marginTop: top, paddingBottom: bottom + spacing.xxl + spacing.lg }]}
+            contentContainerStyle={{ top, paddingBottom: bottom }}
             removeClippedSubviews
         />
     );
-});
-
-const styles = StyleSheet.create({
-    container: {
-        paddingBottom: 32,
-    },
 });

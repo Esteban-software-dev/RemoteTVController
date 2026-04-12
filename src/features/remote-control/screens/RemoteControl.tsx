@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import { useTranslation } from 'react-i18next';
 import { AppBackground } from '@src/shared/components/AppBackground';
 import { colors } from '@src/config/theme/colors/colors';
@@ -23,8 +22,13 @@ import { RemoteModeSegment } from '../components/RemoteModeSegment';
 import { TrackpadSurface } from '../components/TrackpadSurface';
 import { VerticalVolumeControl } from '../components/VerticalVolumeControl';
 import { RokuRemoteCommand, sendRokuRemoteCommand } from '../services/roku-remote.service';
+import {
+    getDpadButtonLayout,
+    getNavigationControlsLayout,
+} from '../utils/navigation-controls-layout';
 import { GridButtonConfig, VoiceButtonProps } from '../data/interfaces/remote-control.interface';
 import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { normalizeSize } from '@src/config/theme/utils/normalize-size';
 
 type ControlMode = 'classic' | 'touch';
 
@@ -73,6 +77,62 @@ export function RemoteControl() {
     const { t } = useTranslation();
     const navigation = useNavigation<NavigationProp<RootDrawerParamList>>();
     const { show } = useToast();
+    const { width: windowWidth } = useWindowDimensions();
+    const navLayout = useMemo(
+        () => getNavigationControlsLayout(windowWidth),
+        [windowWidth],
+    );
+    const dpadKeys = useMemo(
+        () => getDpadButtonLayout(navLayout.dpadScale),
+        [navLayout.dpadScale],
+    );
+
+    const dpadLayoutStyles = useMemo(() => {
+        const k = dpadKeys;
+        return {
+            surface: {
+                width: navLayout.dpadSize,
+                height: navLayout.dpadSize,
+                borderRadius: navLayout.dpadBorderRadius,
+            },
+            up: {
+                top: k.edgeInset,
+                left: '50%' as const,
+                marginLeft: k.directionalOffset,
+                width: k.directionalSize,
+                height: k.directionalSize,
+            },
+            down: {
+                bottom: k.edgeInset,
+                left: '50%' as const,
+                marginLeft: k.directionalOffset,
+                width: k.directionalSize,
+                height: k.directionalSize,
+            },
+            left: {
+                left: k.edgeInset,
+                top: '50%' as const,
+                marginTop: k.directionalOffset,
+                width: k.directionalSize,
+                height: k.directionalSize,
+            },
+            right: {
+                right: k.edgeInset,
+                top: '50%' as const,
+                marginTop: k.directionalOffset,
+                width: k.directionalSize,
+                height: k.directionalSize,
+            },
+            center: {
+                top: '50%' as const,
+                left: '50%' as const,
+                marginLeft: k.centerOffset,
+                marginTop: k.centerOffset,
+                width: k.centerSize,
+                height: k.centerSize,
+            },
+        };
+    }, [dpadKeys, navLayout]);
 
     const { selectedDevice, activeApp, setActiveApp } = useRokuSessionStore();
     const deviceId = selectedDevice?.deviceId;
@@ -437,15 +497,13 @@ export function RemoteControl() {
 
                 <View style={styles.controlsCard}>
                     <Text style={styles.controlsTitle}>{t('remoteControl.sections.controls')}</Text>
-                    <View>
+                    <View style={styles.footerActionContainer}>
                         <View style={styles.footerActionsRow}>
                             <RemoteActionButton
                                 iconName="power"
-                                label={t('remoteControl.actions.power')}
                                 size="lg"
                                 variant="filled"
                                 color={colors.state.danger}
-                                style={styles.powerButtonCompact}
                                 loading={pendingCommand === 'power'}
                                 disabled={isBusy && pendingCommand !== 'power'}
                                 onPress={() => onSendCommand('power')}
@@ -506,8 +564,16 @@ export function RemoteControl() {
                                 <Text style={styles.groupTitle}>
                                     {t('remoteControl.groups.navigation')}
                                 </Text>
-                                <View style={styles.navigationControlsRow}>
-                                    <View style={styles.channelRailShell}>
+                                <View
+                                    style={[
+                                        styles.navigationControlsRow,
+                                        { gap: navLayout.columnGap },
+                                    ]}>
+                                    <View
+                                        style={[
+                                            styles.channelRailShell,
+                                            { width: navLayout.leftRailWidth, minWidth: navLayout.leftRailWidth },
+                                        ]}>
                                         <View style={styles.channelRail}>
                                             <RemoteActionButton
                                                 variant='soft'
@@ -538,12 +604,12 @@ export function RemoteControl() {
                                     </View>
 
                                     <View style={styles.centerPadWrapper}>
-                                        <View style={styles.dpad}>
+                                        <View style={[styles.dpad, dpadLayoutStyles.surface]}>
                                             <RemoteActionButton
                                                 iconName="chevron-up"
                                                 iconOnly
                                                 color={colors.accent.purple.base}
-                                                style={styles.dpadUp}
+                                                style={[styles.dpadKeyBase, dpadLayoutStyles.up]}
                                                 loading={pendingCommand === 'up'}
                                                 disabled={isBusy && pendingCommand !== 'up'}
                                                 onPress={() => onSendCommand('up')}
@@ -554,7 +620,7 @@ export function RemoteControl() {
                                                 iconName="chevron-back"
                                                 iconOnly
                                                 color={colors.accent.purple.base}
-                                                style={styles.dpadLeft}
+                                                style={[styles.dpadKeyBase, dpadLayoutStyles.left]}
                                                 loading={pendingCommand === 'left'}
                                                 disabled={isBusy && pendingCommand !== 'left'}
                                                 onPress={() => onSendCommand('left')}
@@ -566,7 +632,7 @@ export function RemoteControl() {
                                                 iconOnly
                                                 variant="filled"
                                                 color={colors.accent.purple.strong}
-                                                style={styles.dpadCenter}
+                                                style={[styles.dpadKeyBase, styles.dpadCenterFill, dpadLayoutStyles.center]}
                                                 loading={pendingCommand === 'select'}
                                                 disabled={isBusy && pendingCommand !== 'select'}
                                                 onPress={() => onSendCommand('select')}
@@ -578,7 +644,7 @@ export function RemoteControl() {
                                                 iconName="chevron-forward"
                                                 iconOnly
                                                 color={colors.accent.purple.base}
-                                                style={styles.dpadRight}
+                                                style={[styles.dpadKeyBase, dpadLayoutStyles.right]}
                                                 loading={pendingCommand === 'right'}
                                                 disabled={isBusy && pendingCommand !== 'right'}
                                                 onPress={() => onSendCommand('right')}
@@ -589,7 +655,7 @@ export function RemoteControl() {
                                                 iconName="chevron-down"
                                                 iconOnly
                                                 color={colors.accent.purple.base}
-                                                style={styles.dpadDown}
+                                                style={[styles.dpadKeyBase, dpadLayoutStyles.down]}
                                                 loading={pendingCommand === 'down'}
                                                 disabled={isBusy && pendingCommand !== 'down'}
                                                 onPress={() => onSendCommand('down')}
@@ -599,9 +665,14 @@ export function RemoteControl() {
                                         </View>
                                     </View>
 
-                                    <View style={styles.rightRailShell}>
+                                    <View
+                                        style={[
+                                            styles.rightRailShell,
+                                            { width: navLayout.rightRailWidth, minWidth: navLayout.rightRailWidth },
+                                        ]}>
                                         <View style={styles.rightVolumeRail}>
                                             <VerticalVolumeControl
+                                                layoutWidth={navLayout.rightRailWidth}
                                                 disabled={isVolumeControlDisabled}
                                                 onVolumeUp={() => sendVolumeCommand('volumeUp')}
                                                 onVolumeDown={() => sendVolumeCommand('volumeDown')}
@@ -708,7 +779,7 @@ export function RemoteControl() {
 const styles = StyleSheet.create({
     content: {
         paddingTop: spacing.sm,
-        paddingBottom: spacing.lg,
+        paddingBottom: normalizeSize(spacing.xl * 2.3),
         paddingHorizontal: spacing.sm,
         gap: spacing.sm,
     },
@@ -849,22 +920,16 @@ const styles = StyleSheet.create({
     },
     navigationControlsRow: {
         width: '100%',
-        minHeight: 250,
+        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
     },
     channelRailShell: {
-        position: 'absolute',
-        left: 0,
-        width: 72,
-        minHeight: 250,
+        flexShrink: 0,
         alignItems: 'center',
         justifyContent: 'center',
     },
     channelRail: {
         width: '100%',
-        minHeight: 250,
         alignItems: 'center',
         justifyContent: 'center',
         gap: spacing.sm,
@@ -876,22 +941,20 @@ const styles = StyleSheet.create({
         marginVertical: spacing.xs,
     },
     centerPadWrapper: {
-        width: 212,
-        minHeight: 250,
+        flex: 1,
+        minWidth: 0,
         alignItems: 'center',
         justifyContent: 'center',
     },
     rightRailShell: {
-        position: 'absolute',
-        right: 0,
-        width: 72,
-        minHeight: 250,
+        flexShrink: 0,
         alignItems: 'center',
         justifyContent: 'center',
+        maxWidth: '100%',
+        overflow: 'hidden',
     },
     rightVolumeRail: {
         width: '100%',
-        minHeight: 250,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -903,9 +966,6 @@ const styles = StyleSheet.create({
         letterSpacing: 0.6,
     },
     dpad: {
-        width: 212,
-        height: 212,
-        borderRadius: 32,
         backgroundColor: colors.bone.base,
         borderWidth: 1.5,
         borderColor: withOpacityHex(colors.accent.purple.base, 0.16),
@@ -916,46 +976,10 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         elevation: 3,
     },
-    dpadUp: {
+    dpadKeyBase: {
         position: 'absolute',
-        top: spacing.xs,
-        left: '50%',
-        marginLeft: -24,
-        width: 48,
-        height: 48,
     },
-    dpadDown: {
-        position: 'absolute',
-        bottom: spacing.xs,
-        left: '50%',
-        marginLeft: -24,
-        width: 48,
-        height: 48,
-    },
-    dpadLeft: {
-        position: 'absolute',
-        left: spacing.xs,
-        top: '50%',
-        marginTop: -24,
-        width: 48,
-        height: 48,
-    },
-    dpadRight: {
-        position: 'absolute',
-        right: spacing.xs,
-        top: '50%',
-        marginTop: -24,
-        width: 48,
-        height: 48,
-    },
-    dpadCenter: {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        marginLeft: -30,
-        marginTop: -30,
-        width: 60,
-        height: 60,
+    dpadCenterFill: {
         borderRadius: radius.pill,
         backgroundColor: colors.accent.purple.strong,
     },
@@ -980,15 +1004,19 @@ const styles = StyleSheet.create({
         minHeight: 52,
         paddingHorizontal: spacing.xs,
     },
+    footerActionContainer: {
+        height: '10%',
+        justifyContent: 'center',
+    },
     footerActionsRow: {
         flexDirection: 'row',
-        alignItems: 'stretch',
-        gap: spacing.sm,
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     muteToggleCard: {
-        flex: 1.2,
-        minHeight: 58,
-        borderRadius: radius.lg,
+        width: normalizeSize(200, 'width'),
+        height: '100%',
+        borderRadius: normalizeSize(radius.md),
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: withOpacityHex(colors.accent.gray.icon, 0.18),
@@ -1038,11 +1066,6 @@ const styles = StyleSheet.create({
         fontSize: 11,
         fontWeight: '600',
         color: withOpacityHex(colors.dark.base, 0.5),
-    },
-
-    powerButtonCompact: {
-        flex: 0.85,
-        minHeight: 58,
     },
     footerActionButton: {
         flex: 1,

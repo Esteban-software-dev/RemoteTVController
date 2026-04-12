@@ -91,7 +91,7 @@ export function Settings() {
             <ScrollView
             contentContainerStyle={[
                 styles.content,
-                { paddingTop: top, paddingBottom: bottom },
+                { top, paddingBottom: bottom },
             ]}
             showsVerticalScrollIndicator={false}>
                 <Text style={styles.title}>{t('settings.title')}</Text>
@@ -268,7 +268,6 @@ export function Settings() {
                     />
                 </SettingsSection>
             </ScrollView>
-
         </View>
     )
 }

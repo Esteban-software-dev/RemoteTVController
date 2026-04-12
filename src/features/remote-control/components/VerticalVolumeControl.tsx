@@ -1,16 +1,21 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
+import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@src/config/theme/colors/colors';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { VerticalProgressBar } from '@src/shared/components/VerticalProgressBar';
+import { roundToLayoutPixel } from '@src/config/theme/utils/normalize-size';
 
-const TRACK_HEIGHT = 172;
+const SHELL_WIDTH_DESIGN = 58;
+const TRACK_HEIGHT_DESIGN = 172;
+const TRACK_WIDTH_DESIGN = 22;
+const ICON_BUTTON_DESIGN = 40;
+const ICON_GLYPH_DESIGN = 18;
 const DEFAULT_VALUE = 0.55;
 const STEP_COUNT = 12;
 const EMIT_INTERVAL_MS = 120;
@@ -24,6 +29,8 @@ interface VerticalVolumeControlProps {
     value?: number;
     initialValue?: number;
     onPreviewChange?: (value: number) => void;
+    /** Shell width from navigation layout (default 58). Scales track + buttons on narrow screens. */
+    layoutWidth?: number;
 }
 
 export function VerticalVolumeControl({
@@ -33,8 +40,31 @@ export function VerticalVolumeControl({
     value,
     initialValue = DEFAULT_VALUE,
     onPreviewChange,
+    layoutWidth,
 }: VerticalVolumeControlProps) {
     const { t } = useTranslation();
+
+    const metrics = useMemo(() => {
+        const shellW = layoutWidth ?? SHELL_WIDTH_DESIGN;
+        const s = shellW / SHELL_WIDTH_DESIGN;
+        const trackHeight = Math.max(100, roundToLayoutPixel(TRACK_HEIGHT_DESIGN * s));
+        const trackWidth = Math.max(14, roundToLayoutPixel(TRACK_WIDTH_DESIGN * s));
+        const iconButtonSize = Math.max(30, roundToLayoutPixel(ICON_BUTTON_DESIGN * s));
+        const iconGlyph = Math.max(14, roundToLayoutPixel(ICON_GLYPH_DESIGN * s));
+        const padV = Math.max(spacing.xs, roundToLayoutPixel(spacing.sm * s));
+        const padH = Math.max(2, roundToLayoutPixel(spacing.xs * s));
+        const gap = Math.max(spacing.xs, roundToLayoutPixel(spacing.sm * s));
+        return {
+            shellW,
+            trackHeight,
+            trackWidth,
+            iconButtonSize,
+            iconGlyph,
+            padV,
+            padH,
+            gap,
+        };
+    }, [layoutWidth]);
     const initialProgress = clamp(value ?? initialValue);
 
     const progressRef = useRef(initialProgress);
@@ -43,6 +73,11 @@ export function VerticalVolumeControl({
 
     const progressSV = useSharedValue(initialProgress);
     const dragStartProgressSV = useSharedValue(initialProgress);
+    const trackHeightSV = useSharedValue(metrics.trackHeight);
+
+    useEffect(() => {
+        trackHeightSV.value = metrics.trackHeight;
+    }, [metrics.trackHeight, trackHeightSV]);
 
     useEffect(() => {
         if (typeof value !== 'number') return;
@@ -125,7 +160,9 @@ export function VerticalVolumeControl({
             runOnJS(beginDrag)();
         })
         .onUpdate((event) => {
-            const rawNext = dragStartProgressSV.value - event.translationY / TRACK_HEIGHT;
+            'worklet';
+            const rawNext =
+                dragStartProgressSV.value - event.translationY / trackHeightSV.value;
             const next = Math.max(0, Math.min(1, rawNext));
             progressSV.value = next;
             runOnJS(handleDragProgress)(next);
@@ -140,7 +177,17 @@ export function VerticalVolumeControl({
     const volumeRipple = androidRipple({ color: withOpacityHex(colors.accent.teal.strong, 0.28) });
 
     return (
-        <View style={[styles.root, disabled ? styles.rootDisabled : null]}>
+        <View
+            style={[
+                styles.root,
+                {
+                    width: metrics.shellW,
+                    paddingVertical: metrics.padV,
+                    paddingHorizontal: metrics.padH,
+                    gap: metrics.gap,
+                },
+                disabled ? styles.rootDisabled : null,
+            ]}>
             <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('remoteControl.actions.volumeUp')}
@@ -154,9 +201,13 @@ export function VerticalVolumeControl({
                 }}
                 style={({ pressed }) => [
                     styles.iconButton,
+                    {
+                        width: metrics.iconButtonSize,
+                        height: metrics.iconButtonSize,
+                    },
                     disabled ? null : iosPressOpacity(pressed, false),
                 ]}>
-                <IonIcon name="add" size={18} color={colors.accent.teal.strong} />
+                <IonIcon name="add" size={metrics.iconGlyph} color={colors.accent.teal.strong} />
             </Pressable>
 
             <GestureDetector gesture={panGesture}>
@@ -168,8 +219,8 @@ export function VerticalVolumeControl({
                     <VerticalProgressBar
                         progress={progressRef.current}
                         animatedProgress={progressSV}
-                        height={TRACK_HEIGHT}
-                        width={22}
+                        height={metrics.trackHeight}
+                        width={metrics.trackWidth}
                         trackColor={withOpacityHex(colors.accent.gray.base, 0.22)}
                         fillColor={colors.accent.teal.strong}
                     />
@@ -189,9 +240,13 @@ export function VerticalVolumeControl({
                 }}
                 style={({ pressed }) => [
                     styles.iconButton,
+                    {
+                        width: metrics.iconButtonSize,
+                        height: metrics.iconButtonSize,
+                    },
                     disabled ? null : iosPressOpacity(pressed, false),
                 ]}>
-                <IonIcon name="remove" size={18} color={colors.accent.teal.strong} />
+                <IonIcon name="remove" size={metrics.iconGlyph} color={colors.accent.teal.strong} />
             </Pressable>
         </View>
     );
@@ -199,12 +254,9 @@ export function VerticalVolumeControl({
 
 const styles = StyleSheet.create({
     root: {
-        width: 58,
+        alignSelf: 'center',
         borderRadius: radius.xl,
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.xs,
         alignItems: 'center',
-        gap: spacing.sm,
         backgroundColor: colors.white.base,
         borderWidth: 1,
         borderColor: withOpacityHex(colors.accent.gray.icon, 0.14),
@@ -218,8 +270,6 @@ const styles = StyleSheet.create({
         opacity: 0.55,
     },
     iconButton: {
-        width: 40,
-        height: 40,
         borderRadius: radius.pill,
         overflow: 'hidden',
         alignItems: 'center',
