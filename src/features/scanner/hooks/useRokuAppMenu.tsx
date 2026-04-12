@@ -1,13 +1,43 @@
-import { useCallback } from 'react';
-import { useContextMenu } from '@src/shared/context/ContextMenu';
-import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { useAppCustomizationStore } from '@src/store/roku/app-customization.store';
-import { RokuApp } from '../interfaces/roku-app.interface';
 import { rokuPreferencesService } from '../services/roku-preferences.service';
-import { AppItem } from '../components/AppItem';
+import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
+import { useContextMenu } from '@src/shared/context/ContextMenu';
 import { getAppIconCached } from '../services/roku-apps.service';
 import { useToast } from '@src/shared/context/ToastContext';
+import { RokuApp } from '../interfaces/roku-app.interface';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import { AppItem } from '../components/AppItem';
+import { useCallback, memo } from 'react';
 import { t } from 'i18next';
+import { getContextMenuPreviewTileSize } from '@src/config/theme/utils/normalize-size';
+
+/** Square hero tile so aspectRatio + borderRadius match the Smart Hub grid, without selection ring. */
+const ContextMenuAppPreview = memo(function ContextMenuAppPreview({
+    app,
+    deviceId,
+    deviceIp,
+}: {
+    app: RokuApp;
+    deviceId: string;
+    deviceIp: string;
+}) {
+    const { width: winW, height: winH } = useWindowDimensions();
+    const size = getContextMenuPreviewTileSize(winW, winH);
+
+    return (
+        <View pointerEvents="none" style={[styles.previewWrap, { width: size, height: size }]}>
+            <AppItem
+                appId={app.id}
+                name={app.name}
+                deviceId={deviceId}
+                deviceIp={deviceIp}
+                compact
+                appType={app.type}
+                version={app.version}
+            />
+        </View>
+    );
+});
 
 export function useRokuAppMenu() {
     const { open } = useContextMenu<RokuApp>();
@@ -31,15 +61,10 @@ export function useRokuAppMenu() {
         open({
             payload: app,
             renderTarget: () => (
-                <AppItem
-                    appId={app.id}
-                    name={app.name}
+                <ContextMenuAppPreview
+                    app={app}
                     deviceId={selectedDevice.deviceId}
                     deviceIp={selectedDevice.ip}
-                    selected
-                    compact
-                    appType={app.type}
-                    version={app.version}
                 />
             ),
             actions: [
@@ -113,9 +138,16 @@ export function useRokuAppMenu() {
                 },
             ],
         });
-    }, [selectedDevice]);
+    }, [selectedDevice, open, showToast]);
 
     return {
         openMenu
     };
 }
+
+const styles = StyleSheet.create({
+    previewWrap: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});

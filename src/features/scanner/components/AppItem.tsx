@@ -229,6 +229,8 @@ export const AppItem = memo(
 
 const styles = StyleSheet.create({
     compactContainer: {
+        width: '100%',
+        height: '100%',
         flex: 1,
         aspectRatio: 1,
         borderRadius: radius.lg,
@@ -343,6 +345,8 @@ const styles = StyleSheet.create({
         borderRadius: radius.xl,
         overflow: 'hidden',
         padding: spacing.sm,
+        width: '100%',
+        height: '100%'
     },
     moreButton: {
         position: 'absolute',

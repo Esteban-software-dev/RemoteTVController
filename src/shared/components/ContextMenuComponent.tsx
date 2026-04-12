@@ -59,7 +59,7 @@ export function ContextMenuComponent<T>({
 
     menuOpacity.value = withTiming(1, { duration: 200 });
     menuTranslateY.value = withTiming(0, { duration: 220 });
-  }, []);
+  }, [backdropOpacity, menuOpacity, menuTranslateY, targetOpacity, targetScale,targetTranslateY]);
 
   const close = () => {
     targetOpacity.value = withTiming(0, { duration: 120 });
@@ -80,8 +80,8 @@ export function ContextMenuComponent<T>({
       { translateY: targetTranslateY.value },
       { scale: targetScale.value },
     ],
-    width: 350,
-    height: 350
+    justifyContent: 'center',
+    alignItems: 'center',
   }));
 
   const menuStyle = useAnimatedStyle(() => ({
@@ -90,7 +90,7 @@ export function ContextMenuComponent<T>({
   }));
 
   return (
-    <View style={[StyleSheet.absoluteFill, { zIndex: 999 }]} pointerEvents="box-none">
+    <View style={[StyleSheet.absoluteFill, styles.backdropContainer]} pointerEvents="box-none">
       <AnimatedPressable style={[StyleSheet.absoluteFill, {backgroundColor: withOpacityHex(colors.dark.base, .7)}]} onPress={close}>
         {/* <AnimatedBlurBackground style={StyleSheet.absoluteFill} blurType="dark" /> */}
       </AnimatedPressable>
@@ -121,6 +121,7 @@ export function ContextMenuComponent<T>({
 }
 
 const styles = StyleSheet.create({
+  backdropContainer: { zIndex: 999 },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
