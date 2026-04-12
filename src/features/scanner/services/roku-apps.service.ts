@@ -13,12 +13,12 @@ export async function powerRokuDevice(ip: string) {
 export async function launchRokuApp(ip: string, appId: string): Promise<boolean> {
     if (!ip || !appId) return false;
     try {
-        // const response = await fetch(
-        //     `${ROKU_API.BASE_URL(ip)}${ROKU_API.LAUNCH.APP(appId)}`,
-        //     { method: 'POST' }
-        // );
+        const response = await fetch(
+            `${ROKU_API.BASE_URL(ip)}${ROKU_API.LAUNCH.APP(appId)}`,
+            { method: 'POST' }
+        );
 
-        return true;
+        return response.ok;
     } catch (error) {
         return false;
     }

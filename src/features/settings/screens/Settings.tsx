@@ -1,4 +1,4 @@
-import { Button, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import React, { useMemo, useState } from 'react';
 import { AppBackground } from '@src/shared/components/AppBackground';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
@@ -17,6 +17,7 @@ import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
 import { useBottomtabNavigation } from '@src/navigation/hooks/useBottomtabNavigation';
 import { useDrawerNavigation } from '@src/navigation/hooks/useDrawerNavigation';
 import { useToast } from '@src/shared/context/ToastContext';
+import { roundToLayoutPixel } from '@src/config/theme/utils/normalize-size';
 
 export function Settings() {
     const { t, i18n } = useTranslation();
@@ -91,7 +92,7 @@ export function Settings() {
             <ScrollView
             contentContainerStyle={[
                 styles.content,
-                { top, paddingBottom: bottom },
+                { top, paddingBottom: roundToLayoutPixel(bottom + spacing.xl) },
             ]}
             showsVerticalScrollIndicator={false}>
                 <Text style={styles.title}>{t('settings.title')}</Text>

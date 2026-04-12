@@ -28,7 +28,7 @@ import {
 } from '../utils/navigation-controls-layout';
 import { GridButtonConfig, VoiceButtonProps } from '../data/interfaces/remote-control.interface';
 import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
-import { normalizeSize } from '@src/config/theme/utils/normalize-size';
+import { normalizeSize, roundToLayoutPixel } from '@src/config/theme/utils/normalize-size';
 
 type ControlMode = 'classic' | 'touch';
 
@@ -779,7 +779,7 @@ export function RemoteControl() {
 const styles = StyleSheet.create({
     content: {
         paddingTop: spacing.sm,
-        paddingBottom: normalizeSize(spacing.xl * 2.3),
+        paddingBottom: roundToLayoutPixel(spacing.xl * spacing.xxs),
         paddingHorizontal: spacing.sm,
         gap: spacing.sm,
     },

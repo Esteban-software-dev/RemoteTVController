@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo } from 'react';
-import { SectionList, StyleSheet } from 'react-native';
+import { SectionList } from 'react-native';
 import { SmartHubSectionType } from '../interfaces/section.types';
 import { HorizontalAppsRow } from './smarthub-scroll/HorizontalAppRow';
 import { GridApps } from './smarthub-scroll/GridApps';
@@ -7,6 +7,7 @@ import { SectionHeader } from '@src/shared/components/SectionHeader';
 import { useSafeBarsArea } from '@src/navigation/hooks/useSafeBarsArea';
 import { spacing } from '@src/config/theme/tokens';
 import { t } from 'i18next';
+import { roundToLayoutPixel } from '@src/config/theme/utils/normalize-size';
 
 interface SmartHubSectionListProps {
     sections: SmartHubSectionType[];
@@ -86,7 +87,10 @@ export const SmartHubSectionList = memo(({ sections, deviceId, deviceIp }: Smart
             )}
             stickySectionHeadersEnabled={false}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ top, paddingBottom: bottom }}
+            contentContainerStyle={{
+                top,
+                paddingBottom: roundToLayoutPixel(bottom + spacing.xl * 1.6),
+            }}
             removeClippedSubviews
         />
     );

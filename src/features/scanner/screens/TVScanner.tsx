@@ -131,7 +131,7 @@ export function TVScanner() {
             />
 
             <FlatList
-                contentContainerStyle={{ paddingBottom: bottom }}
+                contentContainerStyle={{ paddingBottom: bottom + spacing.lg }}
                 data={devices}
                 keyExtractor={(item: RokuDeviceInfo) => item.ip}
                 renderItem={({ item }) => (

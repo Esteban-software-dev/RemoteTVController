@@ -64,7 +64,8 @@ export function PinnedFabMenu({
     if (!apps.length) return null;
 
     return (
-        <Animated.View style={[ styles.container, { bottom }, barAnim ]}>
+        <Animated.View
+            style={[styles.container, { bottom: bottom - spacing.md }, barAnim]}>
             <View style={styles.glow} />
 
             <Animated.View style={[styles.items, itemsAnim]}>
