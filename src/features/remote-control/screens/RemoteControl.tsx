@@ -199,7 +199,7 @@ export function RemoteControl() {
 
             setActiveApp(refreshedApp);
             return refreshedApp;
-        } catch (error) {
+        } catch {
             if (showFailureToast) {
                 show({
                     type: 'danger',
@@ -228,7 +228,7 @@ export function RemoteControl() {
             if (!sent) {
                 throw new Error('remote-command-failed');
             }
-        } catch (error) {
+        } catch {
             show({
                 type: 'danger',
                 align: 'top',
@@ -264,7 +264,7 @@ export function RemoteControl() {
                 iconName: 'apps',
                 duration: 1600,
             });
-        } catch (error) {
+        } catch {
             show({
                 type: 'danger',
                 align: 'top',
@@ -308,7 +308,7 @@ export function RemoteControl() {
             if (!sent) {
                 throw new Error('mute-command-failed');
             }
-        } catch (error) {
+        } catch {
             setIsMuted(!nextMuted);
             show({
                 type: 'danger',

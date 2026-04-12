@@ -1,6 +1,6 @@
 // useRokuScanner.ts
 import { useRokuStore } from '@src/store/roku/roku.store';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { scanAndFetchRokus } from '../services/roku-scanner.service';
 
 export function useRokuScanner() {
@@ -8,19 +8,22 @@ export function useRokuScanner() {
     const clear = useRokuStore(state => state.clearDevices);
 
     const [scanning, setScanning] = useState(false);
+    const scanningRef = useRef(false);
 
     const scan = useCallback(async () => {
-        if (scanning) return;
+        if (scanningRef.current) return;
 
+        scanningRef.current = true;
         setScanning(true);
         clear();
 
         try {
             await scanAndFetchRokus();
         } finally {
+            scanningRef.current = false;
             setScanning(false);
         }
-    }, [scanning, clear]);
+    }, [clear]);
 
     return {
         devices,

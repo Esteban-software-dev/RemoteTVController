@@ -40,7 +40,7 @@ export function TVScanner() {
 
     useEffect(() => {
         scan();
-    }, []);
+    }, [scan]);
 
     const setSelectedRoku = async (rokuDevice: RokuDeviceInfo) => {
         if (selectedDevice?.modelName === rokuDevice.modelName) return;
@@ -100,20 +100,19 @@ export function TVScanner() {
             <SectionHeader
                 title={t('tvScanner.devices.title')}
                 subtitle={
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center'
+                    }}>
                         {scanning && (
                             <ActivityIndicator
                                 size="small"
                                 color={withOpacityHex(colors.dark.base, 0.6)}
-                                style={{ marginRight: 6 }}
+                                style={{ marginRight: spacing.xs }}
                             />
                         )}
                         <Text
-                            style={{
-                                fontSize: 13,
-                                color: withOpacityHex(colors.dark.base, 0.6),
-                            }}
-                        >
+                        style={styles.deviceSubtitle}>
                             {devicesSubtitle}
                         </Text>
                     </View>
@@ -172,4 +171,8 @@ const styles = StyleSheet.create({
         borderColor: withOpacityHex(colors.accent.purple.dark, 0.5),
         marginBottom: spacing.md,
     },
+    deviceSubtitle: {
+        fontSize: 13,
+        color: withOpacityHex(colors.dark.base, 0.6),
+    }
 });
