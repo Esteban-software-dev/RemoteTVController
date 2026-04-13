@@ -48,7 +48,7 @@ export async function sendRokuRemoteCommand(ip: string, command: RokuRemoteComma
 
         console.log({response});
         return response.ok;
-    } catch (error) {
+    } catch {
         return false;
     }
 }

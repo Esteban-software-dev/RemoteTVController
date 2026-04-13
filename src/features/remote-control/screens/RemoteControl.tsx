@@ -30,6 +30,7 @@ import { GridButtonConfig, VoiceButtonProps } from '../data/interfaces/remote-co
 import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 import { normalizeSize, roundToLayoutPixel } from '@src/config/theme/utils/normalize-size';
 import { PressableFeedback } from '@src/shared/components/PressableFeedback';
+import { Fab } from '@src/shared/components/Fab';
 
 type ControlMode = 'classic' | 'touch';
 
@@ -773,6 +774,19 @@ export function RemoteControl() {
                     </View>
                 </View>
             </ScrollView>
+
+            <Fab
+            vertical="bottom"
+            horizontal="end"
+            size='md'
+            onPress={() => {
+                
+            }}
+            safeArea={false}
+            inset={{ bottom: spacing.sm, right: spacing.sm }}
+            color={colors.accent.purple.strong}
+            icon='search-outline'
+            iconColor={colors.white.base} />
         </View>
     );
 }
