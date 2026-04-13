@@ -5,6 +5,8 @@ export const ROKU_API = {
         DEVICE_INFO: '/query/device-info',
         APPS: '/query/apps',
         ACTIVE_APP: '/query/active-app',
+        TV_CHANELS: '/query/tv-channels',
+        TV_ACTIVE_CHANEL: '/query/tv-active-channel',
         ICON: (appId: string) => `/query/icon/${appId}`,
     },
     KEY_PRESS: {
@@ -26,6 +28,10 @@ export const ROKU_API = {
         VOLUME_UP: '/keypress/VolumeUp',
         VOLUME_DOWN: '/keypress/VolumeDown',
         VOLUME_MUTE: '/keypress/VolumeMute',
+        /** Teclas con nombre (no Lit_); útiles junto al teclado en pantalla */
+        SEARCH: '/keypress/Search',
+        ENTER: '/keypress/Enter',
+        BACKSPACE: '/keypress/Backspace',
     },
     LAUNCH: {
         APP: (appId: string) => `/launch/${appId}`,

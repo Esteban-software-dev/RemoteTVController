@@ -19,6 +19,9 @@ export const navigatorResources = {
                 },
                 remoteControl: {
                     title: 'Control remoto'
+                },
+                keyboard: {
+                    title: 'Teclado'
                 }
             },
 
@@ -59,6 +62,9 @@ export const navigatorResources = {
                 },
                 remoteControl: {
                     title: 'Remote control'
+                },
+                keyboard: {
+                    title: 'Keyboard'
                 }
             },
 

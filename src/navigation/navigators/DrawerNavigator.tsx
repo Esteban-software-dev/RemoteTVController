@@ -7,11 +7,13 @@ import { IonIcon } from '@src/shared/components/IonIcon';
 import { useTranslation } from 'react-i18next';
 import { RootBottomtabs } from './BottomTabNavigator';
 import { RemoteControl } from '@src/features/remote-control/screens/RemoteControl';
+import { Keyboard } from '@src/features/remote-control/screens/Keyboard';
 
 export type RootDrawerParamList = {
     Home: NavigatorScreenParams<RootBottomtabs>;
     HiddenApps: undefined;
     RemoteControl: undefined;
+    Keyboard: undefined;
 };
 
 const Drawer = createDrawerNavigator();
@@ -58,6 +60,16 @@ export function DrawerNavigator() {
                 component={RemoteControl}
                 options={{
                     title: t('drawer.remoteControl.title'),
+                    drawerItemStyle: {
+                        display: 'none'
+                    }
+                }}
+            />
+            <Drawer.Screen
+                name="Keyboard"
+                component={Keyboard}
+                options={{
+                    title: t('drawer.keyboard.title'),
                     drawerItemStyle: {
                         display: 'none'
                     }

@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { AppBackground } from '@src/shared/components/AppBackground';
 import { colors } from '@src/config/theme/colors/colors';
@@ -8,7 +7,6 @@ import { globalStyles } from '@src/config/theme/styles/global.styles';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { IonIcon } from '@src/shared/components/IonIcon';
-import { RootDrawerParamList } from '@src/navigation/navigators/DrawerNavigator';
 import { useToast } from '@src/shared/context/ToastContext';
 import { NoRokuDevice } from '@src/features/scanner/components/NoRokuDevice';
 import { RokuApp } from '@src/features/scanner/interfaces/roku-app.interface';
@@ -31,6 +29,7 @@ import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui
 import { normalizeSize, roundToLayoutPixel } from '@src/config/theme/utils/normalize-size';
 import { PressableFeedback } from '@src/shared/components/PressableFeedback';
 import { Fab } from '@src/shared/components/Fab';
+import { useDrawerNavigation } from '@src/navigation/hooks/useDrawerNavigation';
 
 type ControlMode = 'classic' | 'touch';
 
@@ -77,7 +76,8 @@ function VoiceButton({
 
 export function RemoteControl() {
     const { t } = useTranslation();
-    const navigation = useNavigation<NavigationProp<RootDrawerParamList>>();
+    // const navigation = useNavigation<NavigationProp<RootDrawerParamList>>();
+    const { navigation } = useDrawerNavigation();
     const { show } = useToast();
     const { width: windowWidth } = useWindowDimensions();
     const navLayout = useMemo(
@@ -776,17 +776,15 @@ export function RemoteControl() {
             </ScrollView>
 
             <Fab
-            vertical="bottom"
-            horizontal="end"
-            size='md'
-            onPress={() => {
-                
-            }}
-            safeArea={false}
-            inset={{ bottom: spacing.sm, right: spacing.sm }}
-            color={colors.accent.purple.strong}
-            icon='search-outline'
-            iconColor={colors.white.base} />
+                vertical="bottom"
+                horizontal="end"
+                size='md'
+                onPress={() => navigation.navigate('Keyboard')}
+                safeArea={false}
+                inset={{ bottom: spacing.sm, right: spacing.sm }}
+                color={colors.accent.purple.strong}
+                icon='search-outline'
+                iconColor={colors.white.base} />
         </View>
     );
 }
