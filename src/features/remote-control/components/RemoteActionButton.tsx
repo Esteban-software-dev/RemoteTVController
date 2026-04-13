@@ -3,18 +3,18 @@ import { radius, spacing } from '@src/config/theme/tokens';
 import { getContrastColor } from '@src/config/theme/utils/contrast-color';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { IonIcon } from '@src/shared/components/IonIcon';
-import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import React from 'react';
 import {
     ActivityIndicator,
     Insets,
-    Pressable,
     StyleProp,
     StyleSheet,
     Text,
     ViewStyle,
 } from 'react-native';
+import { PressableFeedback } from '@src/shared/components/PressableFeedback';
 
 interface RemoteActionButtonProps {
     iconName: IoniconsIconName;
@@ -58,11 +58,11 @@ export function RemoteActionButton({
     const isDisabled = disabled || loading;
 
     const ripple = filled
-        ? androidRipple({ color: withOpacityHex(colors.white.base, 0.22) })
-        : androidRipple({ color: withOpacityHex(color, 0.16) });
+        ? androidRippleLightInkForeground({ color: withOpacityHex(colors.white.base, 0.22) })
+        : androidRippleLightInkForeground({ color: withOpacityHex(color, 0.16) });
 
     return (
-        <Pressable
+        <PressableFeedback
             disabled={isDisabled}
             onPress={onPress}
             android_ripple={ripple}
@@ -97,7 +97,7 @@ export function RemoteActionButton({
                 <IonIcon name={iconName} size={sizeMap.icon} color={contentColor} />
             )}
             {label ? <Text style={[styles.label, { color: contentColor }]}>{label}</Text> : null}
-        </Pressable>
+        </PressableFeedback>
     );
 }
 

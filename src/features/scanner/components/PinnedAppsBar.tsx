@@ -10,10 +10,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { colors } from '@src/config/theme/colors/colors';
-import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { RokuApp } from '../interfaces/roku-app.interface';
 import { AppIcon } from './AppIcon';
+import { PressableFeedback } from '@src/shared/components/PressableFeedback';
 
 const BAR_WIDTH = 70;
 const ITEM_SIZE = 52;
@@ -74,16 +75,16 @@ export function PinnedFabMenu({
                 ))}
             </Animated.View>
 
-            <Pressable
+            <PressableFeedback
             onPress={toggle}
-            android_ripple={androidRipple({ color: withOpacityHex(colors.white.base, 0.16) })}
+            android_ripple={androidRippleLightInkForeground({ color: withOpacityHex(colors.white.base, 0.15) })}
             style={({ pressed }) => [styles.toggle, iosPressOpacity(pressed, false)]}>
                 <IonIcon
                     name={collapsed ? 'chevron-up' : 'chevron-down'}
                     size={18}
                     color={colors.white.base}
                 />
-            </Pressable>
+            </PressableFeedback>
         </Animated.View>
     )
 }
@@ -100,12 +101,12 @@ function PinnedAppButton({
     onPress: (app: RokuApp) => void,
 }) {
     return (
-        <Pressable
+        <PressableFeedback
             onPress={() => onPress(app)}
-            android_ripple={androidRipple({ color: withOpacityHex(colors.accent.purple.base, 0.28) })}
-            style={({ pressed }) => [styles.item, iosPressOpacity(pressed, false)]}>
+            android_ripple={androidRippleLightInkForeground({ color: withOpacityHex(colors.accent.purple.base, .60) })}
+            style={styles.item}>
                 <AppIcon appId={app.id} name={app.name} deviceId={deviceId} deviceIp={deviceIp} style={styles.icon} />
-        </Pressable>
+        </PressableFeedback>
     )
 }
 

@@ -308,7 +308,7 @@ export function AppBar() {
         }
         setIsHidden(false);
         appbarHide.value = withTiming(0, { duration: 220 });
-    }, [hideAppbar]);
+    }, [hideAppbar, appbarHide]);
 
     const appbarVisibilityStyle = useAnimatedStyle(() => ({
         opacity: interpolate(appbarHide.value, [0, 1], [1, 0]),

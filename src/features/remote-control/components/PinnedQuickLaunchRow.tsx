@@ -4,8 +4,9 @@ import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { AppIcon } from '@src/features/scanner/components/AppIcon';
 import { RokuApp } from '@src/features/scanner/interfaces/roku-app.interface';
 import React from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { PressableFeedback } from '@src/shared/components/PressableFeedback';
 
 interface PinnedQuickLaunchRowProps {
     apps: RokuApp[];
@@ -79,10 +80,10 @@ function QuickAppChip({
 }) {
     return (
         <View style={styles.itemWrap}>
-            <Pressable
+            <PressableFeedback
             disabled={disabled || loading}
             onPress={onPress}
-            android_ripple={androidRipple({ color: withOpacityHex(colors.accent.purple.base, 0.22) })}
+            android_ripple={androidRippleLightInkForeground({ color: withOpacityHex(colors.accent.purple.base, 0.22) })}
             hitSlop={8}
             accessibilityRole="button"
             accessibilityState={{ disabled: disabled || loading, busy: loading, selected }}
@@ -115,7 +116,7 @@ function QuickAppChip({
                     ]}>
                     {app.name}
                 </Text>
-            </Pressable>
+            </PressableFeedback>
         </View>
     );
 }

@@ -85,11 +85,6 @@ function TabItem({
             { scale: interpolate(progress.value, [0, 1], [1, 1.02]) },
         ],
     }));
-    const inactiveBorderStyle = useAnimatedStyle(() => ({
-        borderWidth: active ? 0 : 1,
-        borderColor: 'rgba(206, 206, 206, 0.59)',
-        borderRadius: radius.xl,
-    }));
 
     const borderStyle = useAnimatedStyle(() => ({
         opacity: progress.value,
@@ -107,7 +102,6 @@ function TabItem({
                 ),
             },
         ],
-        borderWidth: interpolate(progress.value, [0, 1], [0, 1]),
         backgroundColor: interpolateColor(progress.value, [0, 1], [colors.bone.base, colors.bone.base]),
     }));
 
@@ -132,7 +126,7 @@ function TabItem({
         } else {
             gradientRotation.value = withTiming(180, {duration: 200});
         }
-    }, [active]);
+    }, [active, gradientRotation]);
 
     useEffect(() => {
         progress.value = withSpring(active ? 1 : 0, {
@@ -140,7 +134,7 @@ function TabItem({
             stiffness: 260,
             mass: 0.6,
         });
-    }, [active]);
+    }, [active, progress]);
 
     const gradientStyle = useAnimatedStyle(() => ({
         transform: [
@@ -152,7 +146,7 @@ function TabItem({
     return (
         <Pressable style={styles.tabWrapper} onPress={onPress}>
             <Animated.View style={[styles.tabContainer, containerStyle]}>
-                {!active && <Animated.View style={[StyleSheet.absoluteFill, inactiveBorderStyle]} />}
+                {!active && <Animated.View style={[StyleSheet.absoluteFill,]} />}
                 <Animated.View style={[styles.activeBorder, borderStyle]}>
                     <Animated.View
                     style={[StyleSheet.absoluteFill, gradientStyle]}
@@ -169,27 +163,20 @@ function TabItem({
                         />
                     </Animated.View>
 
-                    <View style={{
-                        backgroundColor: colors.bone.base,
-                        borderRadius: radius.xl,
-                        position: 'absolute',
-                        top: 0,
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        margin: spacing.xxs
-                    }} />
+                    <View style={styles.tabButtonBackground} />
                 </Animated.View>
 
                 <Animated.View style={[styles.icon, iconStyle]}>
                     {icon?.({
                         focused: active,
                         color: colors.dark.base,
-                        size: active ? 19 : 18,
+                        size: active ? 20 : 18,
                     })}
                 </Animated.View>
 
-                <Animated.Text style={[ styles.label, labelStyle, { fontWeight: active ? '700' : '500' } ]}
+                <Animated.Text style={[ styles.label, labelStyle, {
+                    fontWeight: active ? '700' : '500'
+                }]}
                 numberOfLines={1}>
                     {label}
                 </Animated.Text>
@@ -221,7 +208,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-
     tabContainer: {
         width: 100,
         height: 44,
@@ -231,7 +217,6 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         paddingBottom: 6,
     },
-
     activeBorder: {
         ...StyleSheet.absoluteFill,
         borderRadius: radius.xl,
@@ -249,12 +234,20 @@ const styles = StyleSheet.create({
         borderRadius: radius.sm,
         justifyContent: 'center',
         alignItems: 'center',
-        borderColor: withOpacityHex(colors.dark.base, .1),
     },
-
     label: {
         fontSize: 11,
         color: colors.dark.base,
         marginBottom: 2,
     },
+    tabButtonBackground: {
+        backgroundColor: colors.bone.base,
+        borderRadius: radius.xl,
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        margin: spacing.xxs
+    }
 });

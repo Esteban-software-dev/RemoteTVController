@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { StyleSheet, View } from 'react-native';
+import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -10,6 +10,7 @@ import { radius, spacing } from '@src/config/theme/tokens';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { VerticalProgressBar } from '@src/shared/components/VerticalProgressBar';
 import { roundToLayoutPixel } from '@src/config/theme/utils/normalize-size';
+import { PressableFeedback } from '@src/shared/components/PressableFeedback';
 
 const SHELL_WIDTH_DESIGN = 58;
 const TRACK_HEIGHT_DESIGN = 172;
@@ -174,7 +175,7 @@ export function VerticalVolumeControl({
             runOnJS(endDrag)();
         });
 
-    const volumeRipple = androidRipple({ color: withOpacityHex(colors.accent.teal.strong, 0.28) });
+    const volumeRipple = androidRippleLightInkForeground({ color: withOpacityHex(colors.accent.teal.strong, 0.15) });
 
     return (
         <View
@@ -188,7 +189,7 @@ export function VerticalVolumeControl({
                 },
                 disabled ? styles.rootDisabled : null,
             ]}>
-            <Pressable
+            <PressableFeedback
                 accessibilityRole="button"
                 accessibilityLabel={t('remoteControl.actions.volumeUp')}
                 accessibilityHint={t('remoteControl.actions.volumeUpHint')}
@@ -208,7 +209,7 @@ export function VerticalVolumeControl({
                     disabled ? null : iosPressOpacity(pressed, false),
                 ]}>
                 <IonIcon name="add" size={metrics.iconGlyph} color={colors.accent.teal.strong} />
-            </Pressable>
+            </PressableFeedback>
 
             <GestureDetector gesture={panGesture}>
                 <View
@@ -227,7 +228,7 @@ export function VerticalVolumeControl({
                 </View>
             </GestureDetector>
 
-            <Pressable
+            <PressableFeedback
                 accessibilityRole="button"
                 accessibilityLabel={t('remoteControl.actions.volumeDown')}
                 accessibilityHint={t('remoteControl.actions.volumeDownHint')}
@@ -247,7 +248,7 @@ export function VerticalVolumeControl({
                     disabled ? null : iosPressOpacity(pressed, false),
                 ]}>
                 <IonIcon name="remove" size={metrics.iconGlyph} color={colors.accent.teal.strong} />
-            </Pressable>
+            </PressableFeedback>
         </View>
     );
 }

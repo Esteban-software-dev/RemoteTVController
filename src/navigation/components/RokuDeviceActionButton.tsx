@@ -1,17 +1,17 @@
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
-import { Pressable, PressableProps, StyleSheet } from 'react-native';
+import {  PressableProps, StyleSheet } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     withTiming,
 } from 'react-native-reanimated';
-
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { useRokuSessionStore } from '@src/store/roku/roku-session.store';
-import { radius } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { colors } from '@src/config/theme/colors/colors';
 import { getContrastColor } from '@src/config/theme/utils/contrast-color';
-import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { PressableFeedback } from '@src/shared/components/PressableFeedback';
+import { radius } from '@src/config/theme/tokens';
 
 interface RokuDeviceActionButtonProps extends PressableProps {
     iconName: IoniconsIconName;
@@ -51,22 +51,22 @@ export function RokuDeviceActionButton({
 
     return (
         <Animated.View style={containerAnimatedStyle}>
-            <Pressable
+            <PressableFeedback
                 {...pressableProps}
                 disabled={disabled}
-                android_ripple={androidRipple({ color: withOpacityHex(contrastIconColor, 0.25) })}
+                android_ripple={androidRippleLightInkForeground({ color: withOpacityHex(contrastIconColor, 0.25) })}
                 style={({ pressed }) => [
                     styles.button,
                     {
                         width: size,
                         height: size,
-                        borderRadius: size / 2.4,
+                        borderRadius: radius.lg,
                         backgroundColor: color,
                     },
                     disabled ? { opacity: 0.5 } : iosPressOpacity(pressed, false),
                 ]}>
                 <IonIcon name={iconName} size={iconSize} color={contrastIconColor} />
-            </Pressable>
+            </PressableFeedback>
         </Animated.View>
     );
 }

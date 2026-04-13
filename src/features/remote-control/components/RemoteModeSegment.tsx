@@ -4,7 +4,6 @@ import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import React, { useEffect, useState } from 'react';
 import {
     LayoutChangeEvent,
-    Pressable,
     StyleProp,
     StyleSheet,
     View,
@@ -16,7 +15,8 @@ import Animated, {
     useSharedValue,
     withTiming,
 } from 'react-native-reanimated';
-import { androidRippleOnLightInk, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { androidRippleLightInkForeground } from '@src/shared/ui/pressFeedback';
+import { PressableFeedback } from '@src/shared/components/PressableFeedback';
 
 type ControlMode = 'classic' | 'touch';
 
@@ -74,31 +74,31 @@ export function RemoteModeSegment({
         ),
     }));
 
-    const segmentRipple = androidRippleOnLightInk();
-
     return (
         <View style={[styles.wrap, style]} onLayout={onLayout}>
             <Animated.View style={[styles.thumb, thumbStyle]} />
             <View style={styles.segment}>
-                <Pressable
-                style={({ pressed }) => [styles.hitArea, styles.hitAreaClassic, iosPressOpacity(pressed, false)]}
-                android_ripple={segmentRipple}
+                <PressableFeedback
+                style={[styles.hitArea, styles.hitAreaClassic]}
+                android_ripple={androidRippleLightInkForeground({color: withOpacityHex(colors.accent.purple.base, .40)})}
+                feedbackDisabled={value === 'classic'}
                 onPress={() => onChange('classic')}>
                     <Animated.Text numberOfLines={1} style={[styles.label, classicTextStyle]}>
                         {classicLabel}
                     </Animated.Text>
-                </Pressable>
+                </PressableFeedback>
             </View>
 
             <View style={styles.segment}>
-                <Pressable
-                style={({ pressed }) => [styles.hitArea, styles.hitAreaTouch, iosPressOpacity(pressed, false)]}
-                android_ripple={segmentRipple}
+                <PressableFeedback
+                style={[styles.hitArea, styles.hitAreaTouch]}
+                android_ripple={androidRippleLightInkForeground({color: withOpacityHex(colors.accent.purple.base, .40)})}
+                feedbackDisabled={value === 'touch'}
                 onPress={() => onChange('touch')}>
                     <Animated.Text numberOfLines={1} style={[styles.label, touchTextStyle]}>
                         {touchLabel}
                     </Animated.Text>
-                </Pressable>
+                </PressableFeedback>
             </View>
         </View>
     );

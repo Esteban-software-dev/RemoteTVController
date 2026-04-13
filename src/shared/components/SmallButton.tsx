@@ -1,12 +1,13 @@
 import React from 'react';
-import { Pressable, PressableProps, Text, ViewStyle, TextStyle, StyleProp } from 'react-native';
-import { androidRipple, iosPressOpacity, rippleClipStyle } from '@src/shared/ui/pressFeedback';
+import { PressableProps, Text, ViewStyle, TextStyle, StyleProp } from 'react-native';
+import { androidRippleLightInkForeground, rippleClipStyle } from '@src/shared/ui/pressFeedback';
 import { colors } from '@src/config/theme/colors/colors';
 import { radius } from '@src/config/theme/tokens';
 import { IonIcon } from './IonIcon';
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import { getContrastColor } from '@src/config/theme/utils/contrast-color';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
+import { PressableFeedback } from './PressableFeedback';
 
 type Variant = 'filled' | 'outline' | 'ghost';
 type Size = 'sm' | 'md';
@@ -83,22 +84,22 @@ export function SmallButton({
 
     const ripple =
         variant === 'filled'
-            ? androidRipple({ color: withOpacityHex(colors.white.base, 0.22) })
-            : androidRipple({ color: withOpacityHex(color, 0.18) });
+            ? androidRippleLightInkForeground({ color: withOpacityHex(colors.dark.base, 0.22) })
+            : androidRippleLightInkForeground({ color: withOpacityHex(color, 0.18) });
 
     return (
-        <Pressable
+        <PressableFeedback
         disabled={disabled}
+        pressDelayMs={20}
         android_ripple={ripple}
         onPressIn={(e) => {
             if (stopPropagation) {
                 e.stopPropagation();
             }
         }}
-        style={({ pressed }) => [
+        style={[
             baseStyle,
             variantStyle,
-            disabled ? { opacity: 0.6 } : iosPressOpacity(pressed, false),
             containerStyle,
         ]}
         {...pressableProps}>
@@ -123,6 +124,6 @@ export function SmallButton({
                     {label}
                 </Text>
             ) : null}
-        </Pressable>
+        </PressableFeedback>
     );
 }

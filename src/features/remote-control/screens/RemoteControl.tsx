@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, useWindowDimensions, View } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { AppBackground } from '@src/shared/components/AppBackground';
@@ -27,8 +27,9 @@ import {
     getNavigationControlsLayout,
 } from '../utils/navigation-controls-layout';
 import { GridButtonConfig, VoiceButtonProps } from '../data/interfaces/remote-control.interface';
-import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 import { normalizeSize, roundToLayoutPixel } from '@src/config/theme/utils/normalize-size';
+import { PressableFeedback } from '@src/shared/components/PressableFeedback';
 
 type ControlMode = 'classic' | 'touch';
 
@@ -46,10 +47,10 @@ function VoiceButton({
     accessibilityHint,
 }: VoiceButtonProps) {
     return (
-        <Pressable
+        <PressableFeedback
             disabled={disabled}
             onPress={onPress}
-            android_ripple={androidRipple({ color: withOpacityHex(colors.accent.teal.strong, 0.28) })}
+            android_ripple={androidRippleLightInkForeground({ color: withOpacityHex(colors.accent.teal.strong, 0.28) })}
             accessibilityRole="button"
             accessibilityState={{ disabled, busy: isListening }}
             accessibilityLabel={accessibilityLabel}
@@ -69,7 +70,7 @@ function VoiceButton({
             <Text style={[styles.voiceMainText, isListening ? styles.voiceMainTextActive : null]}>
                 {isListening ? listeningText : idleText}
             </Text>
-        </Pressable>
+        </PressableFeedback>
     );
 }
 
@@ -510,7 +511,7 @@ export function RemoteControl() {
                                 accessibilityLabel={t('remoteControl.actions.power')}
                                 accessibilityHint={t('remoteControl.actions.powerHint')}
                             />
-                            <Pressable
+                            <PressableFeedback
                             accessibilityRole="switch"
                             accessibilityState={{
                                 checked: isMuted,
@@ -519,7 +520,8 @@ export function RemoteControl() {
                             accessibilityLabel={t('remoteControl.actions.mute')}
                             accessibilityHint={t('remoteControl.actions.muteHint')}
                             onPress={onToggleMute}
-                            android_ripple={androidRipple({ color: withOpacityHex(colors.accent.purple.base, 0.16) })}
+                            android_ripple={androidRippleLightInkForeground({ color: withOpacityHex(colors.accent.purple.base, .15) })}
+                            feedbackDisabled={isBusy}
                             style={({ pressed }) => [
                                 styles.muteToggleCard,
                                 isMuted ? styles.muteToggleCardActive : null,
@@ -555,7 +557,7 @@ export function RemoteControl() {
                                     trackColor={switchColors}
                                     thumbColor={colors.white.base}
                                 />
-                            </Pressable>
+                            </PressableFeedback>
                         </View>
                     </View>
                     {mode === 'classic' ? (
@@ -1025,7 +1027,6 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
     },
     muteToggleCardActive: {
         borderColor: withOpacityHex(colors.accent.purple.base, 0.28),

@@ -5,19 +5,17 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-
 import { IonIcon } from '@src/shared/components/IonIcon';
-import { BlurBackground } from './BlurBackground';
 import { IoniconsIconName } from '@react-native-vector-icons/ionicons';
 import { scheduleOnRN } from 'react-native-worklets';
 import { colors } from '@src/config/theme/colors/colors';
 import { spacing } from '@src/config/theme/tokens';
 import { globalStyles } from '@src/config/theme/styles/global.styles';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
-import { androidRippleOnLightInk, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { PressableFeedback } from './PressableFeedback';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-const AnimatedBlurBackground = Animated.createAnimatedComponent(BlurBackground);
 
 export type ContextMenuAction<T = any> = {
   key: string;
@@ -133,6 +131,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1c1c1e',
     borderRadius: spacing.md,
     paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
     ... globalStyles.shadow
   },
   menuItem: {
@@ -165,10 +164,10 @@ export function MenuItemButton({
   onPress,
 }: MenuItemButtonProps) {
   return (
-    <Pressable
+    <PressableFeedback
     onPress={onPress}
     disabled={disabled}
-    android_ripple={androidRippleOnLightInk()}
+    android_ripple={androidRippleLightInkForeground({color: withOpacityHex(destructive ? colors.state.danger : colors.white.base, 0.40)})}
     style={({ pressed }) => [
       menuItemButtonStyles.container,
       disabled ? { opacity: 0.45 } : iosPressOpacity(pressed, false),
@@ -190,7 +189,7 @@ export function MenuItemButton({
           {label}
         </Text>
       </View>
-    </Pressable>
+    </PressableFeedback>
   );
 }
 const menuItemButtonStyles = StyleSheet.create({
@@ -202,7 +201,7 @@ const menuItemButtonStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: spacing.sm + 6,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     gap: spacing.md,
   },
   label: {
