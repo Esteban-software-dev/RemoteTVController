@@ -685,52 +685,6 @@ export function RemoteControl() {
                                     </View>
                                 </View>
                             </View>
-
-                            <View style={styles.sectionGroup}>
-                                <Text style={styles.groupTitle}>
-                                    {t('remoteControl.groups.system')}
-                                </Text>
-                                <View style={styles.quickNavRow}>
-                                    {leftColumnButtons.map((item) => (
-                                        <RemoteActionButton
-                                            key={item.command}
-                                            iconName={item.iconName}
-                                            label={item.label}
-                                            size="sm"
-                                            variant={item.variant ?? 'soft'}
-                                            color={item.color}
-                                            style={styles.quickNavButton}
-                                            loading={pendingCommand === item.command}
-                                            disabled={isBusy && pendingCommand !== item.command}
-                                            onPress={() => onSendCommand(item.command)}
-                                            accessibilityLabel={item.label}
-                                        />
-                                    ))}
-                                </View>
-                            </View>
-
-                            <View style={styles.sectionGroup}>
-                                <Text style={styles.groupTitle}>
-                                    {t('remoteControl.groups.media')}
-                                </Text>
-                                <View style={styles.mediaRow}>
-                                    {rightColumnButtons.map((item) => (
-                                        <RemoteActionButton
-                                            key={item.command}
-                                            iconName={item.iconName}
-                                            label={item.label}
-                                            size="sm"
-                                            variant={item.variant ?? 'soft'}
-                                            color={item.color}
-                                            style={styles.mediaButton}
-                                            loading={pendingCommand === item.command}
-                                            disabled={isBusy && pendingCommand !== item.command}
-                                            onPress={() => onSendCommand(item.command)}
-                                            accessibilityLabel={item.label}
-                                        />
-                                    ))}
-                                </View>
-                            </View>
                         </View>
                     ) : (
                         <TrackpadSurface
@@ -739,6 +693,51 @@ export function RemoteControl() {
                             onTap={() => onSendCommand('select')}
                         />
                     )}
+                    <View style={styles.sectionGroup}>
+                        <Text style={styles.groupTitle}>
+                            {t('remoteControl.groups.system')}
+                        </Text>
+                        <View style={styles.quickNavRow}>
+                            {leftColumnButtons.map((item) => (
+                                <RemoteActionButton
+                                    key={item.command}
+                                    iconName={item.iconName}
+                                    label={item.label}
+                                    size="sm"
+                                    variant={item.variant ?? 'soft'}
+                                    color={item.color}
+                                    style={styles.quickNavButton}
+                                    loading={pendingCommand === item.command}
+                                    disabled={isBusy && pendingCommand !== item.command}
+                                    onPress={() => onSendCommand(item.command)}
+                                    accessibilityLabel={item.label}
+                                />
+                            ))}
+                        </View>
+                    </View>
+
+                    <View style={styles.sectionGroup}>
+                        <Text style={styles.groupTitle}>
+                            {t('remoteControl.groups.media')}
+                        </Text>
+                        <View style={styles.mediaRow}>
+                            {rightColumnButtons.map((item) => (
+                                <RemoteActionButton
+                                    key={item.command}
+                                    iconName={item.iconName}
+                                    label={item.label}
+                                    size="sm"
+                                    variant={item.variant ?? 'soft'}
+                                    color={item.color}
+                                    style={styles.mediaButton}
+                                    loading={pendingCommand === item.command}
+                                    disabled={isBusy && pendingCommand !== item.command}
+                                    onPress={() => onSendCommand(item.command)}
+                                    accessibilityLabel={item.label}
+                                />
+                            ))}
+                        </View>
+                    </View>
                 </View>
 
                 <View style={styles.voiceCard}>
@@ -909,7 +908,7 @@ const styles = StyleSheet.create({
         color: colors.dark.base,
     },
     classicWrap: {
-        gap: spacing.md,
+        gap: spacing.sm,
     },
     heroRow: {
         width: '100%',
