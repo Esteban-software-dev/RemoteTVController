@@ -2,7 +2,6 @@ import React from 'react';
 import {
     View,
     Text,
-    Pressable,
     ViewStyle,
     StyleSheet,
 } from 'react-native';
@@ -12,7 +11,8 @@ import { GradientCard } from '@src/shared/components/GradientCard';
 import { IonIcon } from '@src/shared/components/IonIcon';
 import { radius, spacing } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
-import { androidRipple, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui/pressFeedback';
+import { PressableFeedback } from '@src/shared/components/PressableFeedback';
 
 interface TVDeviceItemProps extends RokuDeviceInfo {
     index?: number;
@@ -26,7 +26,7 @@ interface TVDeviceItemProps extends RokuDeviceInfo {
 }
 
 export function RokuTVItem({
-    index = 0,
+    index: _index = 0,
     onPress,
     containerStyle,
 
@@ -39,20 +39,37 @@ export function RokuTVItem({
     modelName,
     softwareVersion,
 }: TVDeviceItemProps) {
-    const activeDeviceBG = withOpacityHex(colors.green.base, .18)
+    const activeDeviceBG = withOpacityHex(colors.green.base, 0.18);
+    const iconBg = disabled
+        ? withOpacityHex(colors.accent.gray.base, 0.22)
+        : selected
+            ? activeDeviceBG
+            : colors.white.base;
+    const iconBorder = disabled
+        ? withOpacityHex(colors.dark.base, 0.08)
+        : selected
+            ? colors.green.base
+            : withOpacityHex(colors.dark.base, 0.12);
+    const iconColor = disabled
+        ? colors.accent.gray.icon
+        : selected
+            ? colors.green.base
+            : colors.dark.base;
+
     return (
         <View>
             <View
                 style={[
                     containerStyle,
                     styles.cardContainer,
-                    disabled ? styles.cardDisabled : null,
+                    disabled ? styles.cardOuterDisabled : null,
                     { borderRadius: radius.lg },
                 ]}>
                 <GradientCard>
                     <View>
-                        <Pressable
+                        <PressableFeedback
                         disabled={disabled}
+                        feedbackDisabled={disabled || selected}
                         onPress={() => {
                             onPress?.({
                                 ip,
@@ -61,36 +78,36 @@ export function RokuTVItem({
                                 softwareVersion,
                             } as RokuDeviceInfo)
                         }}
-                        android_ripple={androidRipple({ color: withOpacityHex(colors.dark.base, 0.1) })}
+                        android_ripple={androidRippleLightInkForeground({color: withOpacityHex(colors.dark.base, 0.1)})}
                         style={({ pressed }) => [
                             styles.card,
+                            disabled ? styles.cardInnerDisabled : null,
                             disabled ? null : iosPressOpacity(pressed, false),
                         ]}>
                             <View
                                 style={[
                                     styles.icon,
-                                    selected ? styles.iconSelected : null,
-                                    { backgroundColor: selected ? activeDeviceBG : colors.white.base }
+                                    { backgroundColor: iconBg, borderColor: iconBorder },
+                                    selected && !disabled ? styles.iconSelected : null,
                                 ]}>
-                                <IonIcon
-                                    name="tv"
-                                    size={18}
-                                    color={selected ? colors.green.base : colors.dark.base}
-                                />
+                                <IonIcon name="tv" size={18} color={iconColor} />
                             </View>
 
                             <View style={styles.info}>
                                 <Text
                                     style={[
                                         styles.name,
-                                        selected && { color: '#2F4F2F' },
+                                        disabled ? styles.nameDisabled : null,
+                                        selected && !disabled ? styles.nameSelected : null,
                                     ]}
                                     numberOfLines={1}
                                 >
                                     {friendlyDeviceName}
                                 </Text>
 
-                                <Text style={styles.subtitle} numberOfLines={1}>
+                                <Text
+                                    style={[styles.subtitle, disabled ? styles.subtitleDisabled : null]}
+                                    numberOfLines={1}>
                                     {ip}
                                 </Text>
                             </View>
@@ -102,7 +119,7 @@ export function RokuTVItem({
                                     color={withOpacityHex(colors.dark.base, .35)}
                                 />
                             )}
-                        </Pressable>
+                        </PressableFeedback>
                     </View>
                 </GradientCard>
             </View>
@@ -116,8 +133,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'transparent',
     },
-    cardDisabled: {
-        opacity: 0.45,
+    /** Borde y marco apagados — sin bajar opacidad de todo el bloque */
+    cardOuterDisabled: {
+        borderColor: withOpacityHex(colors.accent.gray.base, 0.55),
+        backgroundColor: colors.bone.soft,
     },
     card: {
         flexDirection: 'row',
@@ -127,16 +146,19 @@ const styles = StyleSheet.create({
         borderRadius: radius.lg,
         overflow: 'hidden',
     },
+    cardInnerDisabled: {
+        backgroundColor: withOpacityHex(colors.accent.gray.base, 0.12),
+    },
     icon: {
         width: 36,
         height: 36,
         borderRadius: radius.sm,
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: .6
+        borderWidth: 0.6,
     },
     iconSelected: {
-        borderColor: colors.green.base,
+        borderWidth: 1,
     },
     info: {
         flex: 1,
@@ -146,9 +168,19 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: colors.dark.base,
     },
+    nameSelected: {
+        color: '#2F4F2F',
+    },
+    nameDisabled: {
+        color: colors.accent.gray.text,
+        fontWeight: '500',
+    },
     subtitle: {
         fontSize: 12,
         marginTop: 2,
-        color: withOpacityHex(colors.dark.base, .6),
+        color: withOpacityHex(colors.dark.base, 0.6),
+    },
+    subtitleDisabled: {
+        color: withOpacityHex(colors.accent.gray.text, 0.85),
     },
 })
