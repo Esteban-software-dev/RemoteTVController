@@ -14,6 +14,7 @@ import { colors } from '@src/config/theme/colors/colors';
 import { radius, spacing, typography } from '@src/config/theme/tokens';
 import { withOpacityHex } from '@src/config/theme/utils/withOpacityHexColor';
 import { t } from 'i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type ToastType = 'default' | 'info' | 'success' | 'warning' | 'danger' | 'primary' | 'dark' | 'medium' | 'light';
 export type ToastAlign = 'top' | 'bottom' | 'center' | 'custom';
@@ -99,6 +100,7 @@ export function Toast({
     onHoldStart,
     onHoldEnd,
 }: ToastProps) {
+    const insets = useSafeAreaInsets();
     const initialOffset = align === 'top' ? -30 : 30;
     const translateY = useSharedValue(initialOffset);
     const opacity = useSharedValue(0);
@@ -191,7 +193,7 @@ export function Toast({
             style={[
                 styles.toast,
                 animatedStyle,
-                getAlignStyle(align, position),
+                getAlignStyle(align, position, insets.top > 0 ? insets.top : undefined),
                 {
                     backgroundColor: styleByType.bg,
                     borderColor: styleByType.border,
@@ -274,9 +276,9 @@ export function Toast({
     );
 }
 
-function getAlignStyle(align: ToastAlign, position?: ToastPosition) {
+function getAlignStyle(align: ToastAlign, position?: ToastPosition, inset?: number) {
     if (align === 'top') {
-        return { top: 6 };
+        return { top: inset ? inset : 6 };
     }
     if (align === 'center') {
         return { top: '45%' as unknown as number };

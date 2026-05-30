@@ -297,7 +297,9 @@ export function AppBar() {
         ),
     }));
 
-    const hideAppbar = routeName === 'RemoteControl';
+    const hideAppbar = 
+        routeName === 'RemoteControl'
+        || routeName === 'Keyboard';
     const [isHidden, setIsHidden] = useState(false);
 
     useEffect(() => {

@@ -28,8 +28,8 @@ import { GridButtonConfig, VoiceButtonProps } from '../data/interfaces/remote-co
 import { androidRippleLightInkForeground, iosPressOpacity } from '@src/shared/ui/pressFeedback';
 import { normalizeSize, roundToLayoutPixel } from '@src/config/theme/utils/normalize-size';
 import { PressableFeedback } from '@src/shared/components/PressableFeedback';
-import { Fab } from '@src/shared/components/Fab';
 import { useDrawerNavigation } from '@src/navigation/hooks/useDrawerNavigation';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ControlMode = 'classic' | 'touch';
 
@@ -78,6 +78,7 @@ export function RemoteControl() {
     const { t } = useTranslation();
     // const navigation = useNavigation<NavigationProp<RootDrawerParamList>>();
     const { navigation } = useDrawerNavigation();
+    const insets = useSafeAreaInsets();
     const { show } = useToast();
     const { width: windowWidth } = useWindowDimensions();
     const navLayout = useMemo(
@@ -426,7 +427,10 @@ export function RemoteControl() {
         <View style={globalStyles.container}>
             <AppBackground />
             <ScrollView
-                contentContainerStyle={styles.content}
+                contentContainerStyle={{
+                    ... styles.content,
+                    paddingTop: spacing.sm + insets.top
+                }}
                 showsVerticalScrollIndicator={false}>
                 <View style={styles.headerCard}>
                     <View style={styles.headerMain}>
@@ -501,17 +505,32 @@ export function RemoteControl() {
                     <Text style={styles.controlsTitle}>{t('remoteControl.sections.controls')}</Text>
                     <View style={styles.footerActionContainer}>
                         <View style={styles.footerActionsRow}>
-                            <RemoteActionButton
-                                iconName="power"
-                                size="lg"
-                                variant="filled"
-                                color={colors.state.danger}
-                                loading={pendingCommand === 'power'}
-                                disabled={isBusy && pendingCommand !== 'power'}
-                                onPress={() => onSendCommand('power')}
-                                accessibilityLabel={t('remoteControl.actions.power')}
-                                accessibilityHint={t('remoteControl.actions.powerHint')}
-                            />
+                            <View style={styles.footerActionsLeft}>
+                                <RemoteActionButton
+                                    iconName="power"
+                                    size="lg"
+                                    variant="filled"
+                                    color={colors.state.danger}
+                                    loading={pendingCommand === 'power'}
+                                    disabled={isBusy && pendingCommand !== 'power'}
+                                    onPress={() => onSendCommand('power')}
+                                    accessibilityLabel={t('remoteControl.actions.power')}
+                                    accessibilityHint={t('remoteControl.actions.powerHint')}
+                                />
+                                <RemoteActionButton
+                                    iconName="keypad"
+                                    label={t('remoteControl.actions.keyboard')}
+                                    size="lg"
+                                    variant="filled"
+                                    color={colors.accent.teal.strong}
+                                    style={styles.keyboardActionButton}
+                                    onPress={() => navigation.navigate('Keyboard')}
+                                    accessibilityLabel={t('remoteControl.actions.keyboard')}
+                                    accessibilityHint={t('remoteControl.actions.keyboardHint')}
+                                    hitSlop={10}
+                                />
+                            </View>
+
                             <PressableFeedback
                             accessibilityRole="switch"
                             accessibilityState={{
@@ -774,24 +793,12 @@ export function RemoteControl() {
                     </View>
                 </View>
             </ScrollView>
-
-            <Fab
-                vertical="bottom"
-                horizontal="end"
-                size='md'
-                onPress={() => navigation.navigate('Keyboard')}
-                safeArea={false}
-                inset={{ bottom: spacing.sm, right: spacing.sm }}
-                color={colors.accent.purple.strong}
-                icon='search-outline'
-                iconColor={colors.white.base} />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     content: {
-        paddingTop: spacing.sm,
         paddingBottom: roundToLayoutPixel(spacing.xl * spacing.xxs),
         paddingHorizontal: spacing.sm,
         gap: spacing.sm,
@@ -1024,10 +1031,20 @@ const styles = StyleSheet.create({
     footerActionsRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+    },
+    footerActionsLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
+        flexShrink: 0,
+    },
+    keyboardActionButton: {
+        minHeight: 56,
+        paddingHorizontal: spacing.sm,
+        borderWidth: 1,
     },
     muteToggleCard: {
-        width: normalizeSize(200, 'width'),
+        width: normalizeSize(178, 'width'),
         height: '100%',
         borderRadius: normalizeSize(radius.md),
         overflow: 'hidden',
@@ -1038,6 +1055,8 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm,
         flexDirection: 'row',
         alignItems: 'center',
+        position: 'absolute',
+        right: 0,
     },
     muteToggleCardActive: {
         borderColor: withOpacityHex(colors.accent.purple.base, 0.28),

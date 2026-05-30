@@ -137,10 +137,6 @@ export const fetchSelectedRokuApps = async (ip: string): Promise<RokuApp[] | und
         const xml = await response.text();
     
         const parsed = parser.parse(xml);
-
-        console.log({
-            appRes: parsed
-        })
     
         const rawApps = parsed?.apps?.app;
     

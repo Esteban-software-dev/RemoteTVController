@@ -32,6 +32,7 @@ export const ROKU_API = {
         SEARCH: '/keypress/Search',
         ENTER: '/keypress/Enter',
         BACKSPACE: '/keypress/Backspace',
+        SEND_TEXT: (text: string) => `/keypress/Lit_${text}`
     },
     LAUNCH: {
         APP: (appId: string) => `/launch/${appId}`,

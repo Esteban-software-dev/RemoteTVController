@@ -39,7 +39,8 @@ export function useSafeBarsArea() {
 
     return {
         top: appBarHeight,
-        bottom,
+        // when insets.bottom is 0, use our calculated value instead
+        bottom: insets.bottom === 0 ? bottom : (insets.bottom + bottom),
         /** Sum of top + bottom insets for full-screen layouts (no normalize/window scale). */
         total: roundToLayoutPixel(appBarHeight + bottom),
     };
